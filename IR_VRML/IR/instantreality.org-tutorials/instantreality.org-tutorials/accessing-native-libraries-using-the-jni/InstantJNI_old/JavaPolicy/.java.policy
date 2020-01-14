@@ -1,0 +1,9 @@
+/* AUTOMATICALLY GENERATED ON Fri Aug 17 13:57:43 CEST 2007*/
+/* DO NOT EDIT */
+
+/* replace DIRECTORY with the directory, where ExampleJNI.class is located*/
+
+grant codeBase "file:///DIRECTORY" {
+  permission java.security.AllPermission;
+};
+

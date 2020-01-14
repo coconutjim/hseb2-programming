@@ -1,0 +1,139 @@
+<div id="tutorialContainer">
+  <h2 class="title">Breaking out of the Java Sandbox</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Script,
+        Java,
+        Security,
+        AccessControlException<br/><strong>Author(s): </strong>Patrick Dähne<br/><strong>Date: </strong>2009-01-08</p>
+  <p><strong>Summary: </strong>Implementing Script nodes Java gives you the full power of the standard Java library. You can read and write files, communicate with other software components over the network, and much more. Unfortunately, for security reasons, all Java code is executed in a sandbox, i.e. it is not allowed to do any potentially hazardous operation. This tutorial explains how to break out of this sandbox.</p>
+  <div id="content">
+        <h2>Problem Statement</h2>
+        <p>We'll start with a simple example. We want to write a VRML scene that displays the name of the user. Our scene simply consists of a Shape with a Text node and the Script node that loads our Java code ("Sandbox.class"). The Script node has a SFNode field "text" that holds a reference to the Text node. In classic VRML encoding, our scene looks like this:</p>
+        <div class="code"><h3>Code: Test scene (VRML encoding)</h3><pre>#VRML V2.0 utf8
+
+Shape
+{
+  geometry DEF text Text
+  {
+    string [ "Username:" "???" ]
+    fontStyle FontStyle
+    {
+      justify [ "MIDDLE" "MIDDLE"]
+    } # FontStyle
+  } # Text
+} # Shape
+
+DEF script Script
+{
+  field SFNode text USE text
+  url "Sandbox.class"
+} # Script</pre></div>
+        <p>In XML encoding, the same scene looks like this:</p>
+        <div class="code"><h3>Code: Test scene (XML encoding)</h3><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;X3D profile='Full' version='3.0'&gt;
+  &lt;Scene&gt;
+
+    &lt;Shape&gt;
+      &lt;Text DEF='text' string='"Username:" "???"'&gt;
+        &lt;FontStyle justify='"MIDDLE" "MIDDLE"'/&gt;
+      &lt;/Text&gt;
+    &lt;/Shape&gt;
+
+    &lt;Script DEF='script' url='"Sandbox.class"'&gt;
+      &lt;field accessType='initializeOnly' name='text' type='SFNode'&gt;
+        &lt;Text USE='text'/&gt;
+      &lt;/field&gt;
+    &lt;/Script&gt;
+
+  &lt;/Scene&gt;
+&lt;/X3D&gt;</pre></div>
+
+        <p>The default user name in our VRML scene is "???". In our Java code, we'll replace that default name when the scene starts running with the actual name of the user. So we implement a class called "Sandbox" that inherits from "vrml.node.Script" (as required for Java in Script nodes) and overwrite the "initialize()" method. In this method, we get the Text node from the "text" field of the Script node, get its "string" field, and replace the second entry of that MFString field with the user name we get from the Java system property "user.name":</p>
+
+<div class="code"><h3>Code: Java implementation of the Script node</h3><pre>import vrml.*;
+import vrml.field.*;
+import vrml.node.*;
+
+public class Sandbox extends vrml.node.Script
+{
+  // This method gets called when loading the scene
+  public void initialize()
+  {
+    // Get the Text node from "text" field of the Script node
+    SFNode textField = (SFNode)getField("text");
+    Node textNode = (Node)textField.getValue();
+
+    // Get the "string" exposed field of the Text node
+    MFString stringField = (MFString)textNode.getExposedField("string");
+
+    // Get the name of the user. This is a privileged method call that
+    // will throw an AccessControlException when we do not give this
+    // script the right to read that property.
+    String username = System.getProperty("user.name");
+
+    // Write the user name into the "string" field of the Text node
+    stringField.set1Value(1, username);
+  }
+}</pre></div>
+
+        <p>Ok, after compiling our Java code, we start our test scene and get the following result:</p>
+
+        <div class="imgContainer"><img src="Player-Sandbox-Failed-small.png" align="center"/><div class="imgCaption">Image: Failed scene</div></div>
+
+        <p>To our surprise, we still see the default name "???" instead of the actual user name. So what went wrong?</p>
+        <p>Whenever something goes wrong, you should have a look into the console. You'll get it when you click onto the "Console" item in the "Window" menu. When we do that after loading our test scene, we'll see that we've got an AccessControlException:</p>
+
+        <div class="code"><h3>Code: Error message in the console</h3><pre>Exception in thread "main" java.security.AccessControlException: access denied (java.util.PropertyPermission user.name read)
+	at java.security.AccessControlContext.checkPermission(AccessControlContext.java:269)
+	at java.security.AccessController.checkPermission(AccessController.java:401)
+	at java.lang.SecurityManager.checkPermission(SecurityManager.java:524)
+	at java.lang.SecurityManager.checkPropertyAccess(SecurityManager.java:1276)
+	at java.lang.System.getProperty(System.java:573)
+	at Sandbox.initialize(Sandbox.java:20)
+</pre></div>
+        <p>This exception tells us that our Java code in line 20 of "Sandbox.java" failed when reading the property "user.name" because access to this property is denied.</p>
+        <p>The reason for this behaviour is that your code for security reasons is running inside a restriced Java sandbox, just like a Java applet in a web browser. Anything that is considered potentially harmful is forbidden inside that sandbox. Harmful operations for example are reading files, opening sockets, and in our case getting the name of the user. So whenever your code throws an AccessControlException, you know that you tried to do something forbidden.</p>
+        <p>So the situation is as follows: With Java, we can implement much more powerful Script nodes than with JavaScript. But due to the restrictions, we cannot actually do much useful. We are trapped inside a sandbox with no chance to interact with the environment. Obviously that's quite unimpressive. But fortunately the inventors of Java knew about that and implemented a way for the user to grant additional rights to code running in a Java sandbox. In the next section, you'll learn how to do that.</p>
+
+        <h2>The Policy Tool</h2>
+        <p>Whenever you want do perform a privileged operation in a Java sandbox, you have to give your code the right to do that. To grant additional rights to Java classes, you have to create a new or edit an existing file called ".java.policy". This file is located in your home directory on Unix systems (Linux and Mac OS X), in the directory "C:\Documents and Settings\&lt;username&gt;\" on an english Windows 2000/XP and in "C:\Users\&lt;username&gt;\" on Vista, where you replace "&lt;username&gt;" by your actual username/account. Keep in mind that on Unix, files whose names start with a dot (as in the case of ".java.policy") are hidden and not visible in file explorers.</p>
+        <p>".java.policy" is a (UTF8-encoded) text file, so you can edit it by using a text editor. But I strongly recommend to use a small software called "policytool" that is part of the Java Runtime Environment (JRE). On Unix systems, you'll usually find it under "/usr/bin/policytool". Simply open a terminal ("/Applications/Utilities/Terminal" on Mac OS X) and enter "policytool" on the command line, it should be in the search path. On an english Windows, you'll find it under "C:\Program Files\Java\jre*\bin\policytool" when you installed the JRE into the default location (where "*" stands for the version number). When you're successfull, you'll get the main policytool window. When ".java.policy" already exists, policytool will automatically load that file, otherwise you'll get an empty window like this:</p>
+        <div class="imgContainer"><img src="policytool-empty.png" align="center"/><div class="imgCaption">Image: The main policytool window</div></div>
+        <p>After starting the policy tool and loading an existing policy file if it exists, you first have to specify the URL of your Java class. Click on the button "Add Policy Entry". You'll get a dialog window that looks like this:</p>
+        <div class="imgContainer"><img src="policyentry-empty.png" align="center"/><div class="imgCaption">Image: The Policy Entry dialog</div></div>
+        <p>Enter the URL into the text field "CodeBase". The exact meaning of the URL depends on the characters at the end. An URL with a trailing "/" matches all class files (not JAR files) in the specified directory. An URL with a trailing "/*" matches all files (both class and JAR files) contained in that directory. An URL with a trailing "/-" matches all files (both class and JAR files) in the directory and recursively all files in subdirectories contained in that directory. So in my case, the example scene for the tutorial (more precisely, the compiled Java byte code "Sandbox.class") is located in "C:\Users\pdaehne", so I have to enter the URL "file:/C:/Users/pdaehne/". Note that you have to specify an URL (starting with "file:"), not only the path. On Windows, make sure to use slashes ("/") instead of backslashes ("\"). When you're using file URLs frequently, you'll notice that the file URL is actually syntactically wrong (file URLs should start with "file:///"), but it has to be this way. Note also that you can leave the code base field empty - an empty URL means "grant the rights to all Java classes", which is quite dangerous.</p>
+        <p>After specifying the code base, you have to specify which rights you grant to the Java classes specified by the code base. Click on the button "Add Permission". You'll get yet another dialog window where you can click onto three drop-down-menus to specify the permission you grant to the classes. All these permissions are quite confusing, and explaining all settings is out of scope of this tutorial - have a look into the Java documentation. For now, we'll simply use the special permission "AllPermission" to give the code all permissions, i.e. to completely disable the sandbox for our example code. Usually, you should not do that, because it's quite dangerous - you should only grant the rights absolutely necessary. So the resulting settings should look like this:</p>
+        <div class="imgContainer"><img src="permissions-all.png" align="center"/><div class="imgCaption">Image: Granting all permissions</div></div>
+        <p>When you're finished, click onto "OK" to close the Permissions dialog. You'll get back to the Policy Entry dialog which should look like this:</p>
+        <div class="imgContainer"><img src="policyentry-finished.png" align="center"/><div class="imgCaption">Image: The Policy Entry dialog with all settings</div></div>
+        <p>Leave the Policy Entry dialog by clicking onto the "Done" button. You'll get back to the main window. Now save the settings. When you already had a ".java.policy" file, you can simply click onto the "Save" menu item in the "File" menu. Otherwise, you have to click onto the "Save As" menu item in the "File" menu and specify the correct location and file name. After saving, your main window should look like this:</p>
+        <div class="imgContainer"><img src="policytool-aftersave.png" align="center"/><div class="imgCaption">Image: The main window after saving our settings</div></div>
+        <p>Now we're ready to load our test scene. And - voilà! It should print the user name.</p>
+        <div class="imgContainer"><img src="Player-Sandbox-Ok-small.png" align="center"/><div class="imgCaption">Image: Working scene</div></div>
+        <p>Ok, now you know how to grant rights to code on your local hard disk. But what about VRML worlds downloaded from the Internet? Again, open the poliytool.</p>
+        <p>Let's say you can download our example scene from "http://www.instantreality.org/tutorial/breaking-out-of-the-java-sandbox/Sandbox.wrl". In the main window, click on "Add Policy Entry" and enter the URL "http://www.instantreality.org/tutorial/breaking-out-of-the-java-sandbox/" into the "CodeBase" field. Then, click on "Add Permission".</p>
+        <p>This time, we are a little bit concerned if the code downloaded from the Internet is really trustworthy, so we won't give it all permissions, just the permission to read the property "user.name". So in the first drop-down menu, we select "PropertyPermission" which is the permission needed for reading or writing properties. Then we have to enter the name of the property we want to access ("user.name") into the second edit field. And finally, we have to select "read" from the third drop-down menu, because we want to read the property. After doing that, the dialog looks like this:</p>
+        <div class="imgContainer"><img src="permissions-propertyread.png" align="center"/><div class="imgCaption">Image: Granting the permission to read the property "user.name"</div></div>
+        <p>Now we close the Permissions dialog by clicking onto "OK". The Policy Entry dialog looks like this:</p>
+        <div class="imgContainer"><img src="policyentry-http.png" align="center"/><div class="imgCaption">Image: The Policy Entry dialog for the HTTP code base</div></div>
+        <p>Leave the Policy Entry dialog by clicking onto "Done", and save the settings in the main window. The main window should look like this now:</p>
+        <div class="imgContainer"><img src="policytool-http.png" align="center"/><div class="imgCaption">Image: The main window with the HTTP code base</div></div>
+        <p>When you now try to open the scene from the Internet, it should again display the correct user name.</p>
+
+        <p>That already concludes this tutorial. Keep in mind:</p>
+        <ul><li>By default, your code has the right to read all files that are located in the same directory as the class file that contains your code.</li><li>You do not only have to grant rights to your own code, but also to code that gets called by your code. This especially means that you explicitly have to grant rights to JARs used by your code. The standard Java packages (“java.*”) contained in the Java runtime by default have all permissions. Non-standard packages like “javax.*” do not have any permissions. Instead of granting permissions to other code called by your code, you can also use so-called “Privileged Blocks”. Have a look into the Java documentation to see how to use privileged blocks.</li></ul>
+        <p>As mentioned before, all of this is not Instant Player-specific, instead it is a standard approach to grant permissions to Java code running in a sandbox, and there is a lot of information available in the Java documentation about this topic.</p>
+        <p>Information about the policy tool is available under the following URL:</p>
+        <p><a href="http://java.sun.com/javase/6/docs/technotes/guides/security/PolicyGuide.html">http://java.sun.com/javase/6/docs/technotes/guides/security/PolicyGuide.html</a></p>
+<p>Information about permissions is available under the following URL:</p>
+<p><a href="http://java.sun.com/javase/6/docs/technotes/guides/security/permissions.html">http://java.sun.com/javase/6/docs/technotes/guides/security/permissions.html</a></p>
+<p>Information about privileged blocks is available under the following URL:</p>
+<p><a href="http://java.sun.com/javase/6/docs/technotes/guides/security/doprivileged.html">http://java.sun.com/javase/6/docs/technotes/guides/security/doprivileged.html</a></p>
+<p>Unfortunately, the location of these documents changes frequently.</p>
+
+        <h2>Example Files</h2>
+		<p>The test scene is available in classic VRML encoding ("Sandbox.wrl") as well as XML encoding ("Sandbox.x3d"). You'll find the Java source code in "Sandbox.java" and the compiled Java byte code in "Sandbox.class".</p>
+        
+    Files:
+    <ul class="files"><li><a href="Sandbox.wrl">Sandbox.wrl</a></li><li><a href="Sandbox.x3d">Sandbox.x3d</a></li><li><a href="Sandbox.java">Sandbox.java</a></li><li><a href="Sandbox.class">Sandbox.class</a></li></ul>
+    </div>
+</div>

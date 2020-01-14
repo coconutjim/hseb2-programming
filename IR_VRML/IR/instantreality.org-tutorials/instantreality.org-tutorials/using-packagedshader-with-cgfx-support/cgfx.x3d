@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D version="3.0">
+  <head>
+    <meta content="" name="info"/>
+  </head>
+<!--
+  This should give a sphere with an earth texture blinking in magenta.
+-->
+  <Scene DEF="scene">
+    <Shape>
+      <Appearance>
+        <!-- This is how you can defines textures to be used by the effect.
+             doing it this way also has the benefit that the chunks of the
+             texture definitions are used as a fallback if the effect cannot
+             be created for some reason. -->
+        <ImageTexture DEF="earth" url="earth.png"/>
+        
+        <!-- Define a CGFX effect -->
+        <PackagedShader DEF="blinkeffect" url="simple_multipass.cgfx"
+          language="CGFX">
+          
+          <!-- Fields __technique__ and __compilerOptions__ are not shader
+               parameters, but used the control the effect itself. -->
+          <field accessType="inputOutput" name="__technique__"
+            type="SFInt32" value="0"/>
+          <field accessType="inputOutput" name="__compilerOptions__"
+            type="MFString" value="&quot;-DAVALON&quot;"/>
+          <!-- With __additionalIncludeDirectories__ you can specify 
+               additional directories that are searched for the
+               virtual include file mechanism. -->
+          <field accessType="inputOutput" name="__additionalIncludeDirectories__"
+            type="MFString" value="&quot;/myshaderlibrary/include&quot;"/>
+
+          <!-- Here come the shader parameters in the usual way. --> 
+
+         <field accessType="inputOutput" name="BlinkColor"
+            type="SFVec3f" value="1 0 1"/>
+          <field accessType="inputOutput" name="BlinkScale"
+            type="SFFloat" value="0.0"/>
+
+          <!-- Sampler/Texture parameters can be set by referencing
+               a texture node. -->
+          <field accessType="inputOutput" name="TestSampler" type="SFNode" >
+            <ImageTexture USE="earth"/>
+          </field>
+
+          <!-- Or, alternatively by specifying a filename directly.
+               Note that in this case the file will by loaded directly from the
+               filesystem, not via a URL.
+          <field accessType="inputOutput" name="TestSampler"
+            type="SFString" value="earth.png"/> -->
+
+        </PackagedShader>
+      </Appearance>
+      <Sphere/>
+    </Shape>
+
+    <!-- Rest of scene just makes the sphere blink. -->
+
+    <TimeSensor DEF="timer"
+        cycleInterval='1'
+        loop='TRUE'
+        startTime='0'
+        stopTime='0'
+        pauseTime='0'
+        resumeTime='0'
+        triggerName='Timer'
+        description=''
+        enabled='TRUE'
+        logFeature=''
+    />
+ 
+    <ScalarInterpolator DEF="int" keyValue="0, 1" key="0, 1" />
+    <ROUTE fromNode='timer' fromField='fraction_changed' toNode='int' toField='set_fraction'/>
+    <ROUTE fromNode='int' fromField='value_changed' toNode='blinkeffect' toField='BlinkScale'/>
+
+  </Scene>
+</X3D>

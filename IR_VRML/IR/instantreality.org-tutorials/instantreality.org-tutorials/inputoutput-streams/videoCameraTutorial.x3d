@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D>
+  <Scene DEF='scene'>
+    <IOSensor DEF='video' type='video' >
+      <field accessType='outputOnly' name='frame*' type='SFImage'/>
+    </IOSensor>
+    <Shape>
+      <Appearance>
+        <PixelTexture2D DEF='tex'/>
+      </Appearance>
+      <Box/>
+    </Shape>
+    <ROUTE fromNode='video' fromField='frame*' toNode='tex' toField='image'/>
+  </Scene>
+</X3D>

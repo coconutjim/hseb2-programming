@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet type="text/xml" href="../../../tutorialXMLToXHTML.xslt"?>
+<?xml-stylesheet type="text/css" href="../../css/tutorial.css"?>
+<!DOCTYPE tutorial SYSTEM "../../../tutorial.dtd">
+
+<tutorial category="Specific Devices" date="2009-02-08" status="good" ordering="4">
+    <title>Immersive VR With The Emagin Visor</title>
+    <description>The eMagin Visor is a lightweight and affordable head mounted display. This tutorial explains how to set up the display and instant player for headtracked stereoscopic VR applications.</description>
+    <keywords>
+        <keyword>tutorial</keyword>
+        <keyword>X3D</keyword>
+        <keyword>active</keyword>
+        <keyword>stereo</keyword>
+        <keyword>head tracking</keyword>
+        <keyword>emagin</keyword>
+        <keyword>HMD</keyword>
+    </keywords>
+    <authors>
+        <author>Torsten Fr&#246;hlich</author>
+    </authors>
+
+
+    <content>
+        <h1>Introduction</h1>
+        <p>The eMagin Visor Z800 is a lightweight and affordable head mounted display. It features two OLED displays which can display two independent images. Being compatible to the Stereographics shutter glasses, it can be driven by an time-sequential (aka "active") stereo video signal.<img src="emagin2.jpg" alt="The eMagin Visor "/>
+        </p>
+        <p>For immersive VR, headtracking is a must. The eMagin visor has a built-in head tracker consisting of acceleration sensors and a compass. This sensor combination only allows registering rotations of the head. Changes in the head position cannot be measured. That is not enough for many professional VR applications but the sensor quality is quite good and, hey it's free ;-)</p>
+        <p>In order to set up instantreality and the display, two major challenges must be mastered:</p>
+        <ol>
+            <li>Setting up active stereo rendering</li>
+            <li>Routing the sensor data into instantplayer</li>
+        </ol>
+        <p>Both issues are not really difficult once you know what you are doing, but it took me quite a long time to get it to work. That wouldn't been possible without the continuous help of Patrick D&#228;hne.  He went to great lengths to get this going. Take a look into the forum and you know what I mean.</p>
+        <h1>Setting Up Stereo</h1>
+        <h2>Hardware Preconditions</h2>
+        
+        <p>In order to generate a time-sequential (active) stereo video signal, your
+ graphics card must support quad buffer. That's a front and back buffer
+ for the left and the right eye. Quad buffer is typically <b>not possible with consumer graphic cards</b>. There are OpenGL drivers tweaking consumer cards into stereo mode as well as tools like the RivaTuner, but these are not covered here. I assume that you have a graphics card allowing for quad buffer. I have a NVIDIA Quadro FX 1500 and all other cards of this type series should work as well.</p>
+        <h2>Operating System And Drivers</h2>
+        <p>This tutorial covers only the Windows operating system. Moreover, at the time of writing, only <b> Windows XP </b>is capable of active stereo rendering. It took some time to find out which OpenGL driver version actually works with instantplayer. Here it is:<b> Forceware 169.21</b>. Newer versions probably work as well.</p>
+        <h2>Enabling Stereo</h2>
+        <p>Before we actually connect the eMagin display, we have to enable active stereo rendering and set the correct resolution. Open the NVIDIA control panel by right clicking on your desktop, select the task "Manage 3D settings" and scroll down to the stereo settings. Set" Stereo - Display Mode" to "Use shutter glasses", set "Stereo - Enable" to "On" and "Stereo - Swap Eyes" to "Off". Your screen should look like this:</p>
+        <img src="StereoSettings.jpg" ></img>
+        <p>Now we are ready to test if active stereo is working. Patrick recommended a free tool called redblue.exe. You can download it <a href="http://www.reald-corporate.com/scientific/developer_tools.asp">here</a>. </p>
+        <p>After launching redblue.exe, you should see a window with flickering contents: A blue and a red rectangle alternating rapidly. Congratulations, you've got stereo working!</p>
+        <p>The final step is connecting your eMagin display and check if it works properly in stereo. Make sure you change the screen resolution to 800x600 pixels. You will see your (monoscopic) screen first. If you start redblue.exe, you should see the blue rectangle with your left eye and the red one on the right. The LED on the eMagin's electronics box should switch to constant (not blinking) green.</p>
+        <h1>Head Tracking</h1>
+        <p>After having installed the eMagin driver and connected the device, you'll find a small icon at the right side of your task bar, depicting what Patrick called an "ugly mafioso". You will also notice that your mouse cursor will move if you take your eMagin display and rotate it. That indicates that your display's sensors are working nicely, but this mouse emulation is poison for instantplayer's device manager, because it blocks the device. So we have to remove it by killing the service. Right click on the icon in the task bar and select exit.</p>
+        <warning><icon src="Mafioso.jpg" /> Beware of the mob: Stop the eMagin mouse emulation by removing the ugly mafioso icon from your task bar!</warning>
+        <p>Next is some X3D code providing the "glue" between the eMagin motion sensors and instantplayer:</p>
+        <code>#VRML V2.0 utf8
+
+DEF emagin IOSensor
+{
+  type "eMagin"
+  eventOut SFRotation Orientation
+}
+
+DEF vp Viewpoint {}
+
+ROUTE emagin.Orientation TO vp.set_orientation
+
+Inline {
+	url "matrix.wrl"
+}</code>
+        <p>This defines some I/O device of type "eMagin" which provides a single output slot: The orientation provided by it's motion sensors. This is routed to the the viewpoint controlling the camera. Finally, some test scene is loaded. That's all we need for head tracking with the eMagin!</p>
+        <p>In order to obtain a deeper understanding of  X3D files provided by this tutorial, you may find it useful to read the tutorials "Active Stereo" and "Connecting Devices". </p>
+        <files>
+        	<file url="emagin.zip">emagin.zip</file>
+        </files>
+        
+
+    </content>
+</tutorial>

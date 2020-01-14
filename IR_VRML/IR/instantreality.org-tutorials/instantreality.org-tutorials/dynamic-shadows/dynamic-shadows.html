@@ -1,0 +1,74 @@
+<div id="tutorialContainer">
+  <h2 class="title">Dynamic shadows</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        rendering,
+        shadows<br/><strong>Author(s): </strong>Tobias Alexander Franke, Johannes Behr, Yvonne Jung<br/><strong>Date: </strong>2007-03-05</p>
+  <p><strong>Summary: </strong>This tutorial shows how to enable dynamic shadows.</p>
+  <div id="content">
+    <h2>Shadow types</h2>
+    <p>
+The current X3D ISO-spec does not include any kind of shadow for dynamic scenes. There are some proposals for shadow extensions, but most are limited in the types of lights or methods supported. Our method has two major advantages. First of all it works with almost every type of scene and is very intuitive. It works with Directional-, Spot- and PointLights and can work well with application defined shaders. We do not introduce new special shadow nodes but extend the existing light nodes with additional fields. Therefore the light-node regulates illumination and shadows simultaneously, just like in the real world. Second, our parameter and abstraction level allows the support and implementation of different methods, e.g. shadow-map or shadow-volumes, to fulfill different requirements.
+     </p>
+     <p>
+For the most basic applications, the <tt>shadowIntensity</tt> field per light controls the shadow-casts for this light-node. 
+The shadowIntensity (in [0, 1]) defines the intensity of the shadows. If the field value is equal to 0, the shadow is off, otherwise it defines the shadow opacity. 
+     </p>
+
+ <div class="code"><h3>Code: Setting individual shadow intensities.</h3><pre>
+ SpotLight {
+  shadowIntensity 0.3
+  direction 0 -1 0
+  location -2 14 -2
+}
+    </pre></div>
+
+     <p>
+  The shadows are then automatically applied to all corresponding scene objects.  The user does not need to specify specific occluders and occludees. But since we are in a virtual world, we can exclude objects from throwing shadows. This is quite useful for performance optimizations and can be achieved via the <tt>shadowExcludeObjects</tt> field of the Environment node. The <a href="/documentation/nodetype/Environment">Environment</a> node is a Bindable which holds rendering states and settings like global shadow parameters. The most important shadow parameters are "globalShadowIntensity" and "shadowMode". The <tt>globalShadowIntensity</tt> allows forcing a global shadow-intensity and overwrites the per-light settings (if not 0). Again, the range is [0, 1], with higher values being more intense (i.e. darker). 
+  The <tt>shadowMode</tt> field allows the selection of different shadow calculation methods.  
+</p>
+
+    <div class="code"><h3>Code: An example environment using the uniformHardShadow method.</h3><pre>
+Environment {
+  globalShadowIntensity 0.3
+  shadowMode "uniformHardShadow" 
+  excludeTransparentObjects FALSE
+}
+    </pre></div>
+
+	<p>
+All run-time environments should at least support the following values: "auto", "uniformHardShadow", "perspectiveHardShadow", "fastUniformSoftShadow, and "niceUniformSoftShadow". Whereas "auto" activates the default browser settings, all other modes are implementation dependent. We only assume that the given order reflects the increasing complexity of the method. "uniformHardShadow" should be the fastest and "niceUniformSoftShadow" should offer good quality shadows.
+	</p><p>
+For example in our implementation we map the PCF-methods for "uniformSoftShadow"-modes and the modified PCSS to "perspectiveSoftShadow". Standard shadow maps correspond to the "uniformHardShadow"-mode and LISP shadows are mapped to the "perspectiveHardShadow"-mode. Different shadow modes are not only useful for speed-quality trade-offs but also for simulating different types of light sources: A single light bulb throws hard shadows, whereas an area light source such as a window throws very soft shows. 
+The following shadow modes are available in the current implementation:
+     </p>
+     
+    <dl><dt>perspectiveHardShadow</dt>:
+            <dd>Light space perspective shadow maps (LISP).</dd><br/><dt>uniformHardShadow</dt>:
+            <dd>Standard shadow maps.</dd><br/><dt>fastUniformSoftShadow</dt>:
+            <dd>Dithered softshadows, comparable to the PCF shadows.</dd><br/><dt>niceUniformSoftShadow</dt>:
+            <dd>Percentage closer filtering (PCF).</dd><br/><dt>perspectiveSoftShadow</dt>:
+            <dd>Percentage closer soft shadows (PCSS).</dd><br/><dt>uniformSoftShadow</dt>:
+            <dd>Variance shadow maps.</dd><br/><dt>none</dt>:
+            <dd>Deactivates shadows completely.</dd><br/></dl>
+
+    <div class="imgContainer"><img src="shadow_modes.png" align="center"/><div class="imgCaption">Image: Left to right, top to bottom: perspectiveHardShadow, uniformHardShadow, fastUniformSoftShadow, niceUniformSoftShadow, perspectiveSoftShadow, uniformSoftShadow</div></div>
+   <p>
+ HINT: Instant Player will allow you to apply shadows to a scene at runtime by pressing the key <tt>x</tt> and cycle through the modes by pressing the <tt>t</tt> key.
+	</p>
+ 
+    <p>
+      Some other fields are worth taking a closer look at: 
+      The field <tt>shadowExcludeTransparentObjects</tt> is a boolean responsible for - as one can guess by the name - the handling of transparent objects like glass etc. Shadow mapping is particularly tricky to get right when transparency comes into play and impacts on rendering speed.
+The <tt>shadowSmoothness</tt> is a mode-dependent scale factor, which determines the tradeoff between speed and quality: 1 equals best and 0 the fastest results for the given mode (by defining a filter kernel sampling range).
+	</p><p>
+	There are two more fields which are used for fine grained control of the shadow mapping implementation:
+     The <tt>shadowOffset</tt> field defines the polygon offset for alleviating artifacts due to depth buffer precision problems. The <tt>shadowMapSize</tt> field defines, as the name implies, the size of the shadow map - again quite useful for controlling the speed-quality trade-off for shadow-map based implementations.
+    </p>
+	
+    
+    Files:
+    <ul class="files"><li><a href="shadows.wrl">shadows.wrl</a></li></ul>
+  </div>
+</div>

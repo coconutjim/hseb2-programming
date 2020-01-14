@@ -1,0 +1,158 @@
+#VRML V2.0 utf8
+
+
+Transform
+{
+	rotation 1 0 0 0.8
+
+	children [
+	DEF touchSensor TouchSensor {}
+	DEF trans Transform
+	{
+		children [
+			SpotLight 
+			{
+			  direction 0.01 -1 0
+			  location 2 12 2
+			}
+
+			SpotLight 
+			{
+			  direction -0.01 -1 0
+			  location -2 12 -2
+			}
+		]
+	}
+
+	NavigationInfo 
+	{
+		headlight FALSE
+	}
+
+	Background 
+	{
+		groundAngle 
+		[
+			0.899999 
+			1.500000 
+			1.570000 
+		]
+		
+		groundColor 
+		[
+			0.600000 0.699999 0.100000 
+			0.400000 0.699999 0.200000 
+			0.100000 0.600000 0.100000 
+			0.000000 0.300000 0.100000 
+		]
+		
+		skyAngle 
+		[
+			0.900000 
+			1.500000 
+			1.570000 
+		]
+		
+		skyColor 
+		[
+			0.209999 0.180000 0.660000 
+			0.200000 0.439999 0.850000 
+			0.509999 0.810000 0.949999 
+			0.769999 0.800000 0.819999 
+		]
+	}
+
+	DEF ground Transform 
+	{
+		children 
+		[
+			Shape 
+			{
+				appearance Appearance 
+				{
+					material Material 
+					{
+						diffuseColor 0.3 0.25 1
+					}
+				}
+				geometry Box 
+				{
+					size 8 0.1 7.5
+				}
+			}
+		]
+		translation 0 -1 0
+	}
+
+	DEF boxTrans Transform 
+	{
+		children 
+		[
+			Shape 
+			{
+				appearance Appearance 
+				{
+					material Material 
+					{
+						diffuseColor 1 0 0
+					}
+				}
+				geometry Box 
+				{
+				}
+			}
+		]
+		translation 0 1.8 0
+	}
+
+	DEF sphere Transform 
+	{
+		children 
+		[
+			Shape 
+			{
+				appearance Appearance 
+				{
+					material Material 
+					{
+						diffuseColor 0 1 0
+					}
+				}
+				geometry Sphere 
+				{
+				}
+			}
+		]
+		translation 2.5 0 1.5
+	}
+	]
+}
+
+DEF time TimeSensor { cycleInterval 5.000000 loop TRUE }
+DEF ori OrientationInterpolator {
+	key [0 .5 1 ]
+	keyValue [
+     0 1 0  0,
+     0 1 0  3.1415,
+     0 1 0  6.283
+    ]
+}
+ROUTE time.fraction_changed TO ori.set_fraction
+ROUTE ori.value_changed TO trans.set_rotation
+DEF bI PositionInterpolator {
+	key [ 0 0.5 1 ]
+	keyValue [ 0 2 0, 1 0 0, 0 2 0 ]
+}
+ROUTE time.fraction_changed TO bI.set_fraction
+ROUTE bI.value_changed TO boxTrans.set_translation
+
+DEF env Environment	{
+	globalShadowIntensity 1.0
+	shadowMode "niceUniformSoftShadow" 
+	shadowExcludeObjects [ USE ground ] 
+}
+
+DEF logger Logger { }
+
+ROUTE touchSensor.hitObject_changed TO logger.write
+ROUTE touchSensor.hitObject_changed TO env.shadowExcludeObjects

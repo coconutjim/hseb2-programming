@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D profile='Immersive'>
+  <Engine>
+    <RenderJob>
+      <WindowGroup>
+        <LocalWindow enabled="FALSE"/>
+        <ClusterWindow servers='"displaypc" "clusterpc1" "clusterpc2"' hServers="1" vServers="1" size="1024 768" balance="TRUE" showBalancing="TRUE"/>
+      </WindowGroup>
+    </RenderJob>
+  </Engine>
+  <Scene>
+    <Transform translation='-5 -5 0'>
+      <Inline url="tie.wrl"/>
+    </Transform>
+    <Transform translation='5 -5 0'>
+      <Inline url="tie.wrl"/>
+    </Transform>
+    <Transform translation='5 5 0'>
+      <Inline url="tie.wrl"/>
+    </Transform>
+    <Transform translation='-5 5 0'>
+      <Inline url="tie.wrl"/>
+    </Transform>
+	</Scene>
+</X3D>

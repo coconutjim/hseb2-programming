@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+
+
+<Engine desiredFrameRate="60">
+    <RenderJob DEF='render'>
+        <WindowGroup>            
+            <Window DEF='win1' fullScreen="true" drawCursor="true">
+                <Viewarea DEF="viewarea" />
+            </Window>            
+        </WindowGroup>
+    </RenderJob>   
+</Engine> 
+
+<Scene DEF='scene'>
+    <NavigationInfo type="none" interactionType="projection" />
+    <Environment DEF="env" frustumCulling="false" shadowMode="none" syncOnFrameFinish="false" />
+    <Viewpoint position="0 0 10" zNear="0.9" zFar="1000" />
+        
+    <ExternProtoDeclare name='NextWindowMultiTouch' url="NextWindowMultiTouch_PROTO.x3d" />        
+    <NextWindowMultiTouch displayPixelSize="1920 1080" touchReleaseDuration="74" />
+        
+	<Transform>	
+		<HypersurfaceSensor DEF="hsSensor" translationOffset="0 0 0" minScale="0.2 0.2 0.2" maxScale="2 2 2" />
+		<Transform DEF="boxTrans" translation="0 0 5">			
+			<Shape>
+				<Box />
+				<Appearance><Material DEF="mat" /></Appearance>
+			</Shape>
+		</Transform>
+	</Transform>
+    
+    <ROUTE fromNode="hsSensor" fromField="translation_changed" 
+           toNode="boxTrans" toField="translation" />
+    <ROUTE fromNode="hsSensor" fromField="scale_changed" 
+           toNode="boxTrans" toField="scale" />
+           
+</Scene>
+</X3D>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+
+<X3D version='3.0'>
+	<Scene>
+		<ProtoDeclare name='TextureMorph'>
+			<ProtoInterface>
+				<field name='translation'	type='SFVec3f'		accessType='inputOutput' 	value='0 0 0' />
+				<field name='render'		type='SFBool' 		accessType='inputOutput' 	value='TRUE' />
+				<field name='rotation'		type='SFRotation' 	accessType='inputOutput' 	value='0 0 0 1' />
+				<field name='scale'			type='SFVec3f' 		accessType='inputOutput' 	value='1 1 1' />
+				<field name='imageurl'		type='MFString' 	accessType='initializeOnly'	value='' />
+				<field name='distance'		type='SFFloat' 		accessType='initializeOnly'	value='0.5' />
+				<field name='instances'		type='SFFloat' 		accessType='initializeOnly'	value='5' />
+				<field name='size'			type='SFVec2f' 		accessType='initializeOnly'	value='512 512'/>
+				<field name='title'			type='SFString' 	accessType='inputOutput' 	value='' />
+				<field name='description'	type='SFString' 	accessType='inputOutput' 	value='' />				
+			</ProtoInterface>
+			<ProtoBody>
+				
+				<Transform DEF='root' translation='0 0 0'>
+				<IS>
+					<connect nodeField='translation' protoField='translation'/>
+					<connect nodeField='rotation' protoField='rotation'/>
+					<connect nodeField='scale' protoField='scale'/>
+					<connect nodeField='render' protoField='render'/>
+				</IS>				
+				</Transform>
+				
+				<Script DEF='script' directOutput='true' >
+					<field name='imageurl' type='MFString' accessType='initializeOnly' value='' />
+					<field name='distance' type='SFFloat' accessType='initializeOnly' value='0.25' />
+					<field name='instances' type='SFFloat' accessType='initializeOnly' value='4' />
+					<field name='plane_size' type='SFVec2f' accessType='initializeOnly' value='512 512' />
+					<IS>
+                    	<connect nodeField='imageurl' protoField='imageurl'/>
+                    	<connect nodeField='distance' protoField='distance'/>
+                    	<connect nodeField='instances' protoField='instances'/>
+                    	<connect nodeField='plane_size' protoField='size'/>
+                  	</IS>
+                  	<field accessType='initializeOnly' name='root' type='SFNode'>
+						<Transform USE='root' />
+					</field>
+		
+					<![CDATA[
+					  ecmascript:
+						
+						function initialize()
+						{
+							var	curRot = new SFRotation(1, 0, 0, 3.14);
+							
+							for (i=0; i<instances; i++)
+							{
+								t = new SFNode ('Transform {}');
+								t.translation[2] = i*distance;
+								t.rotation = curRot;
+								s = new SFNode ('Shape {}');
+								geo = new SFNode ('Rectangle2D { size ' + plane_size + ' }');
+								geo.lit = FALSE;
+								geo.solid = FALSE;
+								app = new SFNode ('Appearance {}');
+								mat = new SFNode ('Material {}');
+								if (i<instances-1)
+								{
+									mat.transparency = 0.35;
+									mat.diffuseColor = new SFColor(0.9, 0.9, 0.9);
+								} else {
+									mat.transparency = 0.25;
+									mat.diffuseColor = new SFColor(0.25, 0.25, 0.25);
+								}
+								tex = new SFNode ('ImageTexture {}');
+								tex.url = imageurl;
+								tex.envMode = "modulate";
+								app.addChild(mat,tex);
+								t.addChild(s);
+								s.geometry	= geo;
+								s.appearance = app;						
+							
+								root.addChild(t);
+							}
+						}
+					]]>
+				</Script>
+			</ProtoBody>
+		</ProtoDeclare>
+	</Scene>
+</X3D>

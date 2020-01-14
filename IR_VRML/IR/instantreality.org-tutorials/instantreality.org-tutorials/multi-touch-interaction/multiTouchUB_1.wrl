@@ -1,0 +1,470 @@
+#VRML V2.0 utf8
+
+EXTERNPROTO USER_BODY_MANAGER [] "ProtoUB.wrl#USER_BODY_MANAGER"
+
+
+NavigationInfo {
+	interactionType "projection"
+}
+
+
+Foreground {
+	overlays [
+		DEF VIS PolygonOverlay {
+			#enabled	FALSE
+			appearance Appearance {
+				material Material {
+					diffuseColor 1 1 1
+					emissiveColor 1 1 1	 
+					transparency .25
+				}
+				texture DEF tex PixelTexture {	
+		    		envMode "modulate"
+					minFilter "linear"	  
+					magFilter "linear"	   
+					autoScale FALSE
+					image 2 2 3
+					0xff00ff 0x00ff00 0x0000ff 0xffffff
+				}
+				textureTransform TextureTransform {
+					rotation 3.1415926
+				}
+			}
+			positions [							
+				0.8 0.8, 1 0.8, 1 1, 0.8 1
+			]
+		}
+		DEF	CalibTxt ScreenTextOverlay {
+			text []	
+			family "Courier"
+			pointSize 28
+			borderOffset 0 0
+			horizontalAlign	"MIDDLE"
+			verticalAlign "CENTER"	 
+			shadowOffset 0, 0
+			textMargin 0, 0
+			color 0 0 0 1
+			bgColor 1 1 1 0.5
+			borderColor	1 1 1 1  
+		}
+		DEF poly PolygonOverlay {
+			#enabled	FALSE
+			appearance Appearance {
+				material Material {
+					diffuseColor 1 1 1
+					emissiveColor 1 0 0
+					transparency 0.6
+				}
+            	texture ImageTexture {	  
+					url	"pointer.png"
+                	repeatS FALSE
+                	repeatT FALSE
+					envMode "modulate"
+            	}
+			}
+			positions [
+				0 0, 0 0, 0 0, 0 0
+			]
+		}
+		DEF poly1 PolygonOverlay {
+			#enabled	FALSE
+			appearance Appearance {
+				material Material {
+					diffuseColor 1 1 1	
+					#emissiveColor 0.686 0.392 0.02
+					emissiveColor 0 1 0
+					transparency 0.6
+				}
+            	texture ImageTexture {	  
+					url	"pointer.png"
+                	repeatS FALSE
+                	repeatT FALSE
+					envMode "modulate"
+            	}
+			}
+			positions [
+				0 0, 0 0, 0 0, 0 0
+			]
+		}
+	]
+}
+
+DEF	CursorScript Script {				
+	eventIn MFVec3f set_camtrans
+	eventIn MFVec3f set_IDs	   
+	eventIn	SFVec2f	set_size	
+	eventIn	SFBool set_press
+	eventIn	SFBool set_release
+	eventIn SFBool set_binaryPressure
+	eventOut MFVec3f trackPositionsIDs_changed
+	eventOut MFVec4f pickedPanePositionsIDs_changed
+	field SFNode poly USE poly
+	field SFNode poly1 USE poly1		
+	field SFNode CalibTxt USE CalibTxt
+
+	url	"javascript:
+	var size  = new SFVec2f(700.0, 525.0);
+	var trans = new SFVec2f(0.0, 0.0);	   
+
+	var calibHilf = new SFVec3f(0, 0, 0);
+	var calibCnt  = 0;
+	var calibPnts = new Array();
+	var calibDone = false;
+
+	var sx = 1.0, sy = 1.0;
+	var tx = 0.0, ty = 0.0;
+	var ix = 0, iy = 1;
+
+	var BlobIDs = new MFVec3f();
+
+	function initialize()
+	{
+		CalibTxt.text = new MFString( 
+			'   Kalibrierung: ', 
+			'1. Links  unten druecken', 
+			'2. Rechts unten druecken', 
+			'3. Rechts oben  druecken', 
+			'   ' );
+		repos(1);
+
+		// comment out till end of function for activating calib
+		/*
+		//TEST
+		CalibTxt.verticalAlign = new String('TOP');
+		CalibTxt.horizontalAlign = new String('LEFT');	
+		CalibTxt.text = new MFString();
+		
+
+		//small
+		//sx =   -0.8935139416004; 
+		//sy =    1.6235716116616; 
+		//tx =  704.2242747231749; 
+		//ty = -161.0429804948586;
+
+		//tuio
+		sx =  675; 
+		sy =  440; 
+		tx =   10; 
+		ty =   50;																   
+		
+		calibCnt = 3;
+		calibDone = true;
+		*/
+	}
+
+	function clamp(val)
+	{	 
+		val.x = val.x < 0 ? 0 : val.x; 
+		val.y = val.y < 0 ? 0 : val.y;
+
+		val.x = val.x > 1 ? 1 : val.x; 
+		val.y = val.y > 1 ? 1 : val.y;
+
+		return val;
+	}
+    
+    var XL = 0.1, XR = 0.9, YU = 0.2, YO = 0.8;
+
+	function repos(anz)
+	{
+		if (anz > 2)
+			return;
+
+		var x = (1.0 / (size.x-1)) * trans.x;
+		var y = (1.0 / (size.y-1)) * (size.y-1 - trans.y);
+		var yIncr = 0.025;
+		var xIncr = (size.y / size.x) * yIncr;  
+
+		xIncr *= 0.5;
+		yIncr *= 0.5;
+        
+		//TODO; allow arbitrary values
+		if (calibCnt == 0) {
+			x = XL; //0.0087;
+			y = YU; //0.0219;
+		}
+		else if (calibCnt == 1) {
+			x = XR; //0.8213;
+			y = YU; //0.0219;
+		}
+		else if (calibCnt == 2)	{
+			x = XR; //0.9121;
+			y = YO; //0.5;
+		}
+
+		var a = new SFVec2f(x-xIncr,y-yIncr);
+		var b = new SFVec2f(x+xIncr,y-yIncr);
+		var c = new SFVec2f(x+xIncr,y+yIncr);
+		var d = new SFVec2f(x-xIncr,y+yIncr);
+
+		a = clamp(a);
+		b = clamp(b);
+		c = clamp(c);
+		d = clamp(d);
+		
+		if (anz == 1)											 
+			poly.positions = new MFVec2f(a, b, c, d);
+		else
+			poly1.positions = new MFVec2f(a, b, c, d);
+	}
+
+	function calibrate(ts)
+	{
+		if (calibDone)
+			return;
+		
+		if (calibCnt < 3) {
+			calibPnts[calibCnt++] = calibHilf;
+		}
+
+		var str = '   (' + calibHilf.x.toFixed(2) + ', ' + 
+			calibHilf.y.toFixed(2) + ') ';
+		CalibTxt.text = new MFString( 
+			'   Kalibrierung: ', 
+			'1. Links  unten druecken', 
+			'2. Rechts unten druecken', 
+			'3. Rechts oben  druecken', 
+			new String(str) );
+
+		if (calibCnt == 3) {
+			calibDone = true;
+			
+			calibPnts[0].z = calibPnts[1].z = calibPnts[2].z = 0;
+
+			// max. Ebene bestimmen, d.h. Indizes ix, iy
+			var a = calibPnts[1].subtract(calibPnts[0]);
+			var b = calibPnts[2].subtract(calibPnts[1]);
+			var c = new SFVec3f(
+				a.y*b.z - a.z*b.y,
+				a.z*b.x - a.x*b.z,
+				a.x*b.y - a.y*b.x );	//cross
+
+			if (Math.abs(c.x) >= Math.abs(c.y) && 
+				Math.abs(c.x) >= Math.abs(c.z)) {
+				ix = 1;
+				iy = 2;
+			}
+			else if (Math.abs(c.y) >= Math.abs(c.x) && 
+				Math.abs(c.y) >= Math.abs(c.z)) {
+				ix = 2;
+				iy = 0;
+			}
+			else if (Math.abs(c.z) >= Math.abs(c.x) && 
+				Math.abs(c.z) >= Math.abs(c.y)) {
+				ix = 0;
+				iy = 1;
+			}
+
+			// s und t bestimmen
+			//var vx0 = 0, vy0 = (1.0 - 0.0219) * (size.y - 1);
+			//var vx1 = 0.9121 * (size.x - 1), vy1 = 0.5 * size.y;
+			var vx0 = XL * (size.x - 1), vy0 = (1.0 - YU) * (size.y - 1);
+			var vx1 = XR * (size.x - 1), vy1 = (1.0 - YO) * (size.y - 1);
+			var dwx = calibPnts[2][ix] - calibPnts[0][ix],
+			    dwy = calibPnts[2][iy] - calibPnts[0][iy];
+
+			sx = (vx1 - vx0) / dwx;
+			sy = (vy1 - vy0) / dwy;
+			tx = (calibPnts[2][ix]*vx0 - calibPnts[0][ix]*vx1) / dwx;
+			ty = (calibPnts[2][iy]*vy0 - calibPnts[0][iy]*vy1) / dwy;
+
+			Browser.println('CalibSys: ' + ix + ', ' + iy);
+			Browser.println(sx + ', ' + sy + '; ' + tx + ', ' + ty);
+
+			//CalibTxt.enabled = false;	
+			CalibTxt.verticalAlign = new String('TOP');
+			CalibTxt.horizontalAlign = new String('LEFT');	
+			CalibTxt.text = new MFString();
+
+			//poly.enabled= false;
+			//poly1.enabled= false;
+		}
+	}
+
+	function transform(value)
+	{
+		var win = new SFVec2f(value[ix], value[iy]);
+		
+		// Umrechnung von Trackingkoordinaten
+		// in Bildschirmkoordinaten (->WVT)
+		win.x = sx * win.x + tx;
+		win.y = sy * win.y + ty;
+
+		return win;
+	}
+
+	function set_size(value)
+	{
+		size.x = value.x;
+		size.y = value.y;
+
+		repos(1);			   
+	}
+
+	function set_press(val, ts)
+	{
+		if (calibDone)
+			hot_changed = true;	  
+	}
+	function set_release(val, ts)
+	{
+		if (calibDone)
+			hot_changed = false;
+		else
+			calibrate(ts);
+	}
+
+	function set_binaryPressure(value, ts)
+	{
+		//Browser.println('Joystick: ' + value);
+		if (calibDone)
+			hot_changed = value;
+		else if (!value)
+			calibrate(ts);
+	}
+
+	function set_camtrans(val, ts)
+	{
+		Browser.println(val);
+		if (val[0].z < 1) return;	// bug in tuio sensor
+
+		var i, j, n = val.length, nn = BlobIDs.length;
+		var blobsIDs = new MFVec3f();
+		var paneBlobPosIDs = new MFVec4f();
+
+		if (calibDone) {
+			var s, txt = new MFString();
+
+			for (i=0; i<n; i++)	{  
+				s = Math.round(BlobIDs[i].z)+': ('+
+					val[i].x.toFixed(2)+' '+
+					val[i].y.toFixed(2)+')';
+				txt[i] = s;			
+			}			 
+
+			CalibTxt.text = txt;
+		}		   
+
+		if (!calibDone)	{
+			calibHilf = val[0];	  
+
+			var str = '   (' + calibHilf.x.toFixed(2) + ', ' + 
+							   calibHilf.y.toFixed(2) + ') ';
+			CalibTxt.text = new MFString( 
+				'   Kalibrierung: ', 
+				'1. Links  unten druecken', 
+				'2. Rechts unten druecken', 
+				'3. Rechts oben  druecken', 
+				new String(str) );
+
+			repos(1);
+		}
+		else {
+			var blobs = new MFVec2f();
+			var newIDs = new MFInt32();
+
+			for (i=0; i<n; i++)
+			{
+				if (i < n)
+				{
+					trans = transform(val[i]);
+					repos(i+1);
+				}						
+
+				var x = trans.x; 
+				var y = trans.y;
+
+				blobs[i] = new SFVec2f(x, y);
+				//newIDs[i] = Math.round(BlobIDs[i].z);
+				newIDs[i] = Math.round(val[i].z);
+
+				blobsIDs[i] = new SFVec3f(x, y, val[i].z);
+
+				// alternative script-based method for calculating blobs
+				// new and hopefully better (no need for routing to engine)
+				// but not yet tested...
+				var view = Browser.getView('default');
+				var s = view.size; 
+				var w = s.x - 1;
+				var h = s.y - 1;			 
+
+				if (w > 0 && h > 0)
+				{
+					x /= w;
+					y /= h;
+
+					var t = new SFVec2f( x, y );
+					var pos = new SFVec3f(0,0,0), 
+						norm = new SFVec3f(0,0,0),
+						pane = new SFVec3f(0,0,0);
+
+					// last param is 3d pos on viewport pane in world coords
+					view.buildRay ( t, pos, norm, pane );	
+
+					paneBlobPosIDs[i] = new SFVec4f(pane.x, pane.y, pane.z, val[i].z);				 
+				}
+			}
+
+			if (n > 1) {
+				poly.enabled= true;
+				poly1.enabled = true;
+			}			
+			else {
+				poly1.enabled = false;
+				if (n == 0)
+					poly.enabled= false;
+				else
+					poly.enabled= true;
+			}
+		}
+		
+		trackPositionsIDs_changed = blobsIDs;
+		pickedPanePositionsIDs_changed = paneBlobPosIDs; 
+	}
+
+	function set_IDs(val, ts)
+	{
+		BlobIDs = val;
+	}
+	"
+}
+
+DEF UBManger USER_BODY_MANAGER {
+	initHot TRUE
+}
+
+DEF ios IOSensor {		   
+	type "joystick"		  
+	eventOut SFBool *button*7
+	eventOut SFFloat X?axis
+	eventOut SFFloat Y?axis
+}
+
+DEF VisionLib IOSensor {
+	type "VisionLib"
+	field SFString configFile "blobblob.pm"
+	eventOut SFImage ConvertedImage
+	eventOut MFVec3f blob_positions
+	eventOut MFVec3f blob_radius_intensity_id
+}
+
+DEF TUIO IOSensor {
+	type "TUIO"
+	eventOut MFVec3f visionLib
+}
+
+ROUTE TUIO.visionLib TO	CursorScript.set_camtrans
+
+ROUTE VisionLib.ConvertedImage TO tex.image
+
+ROUTE VisionLib.blob_radius_intensity_id TO CursorScript.set_IDs
+ROUTE VisionLib.blob_positions TO CursorScript.set_camtrans
+
+ROUTE engine::win.size TO CursorScript.set_size
+ROUTE engine::viewarea.mousePress TO CursorScript.set_press
+ROUTE engine::viewarea.mouseRelease TO CursorScript.set_release
+ROUTE ios.*button*7 TO CursorScript.set_binaryPressure
+
+#ROUTE CursorScript.trackPositionsIDs_changed TO	engine::navigator.pickPositionsIDs 
+#ROUTE engine::navigator.pickedPanePositionsIDs_changed TO UBManger.set_panePositionsIDs
+ROUTE CursorScript.pickedPanePositionsIDs_changed TO UBManger.set_panePositionsIDs

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    
+    <Viewpoint position='-10 28 47' orientation='1 0 0 -0.35' />
+
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+    
+    <Transform DEF='root' rotation='1 0 0 0' >
+    <Transform>
+    <Transform translation='0.7 -1.25 2.5' rotation='-0.577 0.577 0.577 2.093'>
+      <Shape>
+      	<Appearance DEF='ap' containerField='appearance'>
+      		<Material diffuseColor='1 1 1'/>
+      	</Appearance>
+      	<Text string='Uncompressed' depth='0.1' lit='false'>
+      		<FontStyle DEF='fs' family='SANS' size='2' justify='end'/>
+      	</Text>
+      </Shape>
+    </Transform>
+    <Transform translation='0 0 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.mtd"'/>
+        </Appearance>
+        <Box DEF='GEO' size='3 3 3' solid='TRUE'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 5 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.sgi"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 10 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.nrrd"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 15 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.bmp"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 20 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.tga"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 25 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.pnm"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    </Transform>
+    
+    
+    <Transform translation='-5 0 0'>
+    <Transform translation='0.7 -1.25 2.5' rotation='-0.577 0.577 0.577 2.093'>
+      <Shape>
+      	<Appearance USE='ap' />
+      	<Text string='Lossless' depth='0.1' lit='false'>
+      		<FontStyle USE='fs'/>
+      	</Text>
+      </Shape>
+    </Transform>
+    <Transform translation='0 0 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.png"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 5 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.tif"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 10 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.gif"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 15 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.psd"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    </Transform>
+    
+    
+    <Transform translation='-10 0 0'>
+    <Transform translation='0.7 -1.25 2.5' rotation='-0.577 0.577 0.577 2.093'>
+      <Shape>
+      	<Appearance USE='ap' />
+      	<Text string='Lossy' depth='0.1' lit='false'>
+      		<FontStyle USE='fs'/>
+      	</Text>
+      </Shape>
+    </Transform>
+    <Transform translation='0 0 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.jpg"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 5 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.jp2"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    </Transform>
+    
+    
+    <Transform translation='-15 0 0'>
+    <Transform translation='0.7 -1.25 2.5' rotation='-0.577 0.577 0.577 2.093'>
+      <Shape>
+      	<Appearance USE='ap' />
+      	<Text string='GPU support' depth='0.1' lit='false'>
+      		<FontStyle USE='fs'/>
+      	</Text>
+      </Shape>
+    </Transform>
+    <Transform translation='0 0 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.dds"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 5 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image-dxt1c.dds"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 10 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image-dxt1a.dds"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 15 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image-dxt3.dds"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 20 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image-dxt5.dds"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    </Transform>
+    
+    
+    <Transform translation='-20 0 0'>
+    <Transform translation='0.7 -1.25 2.5' rotation='-0.577 0.577 0.577 2.093'>
+      <Shape>
+      	<Appearance USE='ap' />
+      	<Text string='HDR' depth='0.1' lit='false'>
+      		<FontStyle USE='fs'/>
+      	</Text>
+      </Shape>
+    </Transform>
+    <Transform translation='0 0 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.hdr"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    <Transform translation='0 5 0'>
+      <Shape>
+        <Appearance>
+          <ImageTexture repeatS='false' repeatT='false' url='"texture/test_image.exr"'/>
+        </Appearance>
+        <Box USE='GEO'/>
+      </Shape>
+    </Transform>
+    </Transform>
+ 
+    </Transform>
+  </Scene>
+</X3D>

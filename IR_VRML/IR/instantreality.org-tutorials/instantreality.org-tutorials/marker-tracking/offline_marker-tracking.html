@@ -1,0 +1,353 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Marker Tracking</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Marker Tracking</h2>
+  <p class="description"><strong>Keywords:</strong><br/>vision,
+        tracking,
+        marker,
+        augmented reality<br/><strong>Author(s): </strong>Mario Becker, Sabine Webel, Svenja Kahn, Michael Zoellner<br/><strong>Date: </strong>2010-02-05</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to use the basic features of instant reality's vision module for marker tracking. 
+                            It also describes the virtual camera handling in Augmented Reality based X3D, or rather instantreality, applications. 
+                            Furthermore it is discussed how to apply marker tracking to your X3D scene by using a <a href='/documentation/nodetype/Viewpoint'>Viewpoint</a> node, what allows you
+                            to run an Augmented Reality scene with arbitrary aspect ratio of the window.
+    </p>
+  <div id="content">
+        <h2>Introduction</h2>
+	<p>
+        instant<i>vision</i> is a set of visual tracking systems offering a variety of features such as simple marker tracking or markerless tracking (for example line trackers and KLT). The true power of the system lies in the ability to combine of several such tracking procedures, for instance using a line tracker for initialisation with an absolute pose and KLT for frame to frame tracking.
+    </p>
+    <p>
+     In this example we will focus on a simple marker tracking example using the <a href='/documentation/nodetype/VisionLib'>VisionLib</a> backend. First we will show how 
+     to track a single marker for a simple Augmented Reality application while keeping the window size flexible. It is described 
+     how the background image (coming from the camera) can be kept in the correct aspect ratio and how to specify whether
+     it is fitted in the background relative to the window height or width. Then we will extend this example by tracking a 
+     second marker.
+	</p>
+    <p>
+     This example works with all cameras which support DirectShow. If your camera does not support DirectShow have a 
+     look at the <a href="http://www.instantreality.org/tutorial/camera-setup-with-instantvision/">Camera Setup Tutorial</a> 
+     and adapt the "source_url" in the instant<i>vision</i> configuration files of this tutorial.
+    </p>
+
+        <h2>IOSensor</h2>
+        <p>
+        The marker tracking is loaded like any other Instant IO device via an <a href="/documentation/nodetype/IOSensor">IOSensor</a>. These are 
+        the instant<i>vision</i>'s fields which are necessary:
+        </p>
+        
+            
+        
+        
+        <ul><li><i>VideoSourceImage (SFImage)</i>: Camera image</li><li><i>TrackedObject1Camera_ModelView (SFMatrix)</i>: Camera's modelview matrix</li><li><i>TrackedObject1Camera_PrincipalPoint (SFVec2f)</i>: Camera's principal point</li><li><i>TrackedObject1Camera_FOV_horizontal (SFFloat)</i>: Camera's horizontal field of view</li><li><i>TrackedObject1Camera_FOV_vertical (SFFloat)</i>: Camera's vertical field of view</li><li><i>TrackedObject1Camera_CAM_aspect (SFFloat)</i>: The aspect of a pixel in the camera image</li></ul>
+        <div class="code"><h3>Code: IOSensor</h3><pre>
+&lt;IOSensor DEF='VisionLib' type='VisionLib' configFile='TutorialMarkerTracking_OneMarker.pm'&gt;
+    &lt;field accessType='outputOnly' name='VideoSourceImage' type='SFImage'/&gt;
+    &lt;field accessType='outputOnly' name='TrackedObject1Camera_ModelView' type='SFMatrix4f'/&gt;
+    &lt;field accessType='outputOnly' name='TrackedObject1Camera_PrincipalPoint' type='SFVec2f'/&gt;
+    &lt;field accessType='outputOnly' name='TrackedObject1Camera_FOV_horizontal' type='SFFloat'/&gt;
+    &lt;field accessType='outputOnly' name='TrackedObject1Camera_FOV_vertical' type='SFFloat'/&gt;
+    &lt;field accessType='outputOnly' name='TrackedObject1Camera_CAM_aspect' type='SFFloat'/&gt;
+&lt;/IOSensor&gt;
+        </pre></div>
+        
+        
+        <h2>Setting the background and the virtual camera</h2>
+        
+        <p>
+        To set the camera's image in the background we use <a href="/documentation/nodetype/PolygonBackground">PolygonBackground</a> node. By setting the 
+        PolygonBackground's field <i>fixedImageSize</i> the aspect ratio of the image can be defined. This aspect ratio 
+        is also kept when the window is resized. Depending on how you want the background image fit in the window 
+        you need to set the <i>mode</i> field to <i>"VERTICAL"</i> or <i>"HORIZONTAL"</i>. When set to <i>"VERTICAL"</i> 
+        the image fits to the height of the window, when the "<i>mode</i> is set to <i>"HORIZONTAL"</i> it fits to the 
+        width of the window.
+        </p>
+        <div class="code"><h3>Code: Camera image on a PolygonBackground</h3><pre>
+&lt;PolygonBackground fixedImageSize='640,480' mode='VERTICAL'&gt;
+    &lt;Appearance&gt;
+        &lt;PixelTexture2D DEF='tex' autoScale='false'/&gt;
+        &lt;TextureTransform scale='1 -1'/&gt;
+    &lt;/Appearance&gt;
+&lt;/PolygonBackground&gt;
+
+&lt;ROUTE fromNode='VisionLib' fromField='VideoSourceImage' toNode='tex' toField='image'/&gt;
+ </pre></div>
+        <p>
+        Now we add a <a href="/documentation/nodetype/PerspectiveViewpoint">PerspectiveViewpoint</a> node, which represents the virtual camera. To apply the real 
+        camera's <i>field of view</i> and <i>principal point</i> to the virtual camera we route the corresponding values 
+        delivered by the <a href='/documentation/nodetype/IOSensor'>IOSensor</a> to our scene camera <a href='/documentation/nodetype/PerspectiveViewpoint'>(PerspectiveViewpoint).</a> If you decided to fit the background 
+        image to the height of the window (i.e. the <i>mode</i> field of the <a href='/documentation/nodetype/PolygonBackground'>PolygonBackground</a> is set to <i>"VERTICAL"</i>), 
+        you need to
+        </p>
+        <ul><li>connect the vertical field of view (<i>TrackedObject1Camera_FOV_vertical</i>) of the <a href='/documentation/nodetype/IOSensor'>IOSensor</a> with the 
+                    <i>fieldOfView</i> field of the <a href='/documentation/nodetype/PerspectiveViewpoint'>PerspectiveViewpoint</a> and</li><li>set the <i>fovMode</i> field of the <a href='/documentation/nodetype/PerspectiveViewpoint'>PerspectiveViewpoint</a> to <i>"VERTICAL"</i></li></ul>
+        <p>
+        Otherwise you need to use the horizontal field of view (<i>TrackedObject1Camera_FOV_horizontal</i>) of the 
+        <a href='/documentation/nodetype/IOSensor'>IOSensor</a> and set the <i>fovMode</i> field of the <a href='/documentation/nodetype/PerspectiveViewpoint'>PerspectiveViewpoint</a> to <i>"HORIZONTAL"</i>. However, 
+        it is important that the <a href='/documentation/nodetype/PolygonBackground'>PolygonBackground</a> and the <a href='/documentation/nodetype/PerspectiveViewpoint'>PerspectiveViewpoint</a> are working in the same (field of view-) mode. 
+        To achieve an undistroted augmentation, also the <i>CAM_aspect</i> of the <a href='/documentation/nodetype/IOSensor'>IOSensor</a> must be routed to the <i>aspect</i> 
+        of the PerspectiveViewpoint.
+        </p>
+        <p>
+        The <i>position</i> field of the <a href='/documentation/nodetype/PerspectiveViewpoint'>PerspectiveViewpoint</a> is set to <i>'0 0 0'</i> and will not be changed on runtime.
+        </p>
+        <div class="code"><h3>Code: Setting up and connecting the scene camera (PerspectiveViewpoint)</h3><pre>
+&lt;PerspectiveViewpoint DEF='vp' position='0 0 0' fovMode='VERTICAL'/&gt;
+
+&lt;ROUTE fromNode='VisionLib' fromField='TrackedObject1Camera_PrincipalPoint' toNode='vp' toField='principalPoint'/&gt;
+&lt;ROUTE fromNode='VisionLib' fromField='TrackedObject1Camera_FOV_vertical' toNode='vp' toField='fieldOfView'/&gt;
+&lt;ROUTE fromNode='VisionLib' fromField='TrackedObject1Camera_CAM_aspect' toNode='vp' toField='aspect'/&gt;
+
+        </pre></div>
+        <p>
+        To deactive the navigation (what is usually desired in Augmented Reality scenarios) we use a <a href="/documentation/nodetype/NavigationInfo">NavigationInfo</a> node.
+        </p>
+        <div class="code"><h3>Code: Deactivating the navigation</h3><pre>
+&lt;NavigationInfo type='none' /&gt;
+        </pre></div>
+        
+        
+        <h2>Setting the virtual object's position and orientation relative to the camera</h2>
+        
+        <p>
+        We add a virtual object (a yellow teapot) to the scene. Then we set its transformation relative to the camera by 
+        routing the modelview matrix from the <a href='/documentation/nodetype/IOSensor'>IOSensor</a> to a <a href="/documentation/nodetype/MatrixTransform">MatrixTransform</a>, which acts as a "global transformation".
+        A second transformation translates and rotates the teapot relative to the marker.
+        </p>
+        <div class="code"><h3>Code: Transforming the virtual object relative to the marker</h3><pre>
+&lt;MatrixTransform DEF='TransfObj1RelativeToCamPosition'&gt;
+    &lt;Transform DEF='transfObj1RelativeToMarker' translation='2.5 2.5 1.5' rotation='1 0 0 1.57'&gt;
+        &lt;Shape&gt;
+            &lt;Appearance&gt;
+                &lt;Material emissiveColor='1 0.5 0' /&gt;
+            &lt;/Appearance&gt;
+            &lt;Teapot size='5 5 5' /&gt;
+        &lt;/Shape&gt;
+    &lt;/Transform&gt;
+&lt;/MatrixTransform&gt;
+
+&lt;ROUTE fromNode='VisionLib' fromField='TrackedObject1Camera_ModelView' toNode='TransfObj1RelativeToCamPosition' toField='set_matrix'/&gt;
+        </pre></div>        
+        <p>
+        Print the first marker (the one which looks like a "L") to augment it with a virtual yellow teapot.
+        </p>
+        
+        <div class="imgContainer"><img src="TutorialMarkerTracking_verHor.png" align="center"/><div class="imgCaption">Image: Augmented Reality scenario with vertically (left) and horizontally (right) fitted background</div></div>
+        
+        
+    Files:
+    <ul class="files"><li><a href="TutorialMarkerTracking_OneMarker.x3d">TutorialMarkerTracking_OneMarker.x3d (Example)</a></li><li><a href="TutorialMarkerTracking_OneMarker.pm">TutorialMarkerTracking_OneMarker.pm (Configuration File)</a></li><li><a href="TutorialMarkerTracking_Markers.pdf">TutorialMarkerTracking_Markers.pdf (Marker)</a></li></ul>
+        
+        
+        <h2>Tracking two markers</h2>
+        
+        <h2>The InstantVision configuration file</h2>
+        
+        <p>
+        Now let's add a second marker augmented with a blue teapot. 
+        First have a look at the InstantVision configuration file of the previous part of this tutorial (<a href="TutorialMarkerTracking_OneMarker.pm">TutorialMarkerTracking_OneMarker.pm</a>).
+        </p>
+        <p>
+        An InstantVision configuration file is an XML document. It has two main components: An "Action Pipe" with several actions and a "DataSet" where the data of the InstantVision module is stored.
+        </p>
+                
+        <p>
+        We do not need to change anything in the ActionPipe to use several markers but let's nevertheless have a look at it. There are four actions in the ActionPipe of this example:
+        </p>
+        <ul><li> VideoSourceAction: gets the camera image</li><li> ImageConvertAction: converts the camera image from RGB to GREY</li><li> MarkerTrackerAction: the marker tracker</li><li> TrackedObject2CameraAction: creates a camera for every tracked object in the DataSet so we can transfer the data to the InstantPlayer</li></ul>
+        <p>
+        An Action usually has IN- and OUT-slots for incoming and outgoing data. The data routed to IN-Slots or OUT-Slots is identified by "keys". For example the VideoSourceAction has an OUT-Slot for which we use the key "VideoSourceImage". We use the same key for the IN-Slot of the ImageConvertAction to route the image from the VideoSourceAction to the ImageConvertAction. Actions can have an ActionConfig in which you can set several parameters of the Action. For example in the MarkerTrackerAction you can set whether to use a light invariant contour detection (ContourExtractor=0) or a silhouette extractor (ContourExtractor=1) and several other parameters. You can open a configuration file in InstantVision and have a look at the actions in the ActionManager to see a short description of the attributes.
+        </p>
+
+        <div class="code"><h3>Code: The ActionPipe</h3><pre>
+  &lt;ActionPipe category='Action' name='main'&gt;
+    &lt;VideoSourceAction__ImageT__RGB_Frame category='Action' enabled='1' name='VideoSourceAction'&gt;
+      &lt;Keys size='2'&gt;
+        &lt;key val='VideoSourceImage' what='image live, Image*, out'/&gt;
+        &lt;key val='' what='intrinsic parameters to be modified, out'/&gt;
+      &lt;/Keys&gt;
+      &lt;ActionConfig source_url='ds'/&gt;
+    &lt;/VideoSourceAction__ImageT__RGB_Frame&gt;
+    &lt;ImageConvertActionT__ImageT__RGB_FrameImageT__GREY_Frame category='Action' enabled='1' name='ImageConvertActionT'&gt;
+      &lt;Keys size='2'&gt;
+        &lt;key val='VideoSourceImage' what='source image, in'/&gt;
+        &lt;key val='ConvertedImage' what='target image, out'/&gt;
+      &lt;/Keys&gt;
+    &lt;/ImageConvertActionT__ImageT__RGB_FrameImageT__GREY_Frame&gt;
+    &lt;MarkerTrackerAction category='Action'&gt;
+      &lt;Keys size='7'&gt;
+        &lt;key val='ConvertedImage' what='input image, ImageGREY*, in'/&gt;
+        &lt;key val='IntrinsicDataPGRFlea8mm' what='IntrinsicDataPerspective, IntrinsicDatra*, in'/&gt;
+        &lt;key val='World' what='World of TrackedObjects, World*, in/out'/&gt;
+        &lt;key val='MarkerTrackerInternalContour' what='Contour, Contour*, out'/&gt;
+        &lt;key val='MarkerTrackerInternalSquares' what='GeometryContainer of corner points, GeometryContainer*, out'/&gt;
+        &lt;key val='MarkerTrackerInternalCorresp' what='internal use'/&gt;
+        &lt;key val='MarkerTrackerInternalPose' what='internal use'/&gt;
+      &lt;/Keys&gt;
+      &lt;ActionConfig ContourExtractor='0' MTASilThresh='140' MTAThresh='140' MTAcontrast='1' MTAlogbase='10' RefineCorners='0' WithPoseNlls='1'/&gt;
+    &lt;/MarkerTrackerAction&gt;
+    &lt;TrackedObject2CameraAction category='Action' enabled='1' name='TrackedObject2Camera'&gt;
+      &lt;Keys size='3'&gt;
+        &lt;key val='World' what='world, World*, in'/&gt;
+        &lt;key val='IntrinsicDataPGRFlea8mm' what='intrinsic CameraPerspective parameters, IntrinsicDataPerspective*, in'/&gt;
+        &lt;key val='Camera' what='suffix string for the CameraPerspective, out'/&gt;
+      &lt;/Keys&gt;
+    &lt;/TrackedObject2CameraAction&gt;
+  &lt;/ActionPipe&gt;
+        </pre></div>
+        
+        <p>
+        In the DataSet you can see an IntrinsicData element and a World with one TrackedObject.
+        The TrackedObject containes a marker and its description, four lines of markercode and
+        the positions of the markers corners in the world.
+        </p>
+  
+       <div class="code"><h3>Code: The DataSet</h3><pre>
+  &lt;DataSet key=''&gt;
+    &lt;IntrinsicDataPerspective calibrated='1' key='IntrinsicDataPGRFlea8mm'&gt;
+      &lt;Image_Resolution h='480' w='640'/&gt;
+      &lt;Normalized_Principal_Point cx='5.0037218855e-01' cy='5.0014036507e-01'/&gt;
+      &lt;Normalized_Focal_Length_and_Skew fx='1.6826109287e+00' fy='2.2557202465e+00' s='-5.7349563803e-04'/&gt;
+      &lt;Lens_Distortion k1='-1.6826758076e-01' k2='2.5034542035e-01' k3='-1.1740904370e-03' k4='-4.8766380599e-03' k5='0.0000000000e+00'/&gt;
+    &lt;/IntrinsicDataPerspective&gt;
+    &lt;World key='World'&gt;
+      &lt;TrackedObject key='TrackedObject1'&gt;
+        &lt;ExtrinsicData calibrated='0'&gt;
+          &lt;R rotation='1 0 0'/&gt;
+          &lt;t translation='0 0 0'/&gt;
+          &lt;Cov covariance='0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0'/&gt;
+        &lt;/ExtrinsicData&gt;
+        &lt;Marker BitSamples='2' MarkerSamples='6' NBPoints='4' key='MarkerOfTrackedObject1'&gt;
+          &lt;Code Line1='1000' Line2='1000' Line3='1000' Line4='1110'/&gt;
+          &lt;Points3D nb='4'&gt;
+            &lt;HomgPoint3Covd Cov3x3='0  0  0  0  0  0  0  0  0  ' w='1' x='0' y='5' z='0'/&gt;
+            &lt;HomgPoint3Covd Cov3x3='0  0  0  0  0  0  0  0  0  ' w='1' x='5' y='5' z='0'/&gt;
+            &lt;HomgPoint3Covd Cov3x3='0  0  0  0  0  0  0  0  0  ' w='1' x='5' y='0' z='0'/&gt;
+            &lt;HomgPoint3Covd Cov3x3='0  0  0  0  0  0  0  0  0  ' w='1' x='0' y='0' z='0'/&gt;
+          &lt;/Points3D&gt;
+        &lt;/Marker&gt;
+      &lt;/TrackedObject&gt;
+    &lt;/World&gt;
+  &lt;/DataSet&gt;
+        </pre></div>
+        
+        <p>
+        We add a second TrackedObject (TrackedObject2) with the marker code (1000), (0110), (0000), (0000). This describes the second marker which has a white field in the first row and two white fields in the second row.
+        </p>
+       <div class="code"><h3>Code: The second TrackedObject</h3><pre>
+      &lt;TrackedObject key='TrackedObject2'&gt;
+        &lt;ExtrinsicData calibrated='0'&gt;
+          &lt;R rotation='1 0 0'/&gt;
+          &lt;t translation='0 0 0'/&gt;
+          &lt;Cov covariance='0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0'/&gt;
+        &lt;/ExtrinsicData&gt;
+        &lt;Marker BitSamples='2' MarkerSamples='6' NBPoints='4' key='MarkerOfTrackedObject2'&gt;
+          &lt;Code Line1='1000' Line2='0110' Line3='0000' Line4='0000'/&gt;
+          &lt;Points3D nb='4'&gt;
+            &lt;HomgPoint3Covd Cov3x3='0  0  0  0  0  0  0  0  0  ' w='1' x='0' y='5' z='0'/&gt;
+            &lt;HomgPoint3Covd Cov3x3='0  0  0  0  0  0  0  0  0  ' w='1' x='5' y='5' z='0'/&gt;
+            &lt;HomgPoint3Covd Cov3x3='0  0  0  0  0  0  0  0  0  ' w='1' x='5' y='0' z='0'/&gt;
+            &lt;HomgPoint3Covd Cov3x3='0  0  0  0  0  0  0  0  0  ' w='1' x='0' y='0' z='0'/&gt;
+          &lt;/Points3D&gt;
+        &lt;/Marker&gt;
+      &lt;/TrackedObject&gt;
+
+       </pre></div>
+       <p>
+       This is all we need to change in the InstantVision configuration file.
+       Now we open the file <a href="TutorialMarkerTracking_OneMarker.x3d">TutorialMarkerTracking_OneMarker.x3d</a> and add fields for the second object's translation and rotation to the IOSensor.
+       As mentioned before the TrackedObject2CameraAction creates camera objects for each TrackedObject in a world description. These cameras are named KeyOfTrackedObject+Camera.
+       The <a href='/documentation/nodetype/IOSensor'>IOSensor</a> (the gate between InstantVision and InstantPlayer) extracts certain data from these cameras and provides them as
+       TrackedObject2Camera_ModelView, TrackedObject2Camera_PrincipalPoint etc. So we add the object names we need to the <a href='/documentation/nodetype/IOSensor'>IOSensor</a> definition and add routes to the scene object.
+       </p>
+       <div class="code"><h3>Code: Adding the field for the second tracked object to the IOSensor</h3><pre>
+&lt;field accessType='outputOnly' name='TrackedObject2Camera_ModelView' type='SFMatrix4f'/&gt;
+       </pre></div>
+       <p>
+       Then we add the second teapot to the scene and set the routes needed for its transformation.
+       </p>
+       <div class="code"><h3>Code: Transforming a second virtual object relative to the second marker</h3><pre>
+&lt;MatrixTransform DEF='TransfObj2RelativeToCamPosition'&gt;
+    &lt;Transform DEF='transfObj2RelativeToMarker' translation='2.5 2.5 0' rotation='1 0 0 1.57'&gt;
+        &lt;Shape&gt;
+            &lt;Appearance&gt;
+                &lt;Material emissiveColor='0 0.5 1' /&gt;
+            &lt;/Appearance&gt;
+            &lt;Teapot size='5 5 5' /&gt;
+        &lt;/Shape&gt;
+    &lt;/Transform&gt;
+&lt;/MatrixTransform&gt;
+
+&lt;ROUTE fromNode='VisionLib' fromField='TrackedObject2Camera_ModelView' toNode='TransfObj2RelativeToCamPosition' toField='matrix'/&gt;
+       </pre></div>
+       
+       <p>
+       We can now track both markers and augment them with a yellow and a blue teapot.
+       </p>
+       
+        <div class="imgContainer"><img src="TutorialMarkerTracking_TwoMarkers.jpg" align="center"/><div class="imgCaption">Image: TutorialMarkerTracking_TwoMarkers.jpg</div></div>               
+        
+    Files:
+    <ul class="files"><li><a href="TutorialMarkerTracking_TwoMarkers.x3d">TutorialMarkerTracking_TwoMarkers.x3d (Example)</a></li><li><a href="TutorialMarkerTracking_TwoMarkers.pm">TutorialMarkerTracking_TwoMarkers.pm (Configuration File)</a></li><li><a href="TutorialMarkerTracking_Markers.pdf">TutorialMarkerTracking_Markers.pdf (Marker)</a></li></ul>
+        
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

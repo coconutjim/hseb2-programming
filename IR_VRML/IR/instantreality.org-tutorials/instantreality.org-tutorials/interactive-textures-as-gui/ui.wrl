@@ -1,0 +1,105 @@
+#VRML V2.0 utf8
+
+Viewpoint {
+	position 2 1 7
+}
+Background {
+	skyColor 1 1 1
+}
+
+#-----------------------------------------
+# rgb gui
+#-----------------------------------------
+Transform {
+	scale 4 2 2
+	children [
+    	Shape { 
+        	appearance Appearance {
+            	texture DEF colorUi UITexture {
+#                   show TRUE
+#                   eventOut SFInt32 red/valueChanged(int)
+#                   eventOut SFInt32 green/valueChanged(int)
+#                   eventOut SFInt32 blue/valueChanged(int)
+
+            		exposedField SFInt32 red       0
+            		exposedField SFInt32 green     0
+            		exposedField SFInt32 blue      0
+
+            		exposedField SFInt32 reddial   0
+            		exposedField SFInt32 greendial 0
+            		exposedField SFInt32 bluedial  0
+							
+            		alpha 0.9			
+            		url "color.ui"	
+            		minFilter "linear"
+            		magFilter "linear"
+            	}
+        	}
+        	geometry IndexedFaceSet {
+            	coord Coordinate 
+            	{ point [ 0 0 0, 1 0 0, 1 1 0, 0 1 0 ] }
+            	texCoord TextureCoordinate		
+				{ point [ 0 0, 1 0, 1 1, 0 1 ] }
+            	texCoordIndex [ 0 1 2 3, -1 3 2 1 0 -1 ]
+            	coordIndex [ 0 1 2 3 -1, 3 2 1 0 -1 ]
+        	}
+    	}
+    	DEF colorUITouch TouchSensor {
+			description	"Drag the dials."
+		}
+	]
+}      
+
+ROUTE colorUITouch.isActive TO colorUi.button1	
+ROUTE colorUITouch.hitTexCoord_changed TO colorUi.pointer	   
+
+
+DEF setColor Script {
+	eventIn  SFInt32 set_red
+	eventIn  SFInt32 set_green
+	eventIn  SFInt32 set_blue
+	eventOut SFColor color_changed
+	field    SFColor color 0 0 0
+	url "javascript:
+    	function set_red(v)   { color[0]=v/256.0; color_changed = color; }
+    	function set_green(v) { color[1]=v/256.0; color_changed = color; }
+    	function set_blue(v)  { color[2]=v/256.0; color_changed = color; }
+	"
+}
+
+Transform {
+	translation 2 1 -4
+	children [
+    	Shape { 
+        	appearance Appearance {
+            	material DEF mat Material {
+            		diffuseColor 0 0 0
+            	}
+        	}
+        	geometry DEF box Box { size 3 4 2 } 
+    	}
+	]
+}
+
+#ROUTE colorUi.red/valueChanged(int) TO setColor.set_red
+#ROUTE colorUi.green/valueChanged(int) TO setColor.set_green
+#ROUTE colorUi.blue/valueChanged(int) TO setColor.set_blue
+
+ROUTE colorUi.red   TO setColor.set_red
+ROUTE colorUi.green TO setColor.set_green
+ROUTE colorUi.blue  TO setColor.set_blue
+ROUTE setColor.color_changed TO mat.diffuseColor
+
+ROUTE colorUi.red     TO colorUi.reddial
+ROUTE colorUi.reddial TO colorUi.red
+
+ROUTE colorUi.green     TO colorUi.greendial
+ROUTE colorUi.greendial TO colorUi.green
+
+ROUTE colorUi.blue     TO colorUi.bluedial
+ROUTE colorUi.bluedial TO colorUi.blue
+
+
+
+
+

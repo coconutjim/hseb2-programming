@@ -1,0 +1,84 @@
+<div id="tutorialContainer">
+  <h2 class="title">Using a NextWindow multi-touch screen</h2>
+  <p class="description"><strong>Keywords:</strong><br/>NextWindow,
+        touchscreen,
+        multitouch,
+        interaction<br/><strong>Author(s): </strong>Peter Eschler<br/><strong>Date: </strong>2009-11-29</p>
+  <p><strong>Summary: </strong>This tutorial explains how to use a NextWindow (multi-)touchscreen.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+	<p><a href="http://www.nextwindow.com/">NextWindow</a> is a company developing optical touch screen technology. InstantReality supports the NextWindow touchscreens on the Windows platform, there is currently no support on OSX and Linux. </p>
+
+    <h2>Using an IOSensor to access raw multi-touch data</h2>
+    <p>In the first example we create an <a href="/documentation/nodetype/IOSensor">IOSensor</a> of type "NextWindow". You can find more information on the <a href="/documentation/nodetype/IOSensor">IOSensor</a> node in the <a href="/tutorial/connecting-devices/">device tutorial</a>. In order to use a NextWindow touchscreen simply add the following code to your scene:</p>
+        <div class="code"><h3>Code: IOSensor for NextWindow touchscreens</h3><pre>&lt;IOSensor DEF='nextWindow' type='NextWindow'&gt;
+    &lt;field accessType='initializeOnly' name='device' type='SFString' value='0'/&gt;
+    &lt;field accessType='outputOnly' name='Positions' type='MFVec3f'/&gt;
+&lt;/IOSensor&gt;</pre></div>
+        <p>The <i>device</i> field should be '0' unless you have more than one NextWindow screen connected to your system.</p>
+        <p>The <i>Positions</i> output field now sends a new <a href="#" class="field">MFVec3f</a> whenever there are touches on the screen. 
+        The <a href="#" class="field">MFVec3f</a> contains an entry for every touch on the screen. Each <a href="#" class="field">SFVec3f</a> contains the 2D-position on the touchscreen 
+        (in pixel coordinates) and an id. The id starts at 0 and is incremented up to 31 and then starting at 0 again. The id can be used to detect new, modified and removed touches. In order to interpret 
+        the raw data of the <i>Positions</i> field, the output is normally routed to a <a href="/documentation/nodetype/Script">Script</a> node.</p>
+        <p>In the <a href="/documentation/nodetype/Script">Script</a> you can implement your own logic for interpreting the touches, which gives you the greatest flexibility. However this approach might be a little tedious. Thus if you want to be able to manipulate objects in your scene utilizing multi-touch you can try the NextWindowMultiTouch proto, which already implements some logic for interpreting the touches.</p>
+        
+    <h2>Using the NextWindowMultiTouch proto</h2>
+    <p>In order to understand what the NextWindowMultiTouch proto (attached to this tutorial) does, please first read the generic <a href="/tutorial/multi-touch-interaction/">Multi-Touch tutorial</a> which explains the concept of a <a href="/documentation/nodetype/UserBody">UserBody</a> and how the different sensors (e.g. <a href="/documentation/nodetype/TouchSensor">TouchSensor</a>, <a href="/documentation/nodetype/HypersurfaceSensor">HypersurfaceSensor</a>) work together.</p>
+    <p>The NextWindowMultiTouch proto contains an <a href="/documentation/nodetype/IOSensor">IOSensor</a> and some script logic, which automatically adds, updates or removes <a href="/documentation/nodetype/UserBody">UserBody</a> nodes to or from the X3D scene based on the touch infos delivered by the <a href="/documentation/nodetype/IOSensor">IOSensor</a>. Using it is simple, just add this line to your scene:</p>
+    <div class="code"><h3>Code: Using the NextWindowMultiTouch proto</h3><pre>&lt;NextWindowMultiTouch displayPixelSize="1920 1080" touchReleaseDuration="74" /&gt;</pre></div>
+    <p>The NextWindowMultiTouch proto offers the following fields:</p>
+    <dl><dt>device</dt>:
+            <dd>A device number starts at and defaults to 0. Unless you are using more than one NextWindow device this should be set to 0.</dd><br/><dt>positions</dt>:
+            <dd>This output emits an MFVec4f whenever new touches are registered on the multi-touch screen.</dd><br/><dt>displayPixelSize</dt>:
+            <dd>The resolution of the multi-touch screen (in pixel). Defaults to "1920 1080".</dd><br/><dt>allBlobsReleased</dt>:
+            <dd>This output emits an SFTime when no touches are left on the screen, i.e. when all fingers have been removed.</dd><br/><dt>touchReleaseDuration</dt>:
+            <dd>This constant is used for determining when the last finger is removed from the screen. This field is necessary because the NextWindow driver does not signalize the removal of the last finger. Use values greather than 74.</dd><br/><dt>viewareaName</dt>:
+            <dd>The name of the viewarea to use. Specifiy an empty string (the default) when working with only one viewarea.</dd><br/><dt>userBodyHot</dt>:
+            <dd>If this field is set to true (the default), the UserBody nodes added to the scene are hot. If false, the UserBody nodes are not hot (hot==false).</dd><br/></dl>
+    <p>With the NextWindowMultiTouch in place you can use a <a href="/documentation/nodetype/HypersurfaceSensor">HypersurfaceSensor</a> on subgraphs you want to manipulate. The <a href="/documentation/nodetype/HypersurfaceSensor">HypersurfaceSensor</a> reacts to <a href="/documentation/nodetype/UserBody">UserBody</a> nodes added by the NextWindowMultiTouch proto and maps multi-touch gestures to the translation, scale and rotations fields. In the following example the box can be translated and scaled using the translation (one finger) and scale (pinch) gesture.</p>
+    <div class="code"><h3>Code: Complete example using a NextWindowMultiTouch proto</h3><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd"&gt;
+&lt;X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'&gt;
+
+&lt;Engine desiredFrameRate="60"&gt;
+    &lt;RenderJob DEF='render'&gt;
+        &lt;WindowGroup&gt;            
+            &lt;Window DEF='win1' fullScreen="true" drawCursor="true"&gt;
+                &lt;Viewarea DEF="viewarea" /&gt;
+            &lt;/Window&gt;            
+        &lt;/WindowGroup&gt;
+    &lt;/RenderJob&gt;   
+&lt;/Engine&gt; 
+
+&lt;Scene DEF='scene'&gt;
+    &lt;NavigationInfo type="none" interactionType="projection" /&gt;
+    &lt;Environment DEF="env" frustumCulling="false" shadowMode="none" syncOnFrameFinish="false" /&gt;
+    &lt;Viewpoint position="0 0 10" zNear="0.9" zFar="1000" /&gt;
+        
+    &lt;ExternProtoDeclare name='NextWindowMultiTouch' url="NextWindowMultiTouch_PROTO.x3d" /&gt;        
+    &lt;NextWindowMultiTouch displayPixelSize="1920 1080" touchReleaseDuration="74" /&gt;
+        
+    &lt;Transform&gt; 
+        &lt;HypersurfaceSensor DEF="hsSensor" translationOffset="0 0 0" minScale="0.2 0.2 0.2" maxScale="2 2 2" /&gt;
+        &lt;Transform DEF="boxTrans" translation="0 0 5"&gt;          
+            &lt;Shape&gt;
+                &lt;Box /&gt;
+                &lt;Appearance&gt;&lt;Material DEF="mat" /&gt;&lt;/Appearance&gt;
+            &lt;/Shape&gt;
+        &lt;/Transform&gt;
+    &lt;/Transform&gt;
+    
+    &lt;ROUTE fromNode="hsSensor" fromField="translation_changed" 
+           toNode="boxTrans" toField="translation" /&gt;
+    &lt;ROUTE fromNode="hsSensor" fromField="scale_changed" 
+           toNode="boxTrans" toField="scale" /&gt;
+           
+&lt;/Scene&gt;
+&lt;/X3D&gt;</pre></div>
+      <p>You can use as many <a href="/documentation/nodetype/HypersurfaceSensor">HypersurfaceSensor</a> nodes as you want but you only need one NextWindowMultiTouch proto.</p>
+        
+    Files:
+    <ul class="files"><li><a href="NextWindowMultiTouch_PROTO.x3d">NextWindowMultiTouch_PROTO (PROTO)</a></li><li><a href="MTUserBody_PROTO.x3d">MTUserBody_PROTO (PROTO)</a></li><li><a href="test_NextWindowIOSensor.x3d">test_NextWindowIOSensor.x3d (Example)</a></li><li><a href="test_NextWindowMultiTouch.x3d">test_NextWindowMultiTouch.x3d (Example)</a></li></ul>
+        
+    </div>
+</div>

@@ -1,0 +1,541 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - External Authoring Interface: Java/.NET</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">External Authoring Interface: Java/.NET</h2>
+  <p class="description"><strong>Keywords:</strong><br/>eai,
+        external authoring interface<br/><strong>Author(s): </strong>Patrick Dähne<br/><strong>Date: </strong>2011-05-06</p>
+  <p><strong>Summary: </strong>This tutorial explains how to control Instant Player from external software components using the External Authoring Interface (EAI). The EAI is available for Java and for programming languages based on the Microsoft .NET Common Language Infrastructure (CLI), like C#, Visual Basic, C++/CLI, J#, JScript and IronPython.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        <p>
+            X3D is not only a 3D file format. Instead, it is a powerful markup language that allows (in combination with <a href='/documentation/nodetype/Script'>Script</a> nodes) to create full-featured 3D applications. But sometimes it is not sufficient to write the complete application in X3D - e.g. when you need to integrate the 3D rendering into other software components. For these cases, there are standard means to control the 3D scene from external software components: The older External Authoring Interface (EAI), defined by the VRML standard, and the newer <a href='/documentation/nodetype/Scene'>Scene</a> Access Interface (SAI), defined by the X3D standard. Both interfaces allow external software components to completly control the scene graph, i.e. by adding, modifying or removing nodes or by sending and receiving events.
+        </p>
+        <p class="warning"><b>Warning: </b>
+            Instant Player currently only supports the old-style VRML EAI interface. It does not yet support the new X3D <a href='/documentation/nodetype/Scene'>Scene</a> Access Interface (SAI).
+        </p>
+        <p>
+            You can find more information about the VRML EAI in part 2 of the VRML specification available under the following URL: 
+            <a href="http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/">http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/</a>
+        </p>
+        <p>
+            But be warned, this is a hard-to-read specification document that is not meant to be used for learning how to use the EAI!
+        </p>
+        <p>
+            The EAI supports three different use-cases:
+        </p>
+            <ul><li>Controlling an X3D browser instance running on the same or on another machine in the network. The external software component creates a network connection to the browser and controls the rendered scene via this connection.</li><li>Embedding X3D rendering output seamlessly into a window created by the external software component. The X3D browser behaves like a kind of "widget" that can be intergrated into the existing GUI.</li><li>Controlling an X3D plugin embedded into a HTML page by scripts also contained in the HTML page. This allows to create some kind of interaction between the plugin and the containing HTML document.</li></ul>
+        
+        <p class="warning"><b>Warning: </b>
+            Instant Player currently only supports the first use-case, i.e. by using the EAI you can control Instant Player via a network connection. You cannot integrate Instant Player as a widget into your application, and you cannot use it as a plugin in a HTML browser.
+        </p>
+        <p>
+            Instant Player EAI contains language bindings for Java and for programming languages based on the Microsoft .NET Common Language Infrastructure (CLI), like C#, Visual Basic, C++/CLI, J#, JScript and IronPython.
+        </p>
+        <p>
+            For more information about the Java binding, you can read the corresponding Annex B of part 2 of the VRML specification:
+            <a href="http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part2/javaBind.html">http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part2/javaBind.html</a>.
+            The API is documented on the InstantReality web site: <a href="http://doc.instantreality.org/media/apidocs/java/index.html">http://doc.instantreality.org/media/apidocs/java/index.html</a>.
+            You should also be able to find information about the Java EAI in good books about VRML, or in online tutorials available on the Internet. But be warned, some books/tutorials describe older/outdated versions of the EAI!
+        </p>
+        <p>
+            The Java EAI implementation is written in pure Java version 1.1. There are no native function calls, so you should be able to use it on any device where a Java 1.1 runtime environment is available. For example, we successfully got it working on a PocketPC 2003 PDA with the free <a href="http://www2s.biglobe.ne.jp/~dat/java/project/jvm/index_en.html">Mysaifu JVM</a>. On the machine running your Java EAI application, you only need the Java archive "instantreality.jar" (see below for more information), there is no need to install any other Instant Player component.
+        </p>
+        <p>
+            For .NET CLI code, there is currently no language binding officially specified. This means that the API currently available in Instant Player may change in the future when such an official specification gets available. It also implies that there is no information available besides that contained on this web page. The API documentation is available under the following link: <a href="http://doc.instantreality.org/media/apidocs/dotnet/index.html">http://doc.instantreality.org/media/apidocs/dotnet/index.html</a>. The .NET CLI API closely follows the Java API, we only adjusted it to the conventions used for .NET coding, i.e. method and package names start with uppercase letters, where appropriate we use properties instead of getter/setter methods, and we use delegates instead of listeners.
+        </p>
+        <p>
+            In this tutorial, besides the Java code snippets I will only show code snippets written in the most popular CLI language, C#. At the end of this tutorial, you will  also find links to the example written in Visual Basic, C++/CLI, J#, JScript and IronPython.
+        </p>
+        <p>
+            The .NET EAI implementation is written in pure C# code without any native function calls. It is based on the .NET Framework 2.0, so you should be able to run it on any device that has this framework available. Especially, it works on <a href="http://www.mono-project.com/">Mono</a>, the free .NET implementation. On the machine running your .NET EAI application, you only need one DLL, "InstantReality.NET.dll" (see below for more information), there is no need to install any other Instant Player component.
+        </p>
+        <p class="warning"><b>Warning: </b>The following known bug/problem exists in the current EAI implementation: It is not yet possible to set single elements of multi-fields, i.e. call the "set1Value" methods of the "EventInMF..." classes.
+        </p>
+
+        <h2>Initializing and shutting down the connection</h2>
+        <p>
+            Before you can control the 3D scene from your application, you first have to establish a connection between your software component and the X3D browser. This is done by using the "getBrowser" method of the "BrowserFactory" class. This method takes two arguments:
+        </p>
+        <ul><li>The address of the machine Instant Player is running on. Under Java, this argument is an instance of "java.net.InetAddress", under .NET, this is an Instance of "System.Net.IPAddress".</li><li>The port number Instant Player is listening at for connections. This port number can be configured, but by default it is 4848.</li></ul>
+        <p>
+            Let's assume Instant Player is running on a machine whose name is "pc1013.igd.fhg.de". The code to establish an EAI connection under Java looks like this:
+        </p>
+        <div class="code"><h3>Code: Connecting to Instant Player (Java)</h3><pre>
+java.net.InetAddress address = java.net.InetAddress.getByName("pc1013.igd.fhg.de");
+vrml.eai.Browser browser = vrml.eai.BrowserFactory.getBrowser(address, 4848);
+        </pre></div>
+        <p>
+            Under C#, the  code looks like this:
+        </p>
+        <div class="code"><h3>Code: Connecting to Instant Player (C#)</h3><pre>
+System.Net.IPAddress address = System.Net.Dns.GetHostAddresses("pc1013.igd.fhg.de")[0];
+Vrml.EAI.Browser browser = Vrml.EAI.BrowserFactory.GetBrowser(address, 4848);
+        </pre></div>
+        <p>
+            By the way, there is no need to copy the code snippets out of this tutorial to reproduce what I'm talking about. There are ready-to-use source code files that you can download and compile. See the "Files" secton at the end of this tutorial. You will find the code snippets for this part of the tutorial in "<a href="EAIFramework.java">EAIFramework.java</a>" or "<a href="EAIFramework.cs">EAIFramework.cs</a>". These files also contain some basic error handling that is omitted in this document for clarity.
+        </p>
+        <p>
+            In many cases, you do not want to establish a connection to an instance of Instant Player running on another machine, but an instance running on the same machine as your application. In this case, you can use the special name "localhost" instead of the computer's name. Using "localhost" allows you to transfer your setup to another machine without changing your code.
+        </p>
+        <p>
+            Of course, you can also use the IP address of the machine instead of its human-readable name. See the documentation for "java.net.InetAddress" (Java) or "System.Net.Dns" (C#) for more information.
+        </p>
+        <p>
+            The result of calling the "getBrowser" method of the BrowserFactory class is a "Browser" object. This object encapsulates all communication with the X3D browser you are connected to. We will see later in this document how to use this object. For now, we will just read some properties of the browser object to check the connection. In Java, we add the following code:
+        </p>
+        <div class="code"><h3>Code: Printing browser properties (Java)</h3><pre>
+System.out.println("Browser.Name = \"" + browser.getName() + '"');
+System.out.println("Browser.Version = \"" + browser.getVersion() + '"');
+System.out.println("Browser.CurrentSpeed = " + browser.getCurrentSpeed());
+System.out.println("Browser.CurrentFrameRate = " + browser.getCurrentFrameRate());
+System.out.println("Browser.WorldURL = \"" + browser.getWorldURL() + '"');
+        </pre></div>
+        <p>
+            In C#, we add:
+        </p>
+        <div class="code"><h3>Code: Printing browser properties (C#)</h3><pre>
+System.Console.WriteLine("Browser.Name = \"" + browser.Name + '"');
+System.Console.WriteLine("Browser.Version = \"" + browser.Version + '"');
+System.Console.WriteLine("Browser.CurrentSpeed = " + browser.CurrentSpeed);
+System.Console.WriteLine("Browser.CurrentFrameRate = " + browser.CurrentFrameRate);
+System.Console.WriteLine("Browser.WorldURL = \"" + browser.WorldURL + '"');
+        </pre></div>
+        <p>
+            When your application does not need to communicate with the X3D browser anymore, you should disconnect the browser object. Indeed this happens automatically when the browser object gets destroyed by the garbage collector, but usually it is better to disconnect manually to free all resources immediately. To do this, call the "dispose" method of the browser object. In Java, the code looks like this:
+        </p>
+        <div class="code"><h3>Code: Shutting down (Java)</h3><pre>
+browser.dispose();
+        </pre></div>
+        <p>
+            The corresponding C# code looks like this:
+        </p>
+        <div class="code"><h3>Code: Shutting down (C#)</h3><pre>
+browser.Dispose();
+        </pre></div>
+        <p>
+            After calling "dispose", the browser object is disconnected and cannot be used anymore. This also implies that all objects created by the browser object like node or field objects (we'll get to these objects later in this document) cannot be used anymore.
+        </p>
+
+        <h2>Compiling your code</h2>
+        <p>
+            Now that we have a basic framework for EAI applications, the next step is to compile the code.
+        </p>
+        <h2>Compiling Java code</h2>
+        <p>
+            To compile the Java code, you need the Java archive "instantreality.jar". The location of "instantreality.jar" depends on where on your machine you have installed Instant Player:
+        </p>
+        <ul><li>Under Windows, "instantreality.jar" is located in the "bin" folder of Instant Player's installation folder. By default, Instant Player gets installed under "C:\Program Files\Instant Reality" (on english versions of Windows), so the location of "instantreality.jar" is usually "C:\Program Files\Instant Reality\bin\instantreality.jar".</li><li>Under Mac OS, "instantreality.jar" is located inside the application bundle. When you installed Instant Player into your "Applications" folder, the location of "instantreality.jar" is "/Applications/Instant Player.app/Contents/MacOS/instantreality.jar". Please note that the Finder hides the contents of application bundles. To access them, right-click on the application icon and choose "Show Package Contents" from the context menu.</li></ul>
+        <p>
+            When you have located "instantreality.jar", you can either specify its path on the command line when calling the Java compiler, our you can add it to the "CLASSPATH" environment variable (see Java documentation for more information about that). When you specify the path on the command line, the compiler call looks like this (don't forget to adjust the path to "instantreality.jar" when you enter this command):
+        </p>
+        <div class="code"><h3>Code: Compiling the Java code</h3><pre>
+javac -classpath "C:\Program Files\Instant Reality\bin\instantreality.jar" EAIFramework.java
+        </pre></div>
+        <p>
+            The result of this call (when everything went ok) is the compiled Java byte code in the file "EAIFramework.class". In the next chapter you will learn how to start this application. When you get an error message telling you that the package vrml.eai does not exist, the compiler did not find "instantreality.jar". Check the path again you specified on the command line!
+        </p>
+
+        <h2>Compiling C# code</h2>
+        <p>
+            To compile the C# code, you need the Dynamic Link Library (DLL) "InstantReality.NET.dll". The location of "InstantReality.NET.dll" depends on where on your machine you have installed Instant Player:
+        </p>
+        <ul><li>Under Windows, "InstantReality.NET.dll" is located in the "bin" folder of Instant Player's installation folder. By default, Instant Player gets installed under "C:\Program Files\Instant Reality" (on english versions of Windows), so the location of "InstantReality.NET.dll" is usually "C:\Program Files\Instant Reality\bin\InstantReality.NET.dll".</li><li>Under Mac OS, "InstantReality.NET.dll" is located inside the application bundle. When you installed Instant Player into your "Applications" folder, the location of "InstantReality.NET.dll" is "/Applications/Instant Player.app/Contents/MacOS/InstantReality.NET.dll". Please note that the Finder hides the contents of application bundles. To access them, right-click on the application icon and choose "Show Package Contents" from the context menu.</li></ul>
+        <p>
+            When you have located "InstantReality.NET.dll", you have to specify its path on the command line when calling the C# compiler. When using the Microsoft C# compiler, the compiler call looks like this (don't forget to adjust the path to "InstantReality.NET.dll" when you enter this command):
+        </p>
+        <div class="code"><h3>Code: Compiling the C# code using the Microsoft compiler</h3><pre>
+csc /reference:"C:\Program Files\Instant Reality\bin\InstantReality.NET.dll" EAIFramework.cs
+        </pre></div>
+        <p>
+        When using the <a href="http://www.mono-project.com/">Mono</a> C# compiler, the compiler call looks like this:
+        </p>
+        <div class="code"><h3>Code: Compiling the C# code using the Mono compiler</h3><pre>
+mcs -reference:"/Applications/Instant Player.app/Contents/MacOS/InstantReality.NET.dll" EAIFramework.cs
+        </pre></div>
+        <p>
+            The result of this call (when everything went ok) is the compiled CLI byte code in the file "EAIFramework.exe". In the next chapter you will learn how to start this application.
+        </p>
+
+        <h2>Starting the application</h2>
+        <p>
+            Ok, finally we have got our first application executable. Before we start it, we have to start Instant Player and load a scene. Which scene at this point does not matter, we just want to connect to and disconnect from Instant Player.
+        </p>
+        <h2>Starting Java executables</h2>
+        <p>
+            To start the Java executable, you have to call the Java byte code interpreter. The interpreter (like the compiler) needs to know the location of the Java archive "instantreality.jar". Again, you can either specify the location on the command line, or you can add it to the "CLASSPATH" environment variable. When you specify it on the command line, calling the interpreter looks like this (don't forget to adjust the path to "instantreality.jar" when you enter this command):
+        </p>
+        <div class="code"><h3>Code: Starting the Java executable on Mac OS or Linux</h3><pre>
+java -classpath "/Applications/Instant Player.app/Contents/MacOS/instantreality.jar:." EAIFramework
+        </pre></div>
+        <p>
+            (on Mac OS or Linux) or
+        </p>
+        <div class="code"><h3>Code: Starting the Java executable on Windows</h3><pre>
+java -classpath "C:\Program Files\Instant Reality\bin\instantreality.jar;." EAIFramework
+        </pre></div>
+        <p>
+            (on Windows).
+        </p>
+        <p>
+            When you get a "java.lang.NoClassDefFoundError", have a look at the end of the message where it tells you which class it did not find. There are three possible reasons for this exception:
+        </p>            
+        <ul><li>You probably entered a wrong class name. It must be "EAIFramework" - note that you do not specify the ".class" file suffix when calling the interpreter! When this is the reason, the exception will tell you that the interpreter did not find "EAIFramework/class".</li><li>You did not specify the current working directory in the classpath - mind the ":." and ";." respectively at the end of the classpath declaration above. When this is the reason, the exception will tell you that the interpreter did not find "EAIFramework"</li><li>You did not specify the correct path to "instantreality.jar". When this is the reason, the exception will tell you that the interpreter did not find "vrml/eai/BrowserFactory" (or any other of the "vrml/eai" classes)</li></ul>
+        <p>            
+            See below for other, not Java-related error messages.
+        </p>
+
+        <h2>Starting CLI executables</h2>
+        <p>
+            On Windows, support for CLI byte code is integrated into the system, so starting your executable is straight forward: You start it like any other program by entering the name of the executable on the command line or by double-clicking it in the File Explorer. On Mac OS or Linux, you have to use the <a href="http://www.mono-project.com/">Mono</a> byte code interpreter. Call it on the command line like this:
+        </p>
+        <div class="code"><h3>Code: Starting the C# executable on Mac OS or Linux</h3><pre>
+mono EAIFramework.exe
+        </pre></div>
+        <p>
+            In either case, to execute the byte code, the CLI interpreter needs to be able to find the DLL that contain the EAI implementation: "InstantReality.NET.dll". You already know "InstantReality.NET.dll" from compiling the byte code.
+        </p>
+        <p>
+            There are many options to tell the CLI interpreter about the location of this DLL. The simplest way is to copy the DLL into the same directory as your executable. Another possibility is to add the path to the DLL (usually "C:\Program Files\Instant Reality\bin") to the "PATH" environment variable. See the Microsoft .NET documentation for more information.
+        </p>
+
+        <h2>What you should get...</h2>
+        <p>
+            When everything went ok, you should see more or less the following output (surprise, surprise):
+        </p>
+        <div class="code"><h3>Code: Expected output</h3><pre>
+Browser.Name = "Avalon"
+Browser.Version = "2.0.0_beta0"
+Browser.CurrentSpeed = 0.0
+Browser.CurrentFrameRate = 21.276596
+Browser.WorldURL = "null"
+        </pre></div>
+
+        <h2>... and what you should not get</h2>
+        <p>
+            When something went wrong, the code threw an exception. You might get one of the follwing exceptions:
+        </p>            
+        <dl><dt>java.net.UnknownHostException (Java) or System.Net.Sockets.SocketException (C#)</dt>:
+            <dd>You specified a computer name when creating the java.net.InetAddress object that is unknown to the system. Maybe you transferred your application to another computer and forgot to adjust the name, or you just made a typo.</dd><br/><dt>vrml.eai.NotSupportedException (Java) or Vrml.EAI.NotSupportedException (C#)</dt>:
+            <dd>The "getBrowser" method of the "BrowserFactory" class is not implemented. This usually happens when you have Java archives of another X3D browser before "instantreality.jar" in your class search path.</dd><br/><dt>vrml.eai.ConnectionException (Java) or Vrml.EAI.ConnectionException (C#)</dt>:
+            <dd>The "getBrowser" method of the "BrowserFactory" class failed to establish the connection to the X3D browser. Maybe you forgot to start Instant Player before starting your application, or you specified a wrong address or port number, or there is simply a problem with the network connection of either the machine your application is running on, or the machine Instant Player is running on.</dd><br/></dl>
+
+        <p class="warning"><b>Warning: </b>
+            Make sure that "instantreality.jar" is located in the class path before any Java archives installed by other VRML/X3D browsers, otherwise you might not be able to connect to Instant Player.
+        </p>
+
+        <h2>Interacting with the scene</h2>
+        <p>
+            Now that we have a working framework for applications and successfully initiated a connection to Instant Player, it is time to do something useful with the browser object. First, we will create a scene we can use to play around. This scene simply contains a <a href='/documentation/nodetype/TouchSensor'>TouchSensor</a> node (called "touchSensor") and a green sphere. The <a href='/documentation/nodetype/Material'>Material</a> node that defines the green color of the sphere is named "material". In VRML encoding, the scene looks like that (the name of the file is "<a href="EAIExample.wrl">EAIExample.wrl</a>"):
+        </p>
+        <div class="code"><h3>Code: Example scene in classic (VRML) encoding</h3><pre>
+#VRML V2.0 utf8
+
+DEF touchSensor <a href='/documentation/nodetype/TouchSensor'>TouchSensor</a> {}
+
+Shape
+{
+  appearance Appearance
+  {
+    material DEF material <a href='/documentation/nodetype/Material'>Material</a> { diffuseColor 0 1 0 }
+  }
+  geometry <a href='/documentation/nodetype/Sphere'>Sphere</a> {}
+}
+        </pre></div>
+        <p>
+            In XML encoding, the same scene looks like that (the name of the file is "<a href="EAIExample.x3d">EAIExample.x3d</a>"):
+        </p>
+        <div class="code"><h3>Code: Example scene in XML encoding</h3><pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;X3D&gt;
+  &lt;Scene&gt;
+    &lt;TouchSensor DEF='touchSensor'/&gt;
+    &lt;Shape&gt;
+      &lt;Appearance&gt;
+        &lt;Material DEF='material' diffuseColor='0 1 0'/&gt;
+      &lt;/Appearance&gt;
+      &lt;Sphere/&gt;
+    &lt;/Shape&gt;
+  &lt;/Scene&gt;
+&lt;/X3D&gt;
+
+        </pre></div>
+        <p>
+            First of all, we want to get notified when the mouse pointer gets moved over the sphere, i.e. when the touch sensor sends an event through its isOver event out. So we need to get a reference to the <a href='/documentation/nodetype/TouchSensor'>TouchSensor</a> node. This can be done by calling the "getNode" method of the browser object. This method take the name of the node as an argument:
+        </p>
+        <div class="code"><h3>Code: Getting a reference to the <a href='/documentation/nodetype/TouchSensor'>TouchSensor</a> node (Java)</h3><pre>
+vrml.eai.Node touchSensor = browser.getNode("touchSensor");
+        </pre></div>
+        <div class="code"><h3>Code: Getting a reference to the <a href='/documentation/nodetype/TouchSensor'>TouchSensor</a> node (C#)</h3><pre>
+Vrml.EAI.Node touchSensor = browser.GetNode("touchSensor");
+        </pre></div>
+        <p>
+            When we have got the node, we can use the "getEventOut" method of the node object to get a reference to its "isOver" event out. This method takes the name of the event out:
+        </p>
+        <div class="code"><h3>Code: Getting a reference to the "isOver" event out (Java)</h3><pre>
+vrml.eai.field.EventOutSFBool isOver = (vrml.eai.field.EventOutSFBool)touchSensor.getEventOut("isOver");
+        </pre></div>
+        <div class="code"><h3>Code: Getting a reference to the "isOver" event out (C#)</h3><pre>
+Vrml.EAI.Field.EventOutSFBool isOver = (Vrml.EAI.Field.EventOutSFBool)touchSensor.GetEventOut("isOver");
+        </pre></div>
+        <p>
+            The "getEventOut" method returns a generic "vrml.eai.field.EventOut" object. When we want to read the last value sent via the event out, we have to cast it to the specific data type of the event out, in this case SFBool. In our case, we do not want to read values, but I nevertheless made the type cast for demonstration purposes.
+        </p>
+        <p>
+            Now that we have a reference to the "isOver" event out, we can tell it that we want to get a notification when it sends an event. The approach here differs for Java and for C#.
+        </p>
+        <p>
+            In Java, we have to write a class that implements the "vrml.eai.event.VrmlEventListener" interface. That interface has one method, "eventOutChanged", that takes an "vrml.eai.event.VrmlEvent" object as an argument. Whenever an event get sent via the event out, this method gets called. We have to create an instance of our class and tell the event out object about that object by calling its "addVrmlEventListener" method.
+        </p>
+        <p>
+            In practice, we usually do not create a real class that implements the VrmlEventListener interface, instead we use a special Java language feature called "anonymous classes". In our example, we call the "addVrmlEventListener" method and give it an instance of an anonymous class that simply calls our "onIsOverChanged" method. The "onIsOverChanged" method performs the actual event handling:
+        </p>
+        <div class="code"><h3>Code: Registering an event listener (Java)</h3><pre>
+isOver.addVrmlEventListener(
+  new vrml.eai.event.VrmlEventListener()
+  {
+    public void eventOutChanged(vrml.eai.event.VrmlEvent evt)
+    {
+      EAIExample.onIsOverChanged(evt);
+    }
+  }
+);
+        </pre></div>
+        <p>
+            In C#, things are much simpler. We can use the built-in delegate mechanism to call our "OnIsOverChanged" method:
+        </p>
+        <div class="code"><h3>Code: Registering an event delegate (C#)</h3><pre>
+isOver.VrmlEvent += OnIsOverChanged;
+        </pre></div>
+        <p>
+            In our "onIsOverChanged" method, we need to get a reference to the "isOver" event out. In Java this can be done by calling the "getSource" method of the VrmlEvent object we get as an argument of our method. Again, this method returns a generic EventOut object that we have to cast to the concrete EventOutSFBool type. Then we can get the actual value of the "isOver" event out by calling the "getValue" method of the EventOutSFBool object:
+        </p>
+        <div class="code"><h3>Code: "onIsOverChanged" method (Java)</h3><pre>
+private static void onIsOverChanged(vrml.eai.event.VrmlEvent evt)
+{
+  vrml.eai.field.EventOutSFBool isOver = (vrml.eai.field.EventOutSFBool)evt.getSource();
+  boolean value = isOver.getValue();
+  // ...
+}
+        </pre></div>
+        <p>
+            In C#, we get a reference to the "isOver" event out as the first parameter of the delegate function. Again, we have to cast it to the concrete type:
+        </p>
+        <div class="code"><h3>Code: "OnIsOverChanged" method (C#)</h3><pre>
+private static void OnIsOverChanged(object sender, Vrml.EAI.Event.VrmlEventArgs e)
+{
+  Vrml.EAI.Field.EventOutSFBool isOver = (Vrml.EAI.Field.EventOutSFBool)sender;
+  bool value = isOver.GetValue();
+  // ...
+}
+        </pre></div>
+        <p class="warning"><b>Warning: </b>
+            Something really important that you have to keep in mind about event handlers is that they get called by a special thread created inside the EAI implementation, not by the main thread of your application. For this reason, you have to synchronize access to variables and calls to other methods, i.e. you have to make your code thread-safe. For more information about thread-safety, read a good book about thread programming in Java or C#. The EAI interface itself is thread-safe, therefore in this example we do not have to care about thread synchronization. Also keep in mind that your code inside the event handler should not block - as long as the thread is inside your event handler, no other event handler gets called. For performance reasons, do not try to do long-winded operations in your event handler, instead return as soon as possible. If you need to perform lengthy operations, create a new thread to do them.
+        </p>
+        <p>
+            Ok, at this point we have a method that gets called whenever the user moves the mouse pointer over the sphere geometry. Now we want to change the color of the sphere - we want it red when the mouse pointer is over the sphere, and green when not. To do this, we need to get a reference to the "set_diffuseColor" event in of the <a href='/documentation/nodetype/Material'>Material</a> node. So we again use the "getNode" method of the browser object to get the <a href='/documentation/nodetype/Material'>Material</a> node, and then call the "getEventIn" method of the node to get a reference to its "set_diffuseColor" event in. Yet again we get a generic "EventIn" object that we have to cast to the concrete "EventInSFColor" object:
+        </p>
+        <div class="code"><h3>Code: Getting the "set_diffuseColor" event in (Java)</h3><pre>
+vrml.eai.Node material = browser.getNode("material");
+set_diffuseColor = (vrml.eai.field.EventInSFColor)material.getEventIn("set_diffuseColor");
+        </pre></div>
+        <div class="code"><h3>Code: Getting the "set_diffuseColor" event in (C#)</h3><pre>
+Vrml.EAI.Node material = browser.GetNode("material");
+set_diffuseColor = (Vrml.EAI.Field.EventInSFColor)material.GetEventIn("set_diffuseColor");
+        </pre></div>
+        <p>
+            To write new values into the "set_diffuseColor" event in, we have to call the "setValue" method of the "set_diffuseColor" object. This method takes an array of three float values. The first array entry is the red color component, the second the green, and the third the blue. The color components are values between 0 and 1, where 0 means no intensity and 1 means maximum intensity. For example, the float array "{ 1, 0, 0 }" represents red color, and "{ 0, 1, 0 }" represents green color. So our final event handler looks like this:
+        </p>
+        <div class="code"><h3>Code: Final version of the "onIsOverChanged" method (Java)</h3><pre>
+private static float[] red   = { 1, 0, 0 };
+private static float[] green = { 0, 1, 0 };
+private static vrml.eai.field.EventInSFColor set_diffuseColor;
+
+private static void onIsOverChanged(vrml.eai.event.VrmlEvent evt)
+{
+  vrml.eai.field.EventOutSFBool isOver = (vrml.eai.field.EventOutSFBool)evt.getSource();
+  set_diffuseColor.setValue(isOver.getValue() == true ? red : green);
+}
+        </pre></div>
+        <div class="code"><h3>Code: Final version of the "OnIsOverChanged" method (C#)</h3><pre>
+private static float[] red   = { 1, 0, 0 };
+private static float[] green = { 0, 1, 0 };
+private static Vrml.EAI.Field.EventInSFColor set_diffuseColor;
+
+private static void OnIsOverChanged(object sender, Vrml.EAI.Event.VrmlEventArgs e)
+{
+  Vrml.EAI.Field.EventOutSFBool isOver = (Vrml.EAI.Field.EventOutSFBool)sender;
+  set_diffuseColor.SetValue(isOver.GetValue() == true ? red : green);
+}
+        </pre></div>
+        <p>
+            Now we have a first working version of our example program. You can compile it, start Instant Player with the example scene, and move the mouse pointer over the sphere. The sphere should be red when the mouse pointer is over the sphere, and green when not.
+        </p>
+        <p>
+            As a final improvement, we want to get informed when the user quits Instant Player or when the connection breaks. To do this, we have to register a handler for browser events. This works similar to the event handler used to get notified when an event gets sent via an event out.
+        </p>
+        <p>
+            In Java, you have to create a class that implements the "vrml.eai.event.BrowserListener" interface. This interface has one method, "browserChanged", that gets called when the status of the browser or the connection changes. You have to create an instance of this class and register it using the "addBrowserListener" of the browser object. As mentioned before, in practice you usually use the Java language feature of anonymous classes to create the event handler. In our case, we simply call our "onBrowserChanged" method:
+        </p>
+        <div class="code"><h3>Code: Registering a browser event listener (Java)</h3><pre>
+browser.addBrowserListener(
+  new vrml.eai.event.BrowserListener()
+  {
+    public void browserChanged(vrml.eai.event.BrowserEvent evt)
+    {
+      EAIExample.onBrowserChanged(evt);
+    }
+  }
+);
+        </pre></div>
+        <p>
+            In C#, this again is much simpler, because we can use the delegate mechanism built into the language:
+        </p>
+        <div class="code"><h3>Code: Registering a browser event listener (C#)</h3><pre>
+browser.BrowserEvent += OnBrowserEvent;
+        </pre></div>
+        <p>
+            In our "onBrowserEvent" method, we simply quit the application when Instant Player shuts down or when an error occurs.
+        </p>
+        <div class="code"><h3>Code: "onBrowserChanged" method (Java)</h3><pre>
+private static void onBrowserChanged(vrml.eai.event.BrowserEvent evt)
+{
+  switch (evt.getID())
+  {
+  case vrml.eai.event.BrowserEvent.INITIALIZED:
+    break;
+  case vrml.eai.event.BrowserEvent.SHUTDOWN:
+  case vrml.eai.event.BrowserEvent.URL_ERROR:
+  case vrml.eai.event.BrowserEvent.CONNECTION_ERROR:
+  default:
+      System.exit(0);
+  }
+}
+        </pre></div>
+        <div class="code"><h3>Code: "OnBrowserChanged" method (C#)</h3><pre>
+private static void OnBrowserEvent(object sender, Vrml.EAI.Event.BrowserEventArgs e)
+{
+  switch (e.ID)
+  {
+  case Vrml.EAI.Event.BrowserEventArgs.INITIALIZED:
+    break;
+  case Vrml.EAI.Event.BrowserEventArgs.SHUTDOWN:
+  case Vrml.EAI.Event.BrowserEventArgs.URL_ERROR:
+  case Vrml.EAI.Event.BrowserEventArgs.CONNECTION_ERROR:
+    System.Environment.Exit(0);
+    break;
+  }
+}
+        </pre></div>
+        <p class="warning"><b>Warning: </b>
+            Again, do not forget to synchronize all access to variables and other methods, because the browser event handler method gets called by a special thread. And never block inside the handler, instead try to return as soon as possible!
+        </p>
+
+        <h2>Dos and Don'ts</h2>
+        <p>
+            At the end of this tutorial, I will tell you about some dos and don'ts you should keep in mind when using the EAI.
+        </p>
+        <p>
+            When writing EAI applications, always keep in mind that everything you do has to be transferred via a slow network transmission. For this reason, you should limit the amount of data that gets transferred to the absolute minimum. Never ever register an event handler to an event out that sends events in every frame, e.g. the "time" event out of the "TimeSensor" node - it will extremely slow down the performance of both Instant Player and your application. Also realize that reading values is an expensive operation. The EAI code has to send the request to Instant Player. Then, it has to wait until Instant Player returns the values. So, try to avoid reading values and try to cache values locally instead. Also, do not try to get references to nodes and fields over and over again in your code. Get the references once when you start the application, and save these references for later use.
+        </p>
+        <p>
+            When you have to set many values at the same time, you might encounter the problem that these value changes do not take place simultaneously in your 3D scene. E.g. consider the case where you have to set a lot of transformations at the same time. You might not get a simultaneous change in the rendered scene, instead you might see that each change takes place one after another. The reason for this behaviour is simply that your application and Instant Player are running asynchronously. Your application sends each value change in its own network event. Instant Player does not know when you're finished changing the scene - when it does not find any pending events in its network buffer, it continues rendering the scene. To overcome this problem, you can use the "beginUpdate" and "endUpdate" methods of the browser object. When you call "beginUpdate", the browser object collects all following value changes until you call "endUpdate". Then, it sends all value changes in one single network event. This ensures that all value changes take place simultaneously in Instant Player. Is is also much more efficient than sending each value change separately. So you should always use these methods when changing multiple values. Of course, you should never forget calling "endUpdate", otherwise you will never see your changes in the scene! The following code snippets demonstrate how to use "beginUpdate"/"endUpdate" when changing the individual fields of a "Transform" node:
+        </p>
+        <div class="code"><h3>Code: "beginUpdate" and "endUpdate" methods (Java)</h3><pre>
+browser.beginUpdate();
+set_translation.setValue(newTranslation);
+set_rotation.setValue(newRotation);
+set_scale.setValue(newScale);
+browser.endUpdate();
+        </pre></div>
+        <div class="code"><h3>Code: "beginUpdate" and "endUpdate" methods (C#)</h3><pre>
+browser.BeginUpdate();
+set_translation.SetValue(newTranslation);
+set_rotation.SetValue(newRotation);
+set_scale.SetValue(newScale);
+browser.EndUpdate();
+        </pre></div>
+        <p>
+            Sometimes you might realise that there is some kind of delay - it takes some time until your changes to the scene become visible. This is usually a sign that you're overloading the network connection - you're transferring more data than the network connection can handle. In this case, you have to think about how you can reduce the amount of data that you transfer via the network.
+        </p>
+        <p>
+            Finally, you should internalise the following rule of thumb: Never try to animate your scene by frequently changing transformations via the EAI or - even worse - by changing geometries. Actually this is quite obvious - your application and Instant Player run asynchronously, for this reason your application does not know when Instant Player starts and finishes new frames and what is the internal time stamp. But my personal experience has shown that there are always experts that nevertheless try to do animations via the EAI. Never try to do that - it does not work. Believe me. You won't get usable results. Animations are only possible from inside X3D scenes.
+        </p>
+        <p>
+            When you still think that you absolutely have to do animations via the EAI, try to do the following: Put an interpolator and a time sensor into the scene. Try to precalculate the animation and set keys and key values of the interpolator accordingly via the EAI. Start and stop the animation by starting or stopping the time sensor. If this is not possible, try to move parts of your application into the X3D scene by using a script node. Only set the parameters of the animation via the EAI - let the script node do the actual animation.
+        </p>
+
+        <h2>Finished!</h2>
+        <p>
+            This concludes the Instant Player EAI tutorial. It gave a short overview about how to use this interface that should enable you to start writing your own applications. As already announced in the introduction, I will also give you the example's source code for other .NET languages. Well, here they are:
+        </p>
+        <dl><dt>Visual Basic</dt>:
+            <dd>EAIExample.vb. Compile this code using the Microsoft Visual Basic compiler "vbc" - the command line is "vbc /reference:InstantReality.NET.dll EAIExample.vb".</dd><br/><dt>C++/CLI</dt>:
+            <dd>EAIExample.cpp. Compile this code using the Microsoft C++ compiler "cl" - the command line is "cl /clr:pure /FU System.dll /FU InstantReality.NET.dll EAIExample.cpp".</dd><br/><dt>J#</dt>:
+            <dd>EAIExample.jsl. Compile this code using the Microsoft J# compiler "vjc" - the command line is "vjc /reference:InstantReality.NET.dll EAIExample.jsl".</dd><br/><dt>JScript</dt>:
+            <dd>EAIExample.js. Compile this code using the Microsoft JScript compiler "jsc" - the command line is "jsc /reference:InstantReality.NET.dll EAIExample.js".</dd><br/><dt>IronPython</dt>:
+            <dd>EAIExample.py. Either execute the example with the IronPython interpreter - the command line is "ipy EAIExample.py" - or compile this code using the compiler script "pyc.py" which comes with IronPython - the command line is "ipy pyc.py /main:EAIExample.py".</dd><br/></dl>
+        
+    Files:
+    <ul class="files"><li><a href="EAIFramework.java">EAIFramework.java</a></li><li><a href="EAIFramework.cs">EAIFramework.cs</a></li><li><a href="EAIExample.wrl">EAIExample.wrl</a></li><li><a href="EAIExample.x3d">EAIExample.x3d</a></li><li><a href="EAIExample.java">EAIExample.java</a></li><li><a href="EAIExample.cs">EAIExample.cs</a></li><li><a href="EAIExample.vb">EAIExample.vb</a></li><li><a href="EAIExample.cpp">EAIExample.cpp</a></li><li><a href="EAIExample.jsl">EAIExample.jsl</a></li><li><a href="EAIExample.js">EAIExample.js</a></li><li><a href="EAIExample.py">EAIExample.py</a></li></ul>
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

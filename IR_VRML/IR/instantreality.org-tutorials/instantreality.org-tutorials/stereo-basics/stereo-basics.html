@@ -1,0 +1,105 @@
+<div id="tutorialContainer">
+  <h2 class="title">Stereo Basics</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        engine,
+        stereo,
+        multi view<br/><strong>Author(s): </strong>Patrick Riess<br/><strong>Date: </strong>2007-11-23</p>
+  <p><strong>Summary: </strong>
+    This chapter is not a tutorial at all but a brief excursion into optics. It gives an overview over the human eye as a tool to perceive our world stereoscopically. It will also introduce those factors which are responsible for depth perception and which are further used to generate an artificial stereoscopic view in virtual reality environments. As the trick is to create and present a different image for each of your eyes, the last section will discuss the most popular technologies to get this done in a more or less simple way. 
+    </p>
+  <div id="content">
+        <h2>Preconditions for this tutorial</h2>
+        <p> 
+        There are no preconditions. 
+        </p>
+        <h2>Depth perception of human eyes</h2>
+        <p> 
+        There are two categories of depth perception, the monocular perception related to only one eye and the binocular 
+        perception related to both eyes. 
+        </p>
+        <h2>Monocular depth perception</h2>
+    
+        <dl><dt>Occlusion</dt>:
+            <dd>Farther objects are being occluded by nearer objects.</dd><br/><dt>Perspective</dt>:
+            <dd>Objects of the same size are bigger if they are nearer to the viewer.</dd><br/><dt>Depth of field</dt>:
+            <dd>Adaption of the eye lens warping, so called accomodation, focuses objects in a specific distance to the viewer. Other objects 
+        with a different distance to the viewer appear blurred.</dd><br/><dt>Movement parallax</dt>:
+            <dd>If objects with a different distance to the viewer move with the same speed, nearer objects
+        appear to be faster than farther objects.</dd><br/></dl>
+        
+        <div class="imgContainer"><img src="monocular.png" align="center"/><div class="imgCaption">Image: Monocular depth perception: Occlusion, perspective, depth of field and movement parallax</div></div>
+        There are some other attributes which help us to get a monocular depth perception, for example shadows or psychological aspects like 
+        known sizes of common objects. You can get more detailed information about this topic in the internet.
+        <h2>Binocular depth perception</h2>
+        <ul><li><b>Parallax</b>: Each of our eyes sees a slightly different image of the world. This is because each eye is a separate camera which 
+        grabs the environment from a different position. In the image below you see two eyes 
+        focusing the black point. The <b>optical axes</b> show the alignment of the eyes and the projected point on the retinas. There is another 
+        point in green which is also projected. Those points have the same distance <i>L</i> and <i>R</i> to the optical axes on both retinas, they 
+        are <b>corresponding points</b>. Each point on the <b>horopter</b>, let's say a focus circle, has these characteristics. 
+        Points which are in front or behind the horopter have different distances, <i>L'</i> and <i>R'</i>, to the optical axes on the retina. The difference 
+        between <i>R</i> and <i>L</i> is the so called <b>disparity</b>, which is positive or negative dependent on the position in front or behind 
+        the horopter. Points on the horopter have a disparity of 0.</li><li><b>Convergence</b>: The distance between our eyes is fixed but the angle depends on the distance of a focused object. If we watch 
+        the clouds in the sky the eye orientation is nearly the same but when we look at a fly which sits on our nose, the left eye looks 
+        more to the right and the right eye to the left, so we are squiting. This angle between the optical axes of both eyes, the convergence, gives our brain a hint 
+        about the distance to an object.</li></ul>
+        <div class="imgContainer"><img src="horopter.png" align="center"/><div class="imgCaption">Image: Binocular depth perception: Disparity on focused and non-focused points</div></div>
+        
+        <h2>Depth generation in VR</h2>
+        <p> 
+        Generation of stereoscopic viewing in virtual reality environments depends mainly on the above described parallax and convergence, which go 
+        hand in hand. On a projection plane two separate images are displayed, one for the left and one for the right eye. Therefore the scene must be 
+        rendered from two different cameras, next to each other like the human eyes. A separation technique has to make sure that one eye receives 
+        only one image but this issue is discussed in the next chapter. 
+        </p>
+        <p>
+        As each eye receives its appropriate image, their optical axes have a specific 
+        angle which yields to the convergence. The brain recognizes both points as the same point and interprets it as it was 
+        behind the projection plane or in front of it.
+        </p>
+        <p>
+        Parameters which affect the convergence are the distance to the projection plane which is called <b>zero parallax distance</b> and the 
+        <b>eye distance</b>. With these parameters depth impression can be adjusted.
+        </p>
+        <div class="imgContainer"><img src="stereoprojection.png" align="center"/><div class="imgCaption">Image: Stereo projection in VR</div></div>
+        <h2>Eye separation</h2>
+        <p> 
+        Different images for both eyes have to be generated, presented and redivided to the eyes. How these three steps are 
+        performed depends on the chosen technology. Those are categorized into active and passive approaches. 
+        </p>
+        <p>
+        Active eye separation means a presentation of left and right images one after each other with high frequency while the eyes 
+        are alternately being shut in the same frequency by shutter glasses (see image below). The advantage is to see the original 
+        images without reduction of colors or color spectrums. On the other hand you need hardware (graphics card, beamer) which is 
+        able to display images in a high frequency of about 120 Hz as well as synchronisation with shutter 
+        glasses.
+        </p>
+        <div class="imgContainer"><img src="shutter.png" align="center"/><div class="imgCaption">Image: Active eye separation by shutter glasses</div></div>
+        <p>
+        With passive stereo, images for the left and right eye are displayed simultaneously. A common approach is to separate color 
+        channels in order to show the blue channel for the left eye and and the red channel for the right eye. A user wears glasses 
+        that filter the red or blue channel away as you can see in the left image below. The big disadvantage is the corruption of proper 
+        colors.
+        </p>        
+        <div class="imgContainer"><img src="farbtrennung.png" align="center"/><div class="imgCaption">Image: Eye separation by color</div></div>
+        <p>
+        A better approach in this direction is the technology of <a href="http://www.infitec.net/">Infitec</a>, which doesn't split 
+        whole color channels but color spectrums in each channel. For each eye three different bands - for red, green and blue wavelenths - 
+        are filtered, with the result to get a total of six bands: right eye red, right eye green, right eye blue, left eye red, left eye green and 
+        left eye blue. The desired colors are not completely modified like in the color channel separation case, but only a few frequency 
+        regions are lost instead of a whole color channel.
+        </p>
+        <div class="imgContainer"><img src="infitec.png" align="center"/><div class="imgCaption">Image: Eye separation by color spectrum (schematic illustration)</div></div>
+        <p>
+        Another concept of passive stereo is the separation by polarization filters. Light oscillates in different directions and a polarization 
+        filter just filters light in a way to let only parts of the light in a specific direction come through. So, for one eye, vertical oscillating 
+        and for the other, horizontal oscillating light is permitted. It's a simple solution as the filters are not very expensive and can be 
+        easily put in front of a video beamer and into cheap paper glasses. The downside is a loss of brightness and interesting effects when 
+        inclining the head. This effect can be reduced with <b>radial polarization</b> approaches instead of <b>horizontal and vertical</b>.
+        
+        </p>
+        <div class="imgContainer"><img src="polarisation.png" align="center"/><div class="imgCaption">Image: Eye separation by polarisation filter</div></div>
+        
+    </div>
+</div>

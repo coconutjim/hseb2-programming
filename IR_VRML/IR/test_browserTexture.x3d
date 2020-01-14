@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Engine>
+    <RenderJob>
+      <WindowGroup>
+        <Window size='800 400'/>
+      </WindowGroup>
+    </RenderJob>
+  </Engine>
+  
+  <Scene DEF='scene'>
+    <Viewpoint position='-1 0 3' />
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+
+    <Transform translation='-2.5 0 0'>
+      <Transform translation='0 0.7 0' scale='.2 .2 .2'>
+        <Shape>
+        <Appearance DEF='app'>
+          <Material diffuseColor='0 1 1'/>
+        </Appearance>
+        <Text string='Embedded HTML' depth='0.1'>
+          <FontStyle DEF='fs' family='SANS' size='1' justify='MIDDLE'/>
+        </Text>
+        </Shape>
+      </Transform>
+      <Group>
+      <TouchSensor DEF='ts_0' />
+      <Shape>
+        <Appearance>
+          <BrowserTexture DEF='bt_0' size='1024 1024' updateMode='always' 
+              minFilter='linear' magFilter='linear' delegateLinkHandling='false'>
+            <![CDATA[
+              <h1>BrowserTexture Tests</h1>
+              <hr>
+              <h1>Test Image Formats</h1>
+              <!-- DISABLE OBJECT SELECTION -->
+              <div onmousedown='return false;'>
+              <table border="0" cellpadding="10" cellspacing="0">
+                <tr>
+                <th>GIF</th>
+                <th>PNG</th>
+                <th>JPG</th>
+                </tr>
+                <tr>
+                <td><img src='http://doc.instantreality.org/tutorial/texture-file-types/test_image.gif'></td>
+                <td><img src='http://doc.instantreality.org/tutorial/texture-file-types/test_image.png'></td>
+                <td><img src='http://doc.instantreality.org/tutorial/texture-file-types/test_image.jpg'></td>
+                </tr>
+              </table>
+              </div>
+              <hr>
+              <h1>Test Dynamic HTML</h1>
+              <div style='color:yellow;font-size:14pt;border-style:solid;background-color:olivedrab;text-align:center;'>
+             ...and here some nicely formatted text with CSS for testing.</div>
+             <div onClick='javascript:alert("A Message Box pops up :-)");'
+                  style='margin:15px;padding:5px;text-align:center;border-style:solid;'>
+             Click me!</div>
+            ]]>
+          </BrowserTexture>
+        </Appearance>
+        <Rectangle2D DEF='PLANE' size='1 1' />
+      </Shape>
+      </Group>
+    </Transform>
+    
+    <Transform translation='-0.75 0 0'>
+      <Transform translation='0 0.7 0' scale='.2 .2 .2'>
+        <Shape>
+        <Appearance USE='app'/>
+        <Text string='Local URL' depth='0.1'>
+          <FontStyle USE='fs' />
+        </Text>
+        </Shape>
+      </Transform>
+      <Group>
+      <TouchSensor DEF='ts_1' />
+      <Shape>
+        <Appearance>
+          <BrowserTexture DEF='bt_1' url='readme.html' size='1024 1024' updateMode='always' 
+              minFilter='linear' magFilter='linear' delegateLinkHandling='false'>
+          </BrowserTexture>
+        </Appearance>
+        <Rectangle2D USE='PLANE' />
+      </Shape>
+      </Group>
+    </Transform>
+    
+    <Transform translation=' 0.75 0 0'>
+      <Transform translation='0 0.7 0' scale='.2 .2 .2'>
+        <Shape>
+        <Appearance USE='app'/>
+        <Text string='Web URL' depth='0.1'>
+          <FontStyle USE='fs' />
+        </Text>
+        </Shape>
+      </Transform>
+      <Group>
+      <TouchSensor DEF='ts_2' />
+      <Shape>
+        <Appearance>
+          <BrowserTexture DEF='bt_2' url='http://www.instantreality.org/' size='1024 1024' 
+              updateMode='always' minFilter='linear' magFilter='linear' delegateLinkHandling='false'>
+          </BrowserTexture>
+        </Appearance>
+        <Rectangle2D USE='PLANE' />
+      </Shape>
+      </Group>
+    </Transform>
+    
+    <ROUTE fromNode='ts_0' fromField='isActive' toNode='bt_0' toField='button1'/>
+    <ROUTE fromNode='ts_0' fromField='hitTexCoord_changed' toNode='bt_0' toField='pointer'/>
+    <ROUTE fromNode='ts_1' fromField='isActive' toNode='bt_1' toField='button1'/>
+    <ROUTE fromNode='ts_1' fromField='hitTexCoord_changed' toNode='bt_1' toField='pointer'/>
+    <ROUTE fromNode='ts_2' fromField='isActive' toNode='bt_2' toField='button1'/>
+    <ROUTE fromNode='ts_2' fromField='hitTexCoord_changed' toNode='bt_2' toField='pointer'/>
+
+  </Scene>
+</X3D>

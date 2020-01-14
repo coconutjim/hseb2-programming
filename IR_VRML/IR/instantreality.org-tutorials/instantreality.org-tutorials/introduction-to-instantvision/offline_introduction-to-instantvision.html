@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Introduction to InstantVision</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Introduction to InstantVision</h2>
+  <p class="description"><strong>Keywords:</strong><br/>InstantVision,
+        GUI,
+        basics<br/><strong>Author(s): </strong>Mario Becker<br/><strong>Date: </strong>2008-06-19</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to use InstantVision.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        
+            <p>
+            InstantVision is a modular program for visual camera tracking and realtime image processing. It allows composing, testing and tuning of visual tracking systems starting with simple marker tracking going to markerless tracking like line trackers and KLT.
+            </p>
+            <p>
+            The program implements a vast collection of tracking methods, at the moment it contains marker tracker (4x4 code, image, or circular), KLT(Kanade Lucas Tomasi Tracker), LED and Blobs tracking, Line/Edge tracking, randomized trees. The packages is used as a development platform for our tracking research, thus state of the art methods are implemented.
+            </p>
+            <p>
+            The true power of the system lies in the ability to combine several such tracking procedures, for instance using a line tracker for initialisation with an absolute pose and KLT for frame to frame tracking. An inertial sensor can also be used in combination with Kalman filtering to spead up vision procedures and reach tracking framerates up to 100 Hz.
+            </p>
+            <p>
+            InstantVision comes with a configuration tool, which can be used for interactive configuration and testing of tracking systems.
+            </p>
+            <p>
+            The tracking can be used in InstantPlayer to realize Augmented-Reality applications.
+            </p>
+    
+        <h2>How to find/start it</h2>
+
+            <p>
+            A link to InstantVision should be installed in the start menu and in the installation directory.
+            </p>
+        
+        <h2>What it can do</h2>
+        
+            <ul><li>run Activities such as Camera Calibration or CameraSetup.</li><li>Assemble configurations (ActionPipes)</li><li>load/save configurations</li></ul>
+        
+        <h2>GUI elements</h2>
+
+            <div class="imgContainer"><img src="gui2.png" align="center"/><div class="imgCaption">Image: Instant Vision</div></div>
+                
+                in the InstantVision GUI you can find the following elements.
+            <ul><li>Menu (red, on top)</li><li>Toolbars (yellow)</li><li>Dock Widgets (green, blue)
+                <ul><li>Help Viewer (green, bottom left)</li><li>Gallery (green, right)</li><li>DataSetWidget, Editors and DataWatch (blue)</li><li>ActionManager (blue)</li><li>ActionEditor </li></ul></li><li>Viewer(s)</li></ul>
+            
+            some of these are described now in more detail
+            
+            
+            <h2>Help Viewer</h2>
+                <p>
+                Is a dock window which is usually located in the bottom left corner of the picmod window. If it is not visible, use a right click on one of the tool bars and select "help viewer".
+                </p>
+                <p>
+                The help viewer changing documents. Use the "home" button to go back to the start page showing the InstantVision documentation.
+                </p>
+                <p>
+                The help viewer also acts as a command interface for activities. When you select an activity from the left hand tool bar, the contents of the viewer change to show a activity dependent page. The links in this page can be used to trigger activity specific commands. 
+                </p>
+                
+                
+            <h2>Gallery</h2>
+                <p>
+                Is one of the dock windows in InstantVision. It is by default located in the bottom right corner of the PicMod main window. If not visible use a right click on one of the tool bars and select "gallery widget".
+                </p>
+                <p>
+                The Gallery shows bundles of data which can be used together with certain activities. Double clicked a thumbnail in the Gallery to make it the current data which will be used by the activity. 
+                </p>
+                
+                
+            <h2>DataSetWidget, Editors and DataWatch</h2>
+            
+                <h3>DataSetWidget</h3>
+                    <p>
+                    here you can see the data objects generated and used by Actions.
+                    </p>
+
+                    <p>
+                    The data objects in the DataSet can themselves be data sets and thus contain more data objects. To browse into an object, double click it. To go back to the parent level, use the up button on the right.
+                    </p>
+                    
+                <h3>Buttons</h3>
+                    <p>
+                    ..allow you to load and save the DataSet. Then Loading, the objects found in the DataSet section are added to the selected DataSet level.
+                    </p>
+                    
+                <h3>See Whats Inside</h3>
+                    <div class="imgContainer"><img src="DataWatch01.jpg" align="center"/><div class="imgCaption">Image: </div></div>
+                    <p>
+                    You can get information about an object by holding the mouse pointer over an object an watch the tool tip. The same information can be seen then dragging an object into the "data watch" widget without hovering the mouse there. This usually shows you information about the object type and some data from within the object.
+                    </p>
+
+                <h3>Edit Objects</h3>
+                    <p>
+                    You can view or modify data objects by double clicking them. Their are two things which can happen..
+                    </p>
+                    
+                <h3>Data Editor</h3>
+                    <p>
+                    ..is a custom editor for the object it will be opened, otherwise a default editor is opened
+                    </p>
+                    <p>
+                    The default editor allows manipulation of some generic object attributes.
+                    </p>
+                    <div class="imgContainer"><img src="DataEditor01.jpg" align="center"/><div class="imgCaption">Image: </div></div>
+
+                <h3>Specialized Editor</h3>
+                    <p>
+                    If an data object comes with a data editor?, it can be opened by double clicking the data object.
+                    </p>
+                    <p>
+                    One example of such an editor is the Camera editor shown below. It can be used to change intrinsic and extrinsic data of a camera.
+                    </p>
+                    <div class="imgContainer"><img src="CameraEditor01.jpg" align="center"/><div class="imgCaption">Image: </div></div>
+
+            
+            <h2>ActionManager</h2>
+            
+                <div class="imgContainer"><img src="gui_actionmanager.png" align="center"/><div class="imgCaption">Image: </div></div>
+                
+                <p>
+                On the top is a tab bar (blue) for selecting the ActionPipe to edit. The ActionManager can have more than one but the second or third is usually managed by some activity and will not be saved with the configuration.
+                </p>
+                <p>
+                The center contains a list of the Actions in the main ActionPipe. Notice the + in front of some Actions, these are ActionPipes themselfes and can be expanded to see and edit their contents, which are more Actions.
+                </p>
+                <p>
+                The Actions can be turned on or off which might be usefull for debugging or for switching on extra processing steps. 
+                </p>
+                <p>
+                The bottom of the window contains the following buttons:
+                </p>
+
+                <ul><li>attrib button for calling the attribute/ActionEditor</li><li>"+" button to add an Action. This opens the selection box shown above. The show Actions can be filtered by typing a piece of the name in the find field. Double click an Action to add it. If another ActionPipe (marked with the + sign) is selected, the new Action will be added to it, otherwise it is added to the main ActionPipe.</li><li>"x" button deletes the selected Action or ActionPipe. </li></ul>
+            
+                <div class="imgContainer"><img src="gui_addaction.png" align="center"/><div class="imgCaption">Image: </div></div>
+            
+            
+            <h2>ActionEditor</h2>
+                <p>
+                If the Action double clicked in the ActionManager comes with an editor of its own, it will open. Otherwise or when you used the "attrib" button in the ActionManager the AttributeEditor will show up.
+                </p>
+                <p>
+                An ActionEditor is dedicated to one specific Action, here is an example for the VideoSourceAction. The Editor allows you to select a source (the driver plugin which handles the video device). The selected driver will look for a connected device as soon as it is selected.
+                </p>
+                <p>
+                The driver attributes are listed in the line above. Changing some of these attributes might enable the driver to find a device. If such a parameter was changed you can press the probe button to manually look for connected devices.
+                </p>
+                <p>
+                As soon as a device was found, the mode list will be filled with available video modes. You can select one of them or keep the default.
+                </p>
+                <p>
+                clicking "ok" will copy the parameter into the "source_url" attribute of the VideoSourceAction. You can choose to ignore the settings by closing the window.
+                </p>
+                <div class="imgContainer"><img src="gui_videoeditor.png" align="center"/><div class="imgCaption">Image: </div></div>
+                
+                <h3>AttributeEditor</h3>
+                    <p>
+                    By double clicking one of the Actions shown in the ActionManager, the AttributeEditor will open. It allows editing of Keys and Attributes for the clicked Action.
+                    </p>
+                    <div class="imgContainer"><img src="gui_actioneditor.png" align="center"/><div class="imgCaption">Image: </div></div>
+                    <p>
+                    The values can be changed by double clicking one of the lines under keys or attributes.
+                    </p>
+                    <p>
+                    This window can stay open during execution of the Configuration.
+                    </p>
+            
+            
+            <h2>Viewers</h2>
+            
+                <p>
+                These are the windows where you can display certain type of data.
+                </p>
+                <p>
+                A viewer can be opened by an activity like the CameraSetup shown here:
+                </p>
+                <div class="imgContainer"><img src="Viewer01.jpg" align="center"/><div class="imgCaption">Image: </div></div>
+
+                <p>
+                You can also open a viewer by clicking the "new viewer" button in the top toolbar. Then you can drag and drop data from the data set onto the viewer. If the object is known to the viewer, or in other words if their is some rendering object for it, the content of the data object is rendered into the viewer. Known objects are images like ImageRGB, 3d data alias OSGNodeData or geometric data in data object slang called GeometryContainer.
+                </p>
+                <div class="imgContainer"><img src="ViewerMenu01.jpg" align="center"/><div class="imgCaption">Image: </div></div>
+                <p>
+                The viewer allows to zoom and pan images and also to inspect 3d objects using the mouse. Make sure the draw mode is set to "view" otherwise the mouse might appear useless.
+                </p>
+                <p>
+                The viewer also has a menu of it's own. Here you can toggle the viewer's statusbar, reset the zoom and pan levels and switch the mouse mode (draw, edit, view).
+                </p>
+                <p>
+                The statusbar gives you information about the objects in display. you can change the keys here to display the corresponding objects. The "model" line is special, it contains a colon separated list of OSGNodeData objects it must be finished with a colon. Then extr and intr point to ExtrinsicData and IntrinsicData, the 3d "model" is transformed by these data objects and cannot be moved with the mouse. 
+                </p>
+                <div class="imgContainer"><img src="Viewer02.jpg" align="center"/><div class="imgCaption">Image: </div></div>
+            
+        
+        <h2>Activities</h2>
+
+            <p>
+            Activities are dedicated to special problems which require some sort of user interaction. You can find all available Activities in the left toolbar. Click one to activate it, clicking another one kicks out the previous and selecting "NOP" switches off any activity (actually it loads a "No OPeration" activity). Activities come in shared libraries and might need to be loaded using "add plugin" from the file menu or a button in the top tool bar. On startup, the lib folder of the distribution is searched for Activities and other plugins, so you should not need to do it yourself.
+            </p>
+
+            <p>
+            Activities operate together with the help viewer, the mode buttons from the top tool bar or the edit menu and one or more viewer windows. Furthermore the Activity uses the data as shown in the viewers and might operate with the Gallery to operate one multiple data.
+            </p>
+
+            <p>
+            The help viewer loads a help text for the selected activity which will also contain links acting like buttons, so clicking in the help viewer provokes some action from the activity.
+            </p>
+
+            <p>
+            The mode buttons from the top tool bar influence the behaviour of the activity when interpreting mouse clicks. In general,
+            </p>
+
+            <ul><li>draw - adds points or thatever,</li><li>edit - moves existing points,</li><li>view - allows the viewer content to be draged, rotated (3d object) depending on what is visible (refere to viewer to see what a viewer can do). </li></ul>
+            
+        <h2>Importing data</h2>
+
+            <p>
+            You can import certain types of data by using the "add data" button in the top toolbar. In this way you can load e.g. 3d data for augmentations. See also data types.
+            </p>
+
+        <h2>Configuration files</h2>
+
+            <p>
+            A configuration of Actions and data objects can be writen to a file using to save button from the top left tool bar or the file menu. The file will have the ending ".pm" which can be used to identify it as a PicMod file. It contains a XML conform description of the Actions you added and all data in the DataSet.
+            </p>
+
+            <p>
+            The file can be used to run the configuration in another application like Avalon.
+            </p>
+
+        <h2>Settings Files</h2>
+            
+            <p>
+            InstantVision uses a config file to keep certain settings from one run to another. These are window configuration and update behavior. Additionally it contains startup options like fps="30" - the desired frame rate, run="0" - start running after loading some project when set to 1, wait4debug="0" - opens a dialog after starting giving you the chance to attach a debugger to your process. The Config files are located in:
+            </p>
+            
+            <ul><li>WIN32: C:/Document and Settings/username/IVSettings.xml</li><li>Linux: ~/.InstantVision/IVSettings.xml</li><li>MacOSX: ~/Library/Application\ Support/Instant\ Vision/IVSettings.xml</li></ul>
+
+
+
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

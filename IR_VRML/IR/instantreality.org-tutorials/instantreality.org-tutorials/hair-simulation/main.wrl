@@ -1,0 +1,151 @@
+#VRML V2.0 utf8
+
+Viewpoint {
+    #zNear 1
+    zFar 1000
+    position 0 0 50
+    description "a"
+}
+Viewpoint {
+    #zNear 1
+    zFar 1000
+    position 0 0 20
+    description "b"
+}
+
+Background {
+   skyColor 1 1 1 #0.7 0.7 0.7
+}
+
+NavigationInfo {
+    headlight FALSE
+}
+
+#Block {
+#    nameSpaceName "Ewan"
+#    children [
+
+Transform {
+    translation 0 30 0
+    children [
+        DEF hair_light-SS SpaceSensor {}
+        DEF hair_light-MT MatrixTransform {
+            children [
+                PointLight {
+                    location 0 0 0
+                    showProxyGeometry TRUE
+                }
+           ]
+       }
+    ]
+}
+
+# mouse interaction
+#ROUTE hair_light-SS.matrix_changed TO hair_light-MT.set_matrix
+
+Transform {
+    translation 0 -15 70
+    children [
+        DEF eye_light-SS SpaceSensor {}
+        DEF eye_light-MT MatrixTransform {
+            children [
+                PointLight {
+                    location 0 0 0
+                    showProxyGeometry TRUE
+                }
+           ]
+       }
+    ]
+}
+
+# mouse interaction
+#ROUTE eye_light-SS.matrix_changed TO eye_light-MT.set_matrix
+
+Transform {
+    render TRUE ## FALSE
+    translation 10 0 20
+    children [
+       Shape {
+           appearance Appearance {
+               material Material {
+                   diffuseColor 0.8 0.2 0.2
+                   emissiveColor 1 0 0
+                   diffuseColor 1 0 0
+               }
+           }
+           geometry Box {
+               size 1 1 1
+           }
+       }
+       DEF toggleSimulation-TS TouchSensor {}
+    ]
+}
+
+Transform {
+    render TRUE ## FALSE
+    translation 10 0 26
+    children [
+       Shape {
+           appearance Appearance {
+               material Material {
+                   diffuseColor 0.8 0.8 0.2
+                   emissiveColor 1 1 0
+               }
+           }
+           geometry Box {
+               size 1 1 1
+           }
+       }
+       DEF toggleWind-TS TouchSensor {}
+    ]
+}
+
+#    ] #children
+    ROUTE hair_light-SS.matrix_changed TO hair_light-MT.set_matrix
+    ROUTE eye_light-SS.matrix_changed TO eye_light-MT.set_matrix
+#} #Block
+
+
+DEF Kopf-Neutral-TRAFO MatrixTransform
+{
+    children [
+        Transform {
+            children [
+                Inline {
+                    nameSpaceName "Kopf"
+                    url "KopfZaehneAugenTextur.wrl"
+                }
+                Transform {
+                    children [
+                        Inline {
+                            nameSpaceName "Haare"
+                            #url "Frisur.wrl"
+                            url "Skalp.wrl"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
+Transform {
+    translation 10 0 23
+    children [
+       DEF Kopf-Neutral-SS SpaceSensor {}
+       Shape {
+           appearance Appearance {
+               material Material {
+                   diffuseColor 0.2 0.2 0.8
+                   emissiveColor 0 0 1
+               }
+           }
+           geometry Box {
+               size 1 1 1
+           }
+       }
+    ]
+}
+
+# mouse interaction
+ROUTE Kopf-Neutral-SS.matrix_changed TO Kopf-Neutral-TRAFO.matrix

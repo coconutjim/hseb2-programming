@@ -1,0 +1,28 @@
+#ifndef MODIFIEDBLINNPHONGBRDF_CGH_INCLUDED
+#define MODIFIEDBLINNPHONGBRDF_CGH_INCLUDED
+
+#include "BRDF.cgh"
+
+
+struct ModifiedBlinnPhongBRDF: BRDF
+{
+// private:
+    Spectrum color;
+    float shininess;
+    
+// BRDF interface:
+    Spectrum Evaluate(
+        in DifferentialSurface surface,
+        in float3 L,
+        in float3 V
+        )
+    {
+        float3 H = normalize( L+V );
+        float NdotH = max( 0.0, dot( surface.n, H ) );
+        float scale = pow( NdotH, shininess );
+        return color * scale;
+    }
+};
+
+
+#endif

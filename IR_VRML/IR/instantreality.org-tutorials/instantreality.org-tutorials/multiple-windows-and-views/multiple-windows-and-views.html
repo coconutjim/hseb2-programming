@@ -1,0 +1,134 @@
+<div id="tutorialContainer">
+  <h2 class="title">Multiple Windows and Views</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        engine,
+        multi view<br/><strong>Author(s): </strong>Marcus Roth,
+        Patrick Riess<br/><strong>Date: </strong>2007-11-27</p>
+  <p><strong>Summary: </strong>
+    This tutorial describes the configuration of multiple windows and multiple view areas per window. It is 
+    a precondition for the tutorials of this section and the Clustering section.
+    </p>
+  <div id="content">
+        <h2>Preconditions for this tutorial</h2>
+        <p> 
+        Please read the "Engine" tutorial if you are not yet familiar with the concept of different Context base elements.
+        </p>
+        <h2>Engine configuration</h2>
+        <p>   
+        First we try to get some basic window settings right. Therefore we have to setup the <a href="/documentation/nodetype/RenderJob">RenderJob</a>. In the engine section that is used for local rendering, the definition for the rendering in most cases looks like the following line:
+        </p>
+          <div class="code"><pre>DEF render RenderJob {}</pre></div>
+          <p>
+          Instant Reality automatically adds the missing configuration to produce an image on a local window. To be able to understand more complex rendering configurations, we'll have a short look at the automatically generated configuration for a local window.
+          </p>
+          <div class="code"><h3>Code: Simple local window configuration</h3><pre>
+...
+DEF render RenderJob {
+  windowGroups [
+    WindowGroup {
+      windows [
+        LocalWindow {
+          size 512 512
+          views [
+            Viewarea {
+              lowerLeft  0 0
+              upperRight 1 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+...
+          </pre></div>
+          <p>
+          With this configuration we have one local window with one <a href="/documentation/nodetype/Viewarea">Viewarea</a> that covers the whole window.
+          </p>
+        <h2>Multiple view areas</h2>
+        <p>
+        To create a second view area we just have to add a Viewarea node and define the region where it should appear in the window. 0 means 
+        the left or bottom side and 1 is the right or top. If you set values greater than 1, they are interpreted as pixel values. 
+        In each view area, the complete scene is rendered. 
+        </p>
+        <div class="imgContainer"><img src="viewareas.png" align="center"/><div class="imgCaption">Image: Concept of view areas in a window</div></div>
+        <p>
+        The code for putting two view areas next to each other will look like this:
+        </p>
+        <div class="code"><h3>Code: Two view areas in a local window configuration</h3><pre>
+...
+DEF render RenderJob {
+  windowGroups [
+    WindowGroup {
+      windows [
+        LocalWindow {
+          size 800 400
+          views [
+            Viewarea {
+              lowerLeft  0 0
+              upperRight 0.5 1
+            }
+            Viewarea {
+              lowerLeft  0.5 0
+              upperRight 1 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+...
+        </pre></div>
+        <div class="imgContainer"><img src="multipleviews.png" align="center"/><div class="imgCaption">Image: Two view areas next to each other a local window</div></div>
+        <p>
+        View areas can be modified in a way to change the camera position and orientation by <a href="/documentation/nodetype/ViewModifier">ViewModifier</a> nodes. 
+        This is especially used for stereo configurations and CAVE environments (see appropriate tutorials or nodetype tree documentation).
+        </p>
+        <h2>Multiple windows</h2>
+        <p>
+        Multiple windows can be configured by adding <a href="/documentation/nodetype/LocalWindow">LocalWindow</a> nodes into the RenderJob section:
+        </p>
+        <div class="code"><h3>Code: Multiple local windows configuration</h3><pre>
+...
+DEF render RenderJob {
+  windowGroups [
+    WindowGroup {
+      windows [
+        LocalWindow {
+          size 800 400
+          position 0 0
+          views [
+            Viewarea {
+              lowerLeft  0 0
+              upperRight 0.5 1
+            }
+            Viewarea {
+              lowerLeft  0.5 0
+              upperRight 1 1
+            }
+          ]
+        }
+        LocalWindow {
+          size 300 300
+          position 500 500
+          views [
+            Viewarea {
+              lowerLeft  0 0
+              upperRight 1 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+...
+        </pre></div>
+        
+    Files:
+    <ul class="files"><li><a href="MultipleViewareas.wrl">MultipleViewareas.wrl</a></li><li><a href="MultipleWindows.wrl">MultipleWindows.wrl</a></li><li><a href="tie.wrl">tie.wrl</a></li></ul>
+    </div>
+</div>

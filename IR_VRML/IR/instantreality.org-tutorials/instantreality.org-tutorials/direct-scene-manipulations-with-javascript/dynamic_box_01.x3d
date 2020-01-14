@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+
+<X3D version='3.0'>
+	
+	<Scene>
+
+		// we will put our created objects in this node
+		<Group DEF='dynamic_group' />
+		
+		<Script DEF='script' directOutput='true' >
+
+			<![CDATA[
+			  ecmascript:
+
+				// get group node in scene
+				var dynamic_group = Browser.currentScene.getNamedNode('dynamic_group');
+				
+				function initialize()
+				{
+					// create a box
+					var box = Browser.currentScene.createNode("Box");
+					box.size = new SFVec3f(1, 1, 1);
+					
+					// create a material for the box
+					var material = Browser.currentScene.createNode("Material");
+					material.diffuseColor = new SFColor(1, 0.5, 0);
+					
+					// create an appearance
+					var appearance = Browser.currentScene.createNode("Appearance");
+					appearance.material = material;
+					
+					// create a shape and put the box in in it
+					var shape = Browser.currentScene.createNode("Shape");
+					shape.geometry = box;
+					shape.appearance = appearance;
+					
+					// create a transform node and put the shape into it
+					var transform = Browser.currentScene.createNode("Transform");
+					transform.children = new MFNode(shape);
+					
+					// until here the created objects are not in the scene yet
+					// now add them to the scene
+					dynamic_group.children[0] = transform;
+				}
+				
+			]]>
+  		</Script>
+  		
+	</Scene>
+</X3D>

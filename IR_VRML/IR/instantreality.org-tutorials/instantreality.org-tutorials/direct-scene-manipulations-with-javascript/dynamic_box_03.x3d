@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+
+<X3D version='3.0'>
+	
+	<Scene>
+		
+		<Viewpoint position='0 0 15' />
+	
+		<!-- add button -->
+		<Transform translation='-5 -4 2'>
+			<TouchSensor DEF='ts_add' />
+			<Shape>
+				<Appearance>
+					<Material diffuseColor='1,1,1' />
+				</Appearance>
+				<Text string='add box'>
+					<FontStyle family='SANS' />
+				</Text>
+			</Shape>
+		</Transform>
+		
+		<!-- delete button -->
+		<Transform translation='-5 -5 2'>
+			<TouchSensor DEF='ts_delete' />
+			<Shape>
+				<Appearance>
+					<Material diffuseColor='1,1,1' />
+				</Appearance>
+				<Text string='delete box'>
+					<FontStyle family='SANS' />
+				</Text>
+			</Shape>
+		</Transform>
+		
+		
+		
+		<!-- a proto containing the shape and the chasers -->
+		<!-- thus we only have to create one dynamic node in the script -->
+		<ProtoDeclare name='SmoothBox'>
+			<ProtoInterface>
+				<field name='set_translation' type='SFVec3f' accessType='inputOutput' value='0,0,0' />
+				<field name='start_translation' type='SFVec3f' accessType='initializeOnly' value='0,0,0' />
+				<field name='diffuseColor' type='SFColor' accessType='inputOutput' value='1,0.5,0' />
+			</ProtoInterface>
+			<ProtoBody>
+				
+				<Transform DEF='root_trans'>
+					
+					<Transform>
+						<Shape>
+							<Appearance DEF='app_font'>
+								<Material>
+									<IS>
+                    					<connect nodeField='diffuseColor' protoField='diffuseColor'/>
+                  					</IS>
+								</Material>
+							</Appearance>
+							<Box />
+						</Shape>
+					</Transform>
+					
+				</Transform>
+				
+				<PositionChaser3D DEF='pc' duration='2'>
+					<IS>
+                    	<connect nodeField='initialDestination' protoField='start_translation'/>
+                    	<connect nodeField='set_destination' protoField='set_translation'/>
+                  	</IS>
+                </PositionChaser3D>
+				<ROUTE fromNode='pc' fromField='value_changed' toNode='root_trans' toField='set_translation'/>
+				
+			</ProtoBody>
+		</ProtoDeclare>
+		
+		
+		
+		<!-- we will put our created objects in this node -->
+		<Group DEF='dynamic_group' />
+		
+		<Script DEF='script' directOutput='true' >
+			<field name='add_box' type='SFTime' accessType='inputOnly' />
+			<field name='delete_box' type='SFTime' accessType='inputOnly' />
+
+			<![CDATA[
+			  ecmascript:
+
+				// get group node in scene
+				var dynamic_group = Browser.currentScene.getNamedNode('dynamic_group');
+				
+				function initialize()
+				{
+					// create 10 boxes
+					for (i=0; i<10; i++)
+					{
+						add_box();
+					}
+				}
+				
+				function add_box()
+				{
+					// create a smooth box proto
+					var smoothbox = Browser.currentScene.createNode("SmoothBox");
+					smoothbox.start_translation = new SFVec3f(5-Math.random()*10, 5-Math.random()*10, 0);
+					smoothbox.diffuseColor = new SFColor(Math.random(), Math.random(), 0);
+					
+					// until here the created object is not in the scene yet
+					// now add it to the scene
+					dynamic_group.children[dynamic_group.children.length] = smoothbox;
+				}
+				
+				function delete_box()
+				{
+					// delete last box
+					Browser.println(dynamic_group.children.length);
+					dynamic_group.removeChildren = new MFNode(dynamic_group.children[dynamic_group.children.length-1]);
+				}
+				
+			]]>
+  		</Script>
+  		
+  		<ROUTE fromNode='ts_add' fromField='touchTime' toNode='script' toField='add_box'/>
+  		<ROUTE fromNode='ts_delete' fromField='touchTime' toNode='script' toField='delete_box'/>
+  		
+	</Scene>
+</X3D>

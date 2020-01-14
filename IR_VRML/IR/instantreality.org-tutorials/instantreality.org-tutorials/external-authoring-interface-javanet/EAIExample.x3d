@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D>
+  <Scene>
+    <TouchSensor DEF='touchSensor'/>
+    <Shape>
+      <Appearance>
+        <Material DEF='material' diffuseColor='0 1 0'/>
+      </Appearance>
+      <Sphere/>
+    </Shape>
+  </Scene>
+</X3D>

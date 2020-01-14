@@ -1,0 +1,147 @@
+#X3D V3.0 utf8
+
+Engine {
+  jobs [
+    DEF render RenderJob { 
+      windowGroups [
+        WindowGroup {
+          windows [
+            LocalWindow {
+              #This window is just for interaction
+              enabled FALSE
+            }
+            ClusterWindow {
+              servers [ 
+                "front_leftEye"  
+                "front_rightEye" 
+                "left_leftEye"   
+                "left_rightEye" 
+                "bottom_leftEye" 
+                "bottom_rightEye" 
+              ]
+              size 7680 1024
+              fullScreen TRUE
+              hServers 6
+              vServers 1
+              views [
+                #Front wall, left eye
+                Viewarea {
+                  lowerLeft  0 0
+                  upperRight 1023 1023
+                  modifier [
+                    DEF mod_front_left ProjectionViewModifier {
+                      surface [
+                        -60 -60 -60,
+                         60 -60 -60,
+                         60  60 -60,
+                        -60  60 -60 
+                      ]
+                      leftEye  TRUE
+                      rightEye FALSE
+                      eyeSeparation 0.8
+                    }   
+                  ]
+                }
+                #Front wall, right eye
+                Viewarea {
+                  lowerLeft  1280 0
+                  upperRight 2303 1023
+                  modifier [
+                    DEF mod_front_right ProjectionViewModifier {
+                      surface [
+                        -60 -60 -60,
+                         60 -60 -60,
+                         60  60 -60,
+                        -60  60 -60 
+                      ]
+                      leftEye  FALSE
+                      rightEye TRUE
+                      eyeSeparation 0.8
+                    }   
+                  ]
+                }
+                #Left wall, left eye
+                Viewarea {
+                  lowerLeft  2560 0
+                  upperRight 3583 1023
+                  modifier [
+                    DEF mod_left_left ProjectionViewModifier {
+                      surface [
+                        -60 -60  60,
+                        -60 -60 -60,
+                        -60  60 -60,
+                        -60  60  60 
+                      ]
+                      leftEye  TRUE
+                      rightEye FALSE
+                      eyeSeparation 0.8
+                    }   
+                  ] 
+                }
+                #Left wall, right eye
+                Viewarea {
+                  lowerLeft  3840 0
+                  upperRight 4863 1023
+                  modifier [
+                    DEF mod_left_right ProjectionViewModifier {
+                      surface [
+                        -60 -60  60,
+                        -60 -60 -60,
+                        -60  60 -60,
+                        -60  60  60 
+                      ]
+                      leftEye  FALSE
+                      rightEye TRUE
+                      eyeSeparation 0.8
+                    }   
+                  ]
+                }
+                #Bottom, left eye
+                Viewarea {
+                  lowerLeft  5120 0
+                  upperRight 6143 1023
+                  modifier [
+                    DEF mod_bottom_left ProjectionViewModifier {
+                      surface [
+                        -60 -60  60,
+                         60 -60  60,
+                         60 -60 -60,
+                        -60 -60 -60 
+                      ]
+                      leftEye  TRUE
+                      rightEye FALSE
+                      eyeSeparation 0.8
+                    }   
+                  ]
+                }
+                #Bottom, right eye
+                Viewarea {
+                  lowerLeft  6400 0
+                  upperRight 7423 1023
+                  modifier [
+                    DEF mod_bottom_right ProjectionViewModifier {
+                      surface [
+                        -60 -60  60,
+                         60 -60  60,
+                         60 -60 -60,
+                        -60 -60 -60 
+                      ]
+                      leftEye  FALSE
+                      rightEye TRUE
+                      eyeSeparation 0.8
+                    }   
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+Scene {
+  children [
+    Inline { url [ "tie.wrl" ] } 
+  ]
+}

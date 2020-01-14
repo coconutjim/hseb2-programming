@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <Viewpoint position='2 1 7'/>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+
+    <Transform scale='4 2 2'>
+      <Shape>
+        <Appearance>
+          <UITexture DEF='colorUi' minFilter='linear' magFilter='linear' alpha='0.9' url='"texture/color.ui"'>
+            <field accessType='inputOutput' name='red' type='SFInt32' value='0'/>
+            <field accessType='inputOutput' name='green' type='SFInt32' value='0'/>
+            <field accessType='inputOutput' name='blue' type='SFInt32' value='0'/>
+            <field accessType='inputOutput' name='reddial' type='SFInt32' value='0'/>
+            <field accessType='inputOutput' name='greendial' type='SFInt32' value='0'/>
+            <field accessType='inputOutput' name='bluedial' type='SFInt32' value='0'/>
+          </UITexture>
+        </Appearance>
+        <IndexedFaceSet texCoordIndex='0 1 2 3 -1 3 2 1 0 -1' coordIndex='0 1 2 3 -1 3 2 1 0 -1'>
+          <Coordinate point='0 0 0 1 0 0 1 1 0 0 1 0'/>
+          <TextureCoordinate point='0 0 1 0 1 1 0 1'/>
+        </IndexedFaceSet>
+      </Shape>
+      <TouchSensor DEF='colorUITouch'/>
+    </Transform>
+
+    <Script DEF='setColor'>
+      <field accessType='inputOnly' name='set_red' type='SFInt32'/>
+      <field accessType='inputOnly' name='set_green' type='SFInt32'/>
+      <field accessType='inputOnly' name='set_blue' type='SFInt32'/>
+      <field accessType='outputOnly' name='color_changed' type='SFColor'/>
+      <field accessType='initializeOnly' name='color' type='SFColor' value='0 0 0'/>
+      <![CDATA[javascript:
+        function set_red(v)   { color[0]=v/256.0; color_changed = color; }
+        function set_green(v) { color[1]=v/256.0; color_changed = color; }
+        function set_blue(v)  { color[2]=v/256.0; color_changed = color; }
+      ]]>
+    </Script>
+
+    <Transform translation='2 1 -4'>
+      <Shape>
+        <Appearance>
+          <Material DEF='mat' diffuseColor='0 0 0'/>
+        </Appearance>
+        <Box DEF='box' size='3 6 3'/>
+      </Shape>
+    </Transform>
+
+    <ROUTE fromNode='colorUITouch' fromField='isActive' toNode='colorUi' toField='set_button1'/>
+    <ROUTE fromNode='colorUi' fromField='red_changed' toNode='setColor' toField='set_red'/>
+    <ROUTE fromNode='colorUITouch' fromField='hitTexCoord_changed' toNode='colorUi' toField='set_pointer'/>
+    <ROUTE fromNode='colorUi' fromField='bluedial_changed' toNode='colorUi' toField='set_blue'/>
+    <ROUTE fromNode='colorUi' fromField='greendial_changed' toNode='colorUi' toField='set_green'/>
+    <ROUTE fromNode='colorUi' fromField='blue_changed' toNode='setColor' toField='set_blue'/>
+    <ROUTE fromNode='colorUi' fromField='green_changed' toNode='setColor' toField='set_green'/>
+    <ROUTE fromNode='setColor' fromField='color_changed' toNode='mat' toField='set_diffuseColor'/>
+    <ROUTE fromNode='colorUi' fromField='blue_changed' toNode='colorUi' toField='set_bluedial'/>
+    <ROUTE fromNode='colorUi' fromField='red_changed' toNode='colorUi' toField='set_reddial'/>
+    <ROUTE fromNode='colorUi' fromField='reddial_changed' toNode='colorUi' toField='set_red'/>
+    <ROUTE fromNode='colorUi' fromField='green_changed' toNode='colorUi' toField='set_greendial'/>
+  </Scene>
+</X3D>

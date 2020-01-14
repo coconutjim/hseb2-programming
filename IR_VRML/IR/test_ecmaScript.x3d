@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <NavigationInfo speed='2' type='"EXAMINE" "ANY"'/>
+    <Transform>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+      <Viewpoint DEF='Kam1' description='Elso' position='0 0 6'/>
+    </Transform>
+    <DirectionalLight direction='-1 -1 -1'/>
+    <TimeSensor DEF='Idozito1' cycleInterval='3' loop='true'/>
+    <Transform rotation='1 1 0 0.3'>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='0.4 0.6 0.4'/>
+          <PixelTexture DEF='Kep' minFilter='nearest' magFilter='nearest' image='4 4 1 0 0 0 255 0 0 255 0 0 255 0 0 255 0 0 0'>
+              <TextureProperties containerField='textureProperties' boundaryModeS='CLAMP' boundaryModeT='CLAMP' boundaryModeR='CLAMP' magnificationFilter='nearest' minificationFilter='nearest'/>
+		            </PixelTexture>
+        </Appearance>
+        <Box/>
+      </Shape>
+    </Transform>
+    <Script DEF='Felulet'>
+      <field accessType='inputOnly' name='set_fraction' type='SFFloat'/>
+      <field accessType='outputOnly' name='pixelek' type='SFImage'/>
+      <field accessType='initializeOnly' name='minta1' type='MFInt32' value=''/>
+      <field accessType='initializeOnly' name='minta2' type='MFInt32' value=''/><![CDATA[javascript:
+
+     function initialize( ) {
+      meret = 32; 
+
+      for ( i = 0; i <meret*meret; i++ ) {
+         minta1[i]=100;
+         minta2[i]=100;
+         }
+
+      for ( x = 1; x <meret-2; x++ ) {
+        for ( y = 1; y <meret-2; y++ ) {
+         k = Math.random();   
+         if (k>0.6) {
+               set_Minta1(x,y);;
+               } 
+
+           }
+         }
+    
+      }
+
+     
+     function set_fraction (fraction, eventTime)  {
+
+        pixelek.x = meret;
+        pixelek.y = meret;
+        pixelek.comp = 1;
+
+        for ( x = 1; x <meret-2; x++ ) {
+           for ( y = 1; y <meret-2; y++ ) {
+           darab = 0;
+
+           xe = x-1;
+           xu = x+1;
+           ye = y-1;
+           yu = y+1;
+           
+           if (get_Minta1(xe,ye)>100) { darab++; }
+           if (get_Minta1(xe,y)>100) { darab++; }
+           if (get_Minta1(xe,yu)>100) { darab++; }
+
+           if (get_Minta1(xu,ye)>100) { darab++; }
+           if (get_Minta1(xu,y)>100) { darab++; }
+           if (get_Minta1(xu,yu)>100) { darab++; }
+
+           if (get_Minta1(x,ye)>100) { darab++; }
+           if (get_Minta1(x,yu)>100) { darab++; }
+
+
+          //-----------------------------
+          // uj sejtek szamolasa  
+           
+          if (get_Minta1(x,y)== 100) 
+                {
+                if (darab==3) { 
+                                   set_Minta2(x,y); 
+                   }  else { 
+                                   clear_Minta2(x,y); 
+                           } 
+                }
+
+          if (get_Minta1(x,y)> 100) 
+                {
+                if ((darab<2)  || (darab>3))  {
+                                   clear_Minta2(x,y);
+                   } else  {
+                                   set_Minta2(x,y);
+                           }
+                }
+
+          //-------------------------------------------
+
+
+
+           }
+        }
+
+
+        pixelek.array = minta2;
+
+        minta1=minta2;         
+     }
+
+
+
+     function get_Minta1(x,y)  {
+           return    (minta1[x+y*meret]);         
+           }
+
+     function set_Minta1(x,y)  {
+           minta1[x+y*meret]=255;         
+           }
+
+     function set_Minta2(x,y)  {
+           minta2[x+y*meret]=255;         
+           }
+
+     function clear_Minta2(x,y)  {
+           minta2[x+y*meret]=100;         
+           }
+
+    ]]>
+    </Script>
+    <Logger DEF='logger' level='3'/>
+    <ROUTE fromNode='Idozito1' fromField='fraction_changed' toNode='Felulet' toField='set_fraction'/>
+    <ROUTE fromNode='Felulet' fromField='pixelek' toNode='Kep' toField='set_image'/>
+  </Scene>
+</X3D>

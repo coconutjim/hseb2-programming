@@ -1,0 +1,164 @@
+#VRML V2.0 utf8
+
+EXTERNPROTO USER_BODY_MANAGER [
+  eventIn MFVec4f set_panePositionsIDs
+  field SFBool initHot
+  field SFBool render
+] "ProtoUB.wrl#USER_BODY_MANAGER"
+
+
+Viewpoint {
+  zNear 0.05
+  #zFar 10
+  position -3 0 20
+}  
+
+DEF navinfo NavigationInfo {
+	type [ "none" "any" ]
+	interactionType "projection"
+}
+
+Foreground {
+	overlays [
+		DEF poly PolygonOverlay {
+			#enabled	FALSE
+			appearance Appearance {
+				material Material {
+					diffuseColor 1 1 1
+					emissiveColor .255 .831 .0275					 
+					transparency .6
+				}
+            	texture ImageTexture {	  
+					url	"pointer.png"
+                	repeatS FALSE
+                	repeatT FALSE
+					#envMode "modulate"
+            	}
+			}
+			positions [
+				0 0, 0 0, 0 0, 0 0
+			] 
+		   normalizedX FALSE
+		   normalizedY FALSE
+		}
+		DEF poly1 PolygonOverlay {
+			#enabled	FALSE
+			appearance Appearance {
+				material Material {
+					diffuseColor 1 1 1	
+					emissiveColor 0.686 0.392 0.02			 
+					transparency 0.6
+				}
+            	texture ImageTexture {	  
+					url	"pointer.png"
+                	repeatS FALSE
+                	repeatT FALSE
+					#envMode "modulate"
+            	}
+			}
+			positions [
+				0 0, 0 0, 0 0, 0 0
+			]
+		   normalizedX FALSE
+		   normalizedY FALSE
+		}
+	]
+}
+	
+DEF	CursorScript Script {	
+	eventIn	SFVec2f	set_size	
+	eventIn MFVec4f set_camtrans   
+	field SFNode poly USE poly
+	field SFNode poly1 USE poly1		
+
+	url	"javascript:
+
+	var size  = new SFVec2f(1024.0, 768.0);
+
+	function clamp(val)
+	{	 
+		val.x = val.x < 0 ? 0 : val.x; 
+		val.y = val.y < 0 ? 0 : val.y;
+
+		val.x = val.x >= size.x ? size.x - 1 : val.x; 
+		val.y = val.y >= size.y ? size.y - 1 : val.y;
+
+		return val;
+	}
+
+	function repos(anz, x, y)
+	{
+		if (anz > 2)
+			return;
+
+		xIncr = 20;
+		yIncr = 20; 
+
+		y = size.y - 1 - y; 
+
+		var a = new SFVec2f(x-xIncr,y-yIncr);
+		var b = new SFVec2f(x+xIncr,y-yIncr);
+		var c = new SFVec2f(x+xIncr,y+yIncr);
+		var d = new SFVec2f(x-xIncr,y+yIncr);
+
+		a = clamp(a);
+		b = clamp(b);
+		c = clamp(c);
+		d = clamp(d);										  
+		
+		if (anz == 1)											 
+			poly.positions = new MFVec2f(a, b, c, d);
+		else
+			poly1.positions = new MFVec2f(a, b, c, d);
+	} 
+
+	function set_size(value)
+	{
+		size.x = value.x;
+		size.y = value.y;		   
+	}
+
+	
+	function set_camtrans(val, ts)
+	{
+		var i, n = val.length;		
+
+		for (i=0; i<n; i++)
+		{							 
+			repos(i+1, val[i].x, val[i].y);							   
+		}
+
+		/*
+		if (n > 1) {
+			poly.enabled = true;
+			poly1.enabled = true;
+		}			
+		else if (n == 1) {
+			if (val[0].w == 1) // release
+				poly.enabled = false;
+			else
+				poly.enabled = true;
+			poly1.enabled = false;
+		}
+		else   */
+		{
+			poly.enabled = false;
+			poly1.enabled = false;
+		}	 
+	}  
+	"
+}
+
+DEF UBManger USER_BODY_MANAGER {
+  initHot TRUE
+}
+
+DEF	log Logger {
+	level 3
+}
+
+																						  
+ROUTE engine::viewarea.touchPoints TO CursorScript.set_camtrans					   
+#ROUTE engine::navigator.pickedPanePositionsIDs_changed TO log.write
+ROUTE engine::navigator.pickedPanePositionsIDs_changed TO UBManger.set_panePositionsIDs	 
+ROUTE engine::win.size TO CursorScript.set_size

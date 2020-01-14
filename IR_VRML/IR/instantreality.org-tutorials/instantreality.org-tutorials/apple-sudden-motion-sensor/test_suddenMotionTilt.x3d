@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <Viewpoint position='0 0 5' />
+  
+  	<GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+  	
+    <IOSensor DEF='AppleMotionSensor' type='AppleMotionSensor'>
+      <field accessType='outputOnly' name='Motion' type='SFVec3f'/>
+    </IOSensor>
+    
+    <Transform rotation='1 0 0 1.57'>
+		<Transform DEF='tr'>
+		  <Shape>
+			<Appearance>
+			  <Material diffuseColor='0 0.329 0.706' />
+			</Appearance>
+			<Teapot />
+		  </Shape>
+		</Transform>
+    </Transform>
+    
+    <Script DEF='script'>
+      <field accessType='inputOnly' name='set_motion' type='SFVec3f'/>
+      <field accessType='outputOnly' name='rotation_changed' type='SFRotation'/>
+      <![CDATA[javascript:
+	  
+	  var rotation_changed;
+	  var vector = new SFVec3f(0,1,0);
+	  
+	  function set_motion(motion)
+	  {
+	  	rotation_changed = new SFRotation(motion, vector);
+	  }
+
+    ]]>
+    </Script>
+
+    <ROUTE fromNode='AppleMotionSensor' fromField='Motion' toNode='script' toField='set_motion'/>
+    <ROUTE fromNode='script' fromField='rotation_changed' toNode='tr' toField='set_rotation'/>
+  </Scene>
+</X3D>

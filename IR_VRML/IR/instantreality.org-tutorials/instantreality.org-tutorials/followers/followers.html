@@ -1,0 +1,62 @@
+<div id="tutorialContainer">
+  <h2 class="title">Followers</h2>
+  <p class="description"><strong>Keywords:</strong><br/>animation,
+        dampers,
+        chasers,
+        interpolation<br/><strong>Author(s): </strong>Michael Zoellner<br/><strong>Date: </strong>2007-06-12</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to use damper and chaser nodes for animation.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+	<p>
+        Followers divide in Dampers and Chasers. They are an easy to use alternative for common X3D interpolators. You only have to define a destination value and the duration of the interpolation in order to create a tween. Instant Reality provides the following dampers and chasers:
+	</p>
+        <ul><li>ColorChaser</li><li>ColorDamper</li><li>CoordinateChaser</li><li>CoordinateDamper</li><li>OrientationChaser</li><li>OrientationDamper</li><li>PositionChaser2D</li><li>PositionChaser3D</li><li>PositionDamper2D</li><li>PositionDamper3D</li><li>ScalarChaser</li><li>ScalarDamper</li><li>TexCoordChaser</li><li>TexCoordDamper</li></ul>
+
+        <h2>PositionChaser3D</h2>
+        <p>
+        This is an example about a PositionChaser3D that lets an object follow the mouse pointer. Other damper and chaser nodes follow the same logic.
+        </p>
+        <p>
+        Initially only the PositionChaser's <i>duration</i> - the time it takes to get to the <i>destination</i> value - has to be defined.
+        </p>
+        <div class="code"><h3>Code: PositionChaser3D</h3><pre>
+&lt;PositionChaser3D DEF='pc' duration='5' /&gt;
+        </pre></div>
+        
+        <p>
+        The mouse pointer's position on a plane is recognized by a TouchSensor and routed to the PositionChaser3D's <i>destination</i> value. By routing the PositionChaser3D's <i>value_changed</i> field to a Transform's <i>set_translation</i> the objects seems to follow the mouse.
+        </p>
+        <div class="code"><h3>Code: PositionChaser3D</h3><pre>
+&lt;PositionChaser DEF='pc' duration='5' /&gt;
+
+&lt;Transform DEF='trans_box'&gt;
+	&lt;Shape&gt;
+		&lt;Appearance&gt;
+			&lt;Material diffuseColor='0 0.329 0.706' /&gt;
+		&lt;/Appearance&gt;
+		&lt;Sphere radius='0.25'/&gt;
+	&lt;/Shape&gt;
+&lt;/Transform&gt;
+		
+&lt;Transform DEF='trans_plane' translation='0 -0.25 0'&gt;
+	&lt;TouchSensor DEF='ts' /&gt;
+	&lt;Shape&gt;
+		&lt;Appearance&gt;
+			&lt;Material diffuseColor='1 1 1' emissiveColor='1 1 1'/&gt;
+		&lt;/Appearance&gt;
+		&lt;Box size='10 0.1 10'/&gt;
+	&lt;/Shape&gt;
+&lt;/Transform&gt;
+		
+&lt;ROUTE fromNode='ts' fromField='hitPoint_changed' toNode='pc' toField='set_destination'/&gt;
+&lt;ROUTE fromNode='pc' fromField='value_changed' toNode='trans_box' toField='set_translation'/&gt;
+        </pre></div>
+
+		<div class="imgContainer"><img src="PositionChaser3D.png" align="center"/><div class="imgCaption">Image: PositionChaser3D</div></div>
+
+        
+    Files:
+    <ul class="files"><li><a href="PositionChaser3D.x3d">PositionChaser3D.x3d</a></li></ul>
+        
+    </div>
+</div>

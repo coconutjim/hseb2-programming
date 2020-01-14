@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Engine>
+	<RenderJob>
+	  <WindowGroup>
+		<Window size='640 480'/>
+	  </WindowGroup>
+	</RenderJob>
+  </Engine>
+
+  <Scene>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+    
+    <IOSensor DEF='kinect' type='NI2'>
+        <field accessType='outputOnly' name='image' type='SFImage'/>
+        <field accessType='outputOnly' name='depth' type='SFImage'/>
+    </IOSensor>
+    
+    <Transform translation='-2.1 0 0'>
+        <Shape>
+            <Appearance>
+                <PixelTexture2D DEF='image'/>
+            </Appearance>
+            
+            <Plane size='4 3'/>
+        </Shape>
+    </Transform>
+    
+    <Transform translation='2.1 0 0'>
+        <Shape>
+            <Appearance>
+                <PixelTexture2D DEF='depth'/>
+            </Appearance>
+            
+            <Plane size='4 3'/>
+        </Shape>
+    </Transform>
+    
+    <ROUTE fromNode='kinect' fromField='image' toNode='image' toField='set_image'/>
+    <ROUTE fromNode='kinect' fromField='depth' toNode='depth' toField='set_image'/>
+  </Scene>
+</X3D>

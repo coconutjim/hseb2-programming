@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+	<Scene DEF='scene'>
+	
+		<Viewpoint position='0 7 15' orientation='1 0 0 -0.5' />
+		
+		<GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+		
+		<PositionChaser DEF='pc' duration='5' />
+	
+		<Transform DEF='trans_box'>
+			<Shape>
+				<Appearance>
+					<Material diffuseColor='0 0.329 0.706' />
+				</Appearance>
+				<Sphere radius='0.25'/>
+			</Shape>
+		</Transform>
+		
+		<Transform DEF='trans_plane' translation='0 -0.25 0'>
+			<TouchSensor DEF='ts' />
+			<Shape>
+				<Appearance>
+					<Material diffuseColor='1 1 1' emissiveColor='1 1 1'/>
+				</Appearance>
+				<Box size='10 0.1 10'/>
+			</Shape>
+		</Transform>
+		
+		<ROUTE fromNode='ts' fromField='hitPoint_changed' toNode='pc' toField='set_destination'/>
+		<ROUTE fromNode='pc' fromField='value_changed' toNode='trans_box' toField='set_translation'/>
+	</Scene>
+</X3D>

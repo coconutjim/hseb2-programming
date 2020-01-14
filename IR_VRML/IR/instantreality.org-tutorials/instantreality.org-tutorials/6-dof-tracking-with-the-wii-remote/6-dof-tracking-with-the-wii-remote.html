@@ -1,0 +1,141 @@
+<div id="tutorialContainer">
+  <h2 class="title">6 Dof Tracking with the Wii-Remote</h2>
+  <p class="description"><strong>Keywords:</strong><br/>vision,
+        6 Dof,
+        wiimote,
+        Wii-Remote,
+        augmented reality<br/><strong>Author(s): </strong>Rudolf Adler<br/><strong>Date: </strong>2009-04-15</p>
+  <p><strong>Summary: </strong>This tutorial shows you, how to use the basic features of the 6 Degrees of Freedom Tracker with the Wiimote. </p>
+  <div id="content">
+        <h2>Introduction</h2>
+  The Wiimote needs to be 'paired' (Bluetooth connected) with the PC before you can use it.  Pressing 1 and 2 simultaneously puts it into 'discoverable' mode for a few seconds (LEDs will
+   flash - the number of LEDs reflects the battery level).
+    <div class="imgContainer"><img src="bluetoothstack.jpg" align="center"/><div class="imgCaption">Image: bluetoothstack.jpg</div></div>
+    
+    <div class="imgContainer"><img src="bluetoothstack_search.jpg" align="center"/><div class="imgCaption">Image: bluetoothstack_search.jpg</div></div>
+    Now you have to connect with your Wiimote, it will be detected as 'Nintendo RVL-CNT-01' (The LED´s on your Wiimote should flash and the status should be "connected") .
+        
+        <h2>IOSensor</h2>
+        <p>
+        The 6dof tracker is loaded like any other Instant IO device via an IOSensor. These are instant<i>vision</i>'s fields:
+        </p>
+        <ul><li><i>InstantCamera_Projection (SFMatrix4f)</i>: Camera' projection matrix</li><li><i>InstantCamera_Position (SFVec3f)</i>: Camera's position</li><li><i>InstantCamera_Orientation (SFRotation)</i>: Camera's orientation</li></ul>
+        
+                <div class="code"><h3>Code: IOSensor</h3><pre>
+        &lt;IOSensor DEF='VisionLib' type='VisionLib' configFile='Wiitest_3PointPose.pm'&gt;
+    	    &lt;field accessType='outputOnly' name='InstantCamera_Projection'  type='SFMatrix4f'/&gt;
+            &lt;field accessType='outputOnly' name='InstantCamera_Position'    type='SFVec3f'/&gt;
+    	    &lt;field accessType='outputOnly' name='InstantCamera_Orientation' type='SFRotation'/&gt;
+        </pre></div>
+        
+        <h2>Setting the virtual object's position and orientation relative to the camera</h2>
+        
+        <p>
+        We add a virtual object (a teapot) to the scene.
+        </p>
+        <div class="code"><h3>Code: Add a yellow teapot</h3><pre>
+    	&lt;Transform DEF='ControlerPosition'&gt;
+            &lt;Shape DEF='geo2'&gt;
+                &lt;Appearance&gt;
+                    &lt;Material DEF='mat' emissiveColor='1 0.5 0' /&gt;
+                &lt;/Appearance&gt;
+                &lt;Teapot size='5 5 5' /&gt;
+            &lt;/Shape&gt;
+        &lt;/Transform&gt;
+        </pre></div>        
+        
+        <h2>IR-LED Pattern</h2>
+        You need a Infrared Pattern with 4 Infrared Lights that looks similar to this
+        
+        <div class="imgContainer"><img src="IR-LEDPattern.jpg" align="center"/><div class="imgCaption">Image: IR-LEDPattern.jpg</div></div>
+        
+        You have to write the distances between the IR-LED in your .pm file. Bottom left is your first value, bottom right the second, top right your third and top left is your last value and your ID-Point.
+        
+        <div class="code"><h3>Code: Transforming the virtual object relative to the marker</h3><pre>
+    &lt;LEDModel key="myLEDModel"&gt;
+      &lt;LED&gt;
+      &lt;Position x="0" y="0" z="0"/&gt;
+      &lt;/LED&gt;
+      &lt;LED&gt;
+        &lt;Position x="12.2" y="0" z="0"/&gt;
+      &lt;/LED&gt;
+      &lt;LED&gt;
+        &lt;Position x="12.2" y="15.4" z="0"/&gt;
+      &lt;/LED&gt;
+      &lt;LED&gt;
+        &lt;Position x="0" y="15.4" z="0"/&gt;
+      &lt;/LED&gt;      
+    &lt;/LEDModel&gt;
+        </pre></div>
+
+        Now we can start Instant Vision. The Led´s on your Wiimote should stop to flash and only one blue light should glow. If we look with the cam in the Wiimote to all 4 Infrared Lights we can interact with the teapot.
+
+        <div class="imgContainer"><img src="teapot.jpg" align="center"/><div class="imgCaption">Image: teapot.jpg</div></div>
+            
+        <h2>Tracking with more Pattern</h2>
+        <p>
+        To use more than one Pattern you have to write the ID-Points of all Pattern in your .pm file.
+        </p>
+        
+        <div class="code"><h3>Code: Transforming the virtual object relative to the marker</h3><pre>
+    &lt;HomgPoint3Container key="IDPoint"&gt;
+      &lt;HomgPoint3d w="1" x="0" y="15.4" z="0"/&gt;
+      &lt;HomgPoint3d w="1" x="2" y="15.4" z="0"/&gt;
+      &lt;HomgPoint3d w="1" x="4" y="15.4" z="0"/&gt;
+    &lt;/HomgPoint3Container&gt;
+     
+    &lt;LEDModel key="myLEDModel"&gt;
+      &lt;LED&gt;
+      &lt;Position x="0" y="0" z="0"/&gt;
+      &lt;/LED&gt;
+      &lt;LED&gt;
+        &lt;Position x="12.2" y="0" z="0"/&gt;
+      &lt;/LED&gt;
+      &lt;LED&gt;
+        &lt;Position x="12.2" y="15.4" z="0"/&gt;
+      &lt;/LED&gt;
+      &lt;LED&gt;
+        &lt;Position x="0" y="15.4" z="0"/&gt;
+      &lt;/LED&gt;      
+    &lt;/LEDModel&gt;
+        </pre></div>
+        
+
+    <h2>Use the Buttons of the Wiimote</h2>
+    <p>
+        To use the Buttons of the Wiimote you have to enable dataAttributeSlots and add your DataBase.
+    </p>
+                    <div class="code"><h3>Code: IOSensor</h3><pre>
+        &lt;IOSensor DEF='VisionLib' type='VisionLib' configFile='Tutorial6dofTracking.pm' dataAttributeSlots='true' addDataBases='WiiData1;InstantCamera;'&gt;
+    	    &lt;field accessType='outputOnly' name='InstantCamera_ModelView'     type='SFMatrix4f'/&gt;
+    	    &lt;field accessType='outputOnly' name='InstantCamera_Projection'    type='SFMatrix4f'/&gt;
+            &lt;field accessType='outputOnly' name='InstantCamera_Position'      type='SFVec3f'/&gt;
+    	    &lt;field accessType='outputOnly' name='InstantCamera_Orientation'   type='SFRotation'/&gt;
+            
+            &lt;field accessType='outputOnly' name='WiiData1_out_ButtonAPressed' type='SFString'/&gt;
+        &lt;/IOSensor&gt;
+        </pre></div>
+    <p>
+        Now you can interact with the A Button of your Wiimote.
+    </p>
+    
+    <p>
+        To put something in the Wiimote (Rumble or LED´s)
+    </p>
+        <div class="code"><h3>Code: IOSensor</h3><pre>
+            &lt;IOSensor DEF='VisionLib' type='VisionLib' configFile='Tutorial6dofTracking.pm' dataAttributeSlots='true' addDataBases='WiiData1;InstantCamera;'&gt;
+    	    &lt;field accessType='outputOnly' name='InstantCamera_ModelView'   type='SFMatrix4f'/&gt;
+    	    &lt;field accessType='outputOnly' name='InstantCamera_Projection'  type='SFMatrix4f'/&gt;
+            &lt;field accessType='outputOnly' name='InstantCamera_Position'    type='SFVec3f'/&gt;
+    	    &lt;field accessType='outputOnly' name='InstantCamera_Orientation' type='SFRotation'/&gt;
+            
+            &lt;!--Wiidata Input Slots--&gt;
+            &lt;field accessType='inputOnly' name='WiiData1_in_Rumble' type='SFString'/&gt;
+        &lt;/IOSensor&gt;
+        </pre></div>
+            
+    
+    Files:
+    <ul class="files"><li><a href="Tutorial6dofTracking.x3d">Tutorial6dofTracking.x3d (Example)</a></li><li><a href="Tutorial6dofTracking.pm">Tutorial6dofTracking.pm (Configuration File)</a></li><li><a href="CoordFrame.wrl">CoordFrame.wrl</a></li></ul>
+    </div>
+</div>

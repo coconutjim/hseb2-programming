@@ -1,0 +1,55 @@
+#X3D V3.0 utf8
+
+Engine {
+  jobs [
+    DEF render RenderJob { 
+       windowGroups [
+        WindowGroup {
+          windows [
+            Window {
+              #This window is just for interaction
+              enabled FALSE
+            }
+            ClusterWindow {
+              servers [ "displaypc" "clusterpc1" "clusterpc2" ]
+              size 1024 768
+              balance TRUE
+              showBalancing TRUE
+              hServers 1
+              vServers 1
+            }
+          ]
+        }
+       ]
+    }	
+  ]
+}
+Scene {
+  children [
+    Transform {
+      translation -5 -5 0
+      children [
+        Inline { url [ "tie.wrl" ] }
+      ]
+    }
+    Transform {
+      translation 5 -5 0
+      children [
+        Inline { url [ "tie.wrl" ] }
+      ]
+    }
+    Transform {
+      translation 5 5 0
+      children [
+        Inline { url [ "tie.wrl" ] }
+      ]
+    }
+    Transform {
+      translation -5 5 0
+      children [
+        Inline { url [ "tie.wrl" ] }
+      ]
+    }
+  ]
+}
+

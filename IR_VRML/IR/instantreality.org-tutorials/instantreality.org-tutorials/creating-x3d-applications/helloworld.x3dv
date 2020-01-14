@@ -1,0 +1,9 @@
+#X3D V3.0 utf8
+
+Shape {
+  geometry Text {
+    string "Hello world!"
+  }
+}
+
+

@@ -1,0 +1,205 @@
+#VRML V2.0 utf8
+
+ ?INFO? 
+
+
+DEF IWT1 InverseWorldTransform {
+    children [
+
+       DEF HaareTrafo1 Transform {
+	      #render FALSE
+          children [
+             Shape {
+             appearance MultiPassAppearance {
+			   sortKey 2
+               appearance [
+
+                DEF Haare_Appearance1 Appearance
+                {
+                   faceMode FaceMode {
+                      cullFace "back"
+                      smooth FALSE
+                   }
+                   blendMode DEF blend BlendMode {
+                      srcFactor "src_alpha"
+                      destFactor "one_minus_src_alpha"
+                   }
+                   depthMode DepthMode {
+                      readOnly TRUE
+                      depthFunc "less"
+                   }
+                   texture DEF HaarTex MultiTexture {
+                      texture [
+                         ImageTexture {
+                            url "Textures/TT_Haare_1.tif"
+                            repeatS FALSE
+                            repeatT FALSE
+                         }
+                         ImageTexture {
+                            url "Textures/noiseSpec14.tif"
+                            compression "on"
+                            repeatS FALSE
+                            repeatT FALSE
+                        }
+                      ]
+                   }
+                   shaders [
+                    DEF HaarShader ComposedShader {
+                        #lighting
+                        exposedField SFFloat shiftValue1 0.05
+                        exposedField SFFloat shiftValue2 0.35
+                        exposedField SFFloat shininess1 40
+                        exposedField SFFloat shininess2 100
+                        exposedField SFVec3f ambientColor 0.60 0.52 0.44
+                        exposedField SFVec3f diffuseColor 0.60 0.52 0.44
+                        exposedField SFVec3f specularColor1 0.6 0.6 0.80
+                        exposedField SFVec3f specularColor2 1.0 1.0 1.0
+                        exposedField SFFloat scattering 0.25
+                        #textures
+                        exposedField SFInt32 hairTex 0
+                        exposedField SFInt32 noise 1
+
+                        parts [
+                            ShaderPart {
+                                    type "VERTEX"
+                                    url "shader-Lebacher-Haare-VS.glsl"
+                            }
+                            ShaderPart {
+                                    type "FRAGMENT"
+                                    url "shader-Lebacher-Haare-FS.glsl"
+                            }
+                        ]
+                    }
+                   ]
+                }
+                DEF Haare_Appearance2 Appearance
+                {
+                   faceMode FaceMode {
+                      cullFace "front"
+                      smooth FALSE
+                   }
+                   blendMode USE blend
+                   depthMode DepthMode {
+                      readOnly TRUE
+                      depthFunc "less"
+                   }
+                   texture USE HaarTex
+                   shaders USE HaarShader
+                }
+
+                ]
+                }
+
+                geometry DEF HaareParticleSet1 SortedPrimitiveSet {
+                   upThreshold 0 1 0 -0.4 #-0.7 #0.275 # -0.75
+                   mode "QuadSet"
+                   drawOrder "BackToFront"
+                   size 1 1 1
+				   lowerBound 0.01
+
+                   coord DEF coord1 Coordinate {
+                      point [
+                         0 0 0
+                      ]
+                   }
+                   refPoint DEF refPoint1 Coordinate {
+                      point [
+                         0 0 0
+                      ]
+                   }
+                   normal DEF normal1 Normal {
+                      vector [
+                         0 1 0
+                      ]
+                   }
+                   tangent DEF tangent1 Normal {
+                      vector [
+                         0 1 0
+                      ]
+                   }
+                   texCoord DEF texCoord1 TextureCoordinate {
+                      point [
+                         0 0
+                      ]
+                   }
+                   color DEF color1 Color {
+                      color [
+                         1 1 1
+                      ]
+                   }
+                }
+             }
+          ]
+       }
+
+    ]
+} #InverseWorldTransform
+
+DEF simulation-TIMER1 TimeSensor {
+  cycleInterval 1
+  loop TRUE
+  enabled TRUE # FALSE 
+}
+
+
+DEF mss1 CantileverBeamSystem {
+    speed 0.5
+    maxStepTime 0.02
+    #minStepsPerFrame 1
+    #maxStepsPerFrame 1
+    localCoordSystem FALSE
+
+    collisionDomainType [  ?HAIRCOLLSPHERECOUNT?  ]
+    collisionDomainParam [
+		?HAIRCOLLSPHERES?
+    ]
+    gravity  ?HAIRGRAVITY?  
+    externalForce 0 0 0
+    minBend  ?HAIRBEND?  
+    maxBend  ?HAIRBEND?  
+    
+    staticFriction 0.5
+    slidingFriction 0.5
+    airFriction 1.0
+    massRadius 0.5
+
+    coord [
+    ?HAIRVERTICES? 
+    ]
+    
+    index [
+    ?DIRECTHAIRQUADS? 
+    ]
+
+	normal [ 0 0 0 ]
+	
+	color [ 
+	?HAIRCOLORS?  
+	]
+		
+}
+
+ROUTE simulation-TIMER1.time
+   TO mss1.set_time
+
+ROUTE mss1.refPoint
+   TO refPoint1.set_point
+ROUTE mss1.coord_changed
+   TO coord1.set_point
+
+ROUTE mss1.tangent
+   TO tangent1.set_vector
+ROUTE mss1.normal
+   TO normal1.set_vector
+
+ROUTE mss1.texCoord
+   TO texCoord1.set_point
+ROUTE mss1.color
+   TO color1.set_color
+
+ROUTE mss1.index
+   TO HaareParticleSet1.index
+
+#ROUTE mss1.occluderSpheres
+#   TO HaareParticleSet1.occluderSpheres
+

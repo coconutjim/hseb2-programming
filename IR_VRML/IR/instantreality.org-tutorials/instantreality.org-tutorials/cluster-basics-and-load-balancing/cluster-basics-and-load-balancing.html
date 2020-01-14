@@ -1,0 +1,112 @@
+<div id="tutorialContainer">
+  <h2 class="title">Cluster Basics and Load Balancing</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        engine,
+        distribution,
+        cluster<br/><strong>Author(s): </strong>Marcus Roth,
+        Patrick Riess<br/><strong>Date: </strong>2007-11-28</p>
+  <p><strong>Summary: </strong>
+    This tutorial gives an overview over cluster topologies in computer graphics. It continues with the often ignored topic of load balancing, as 
+    clusters are mostly used to setup multi display environments without a real distribution of load. In InstantReality the activation of load 
+    balancing is very easy. You will finally get a basic introduction on how to setup your network and start cluster servers to be ready to use 
+    your cluster. Different setups will be explained in the following tutorials of this Clustering section.
+    </p>
+  <div id="content">
+        <h2>Preconditions for this tutorial</h2>
+        <p> 
+        There are no preconditions.
+        </p>
+        <h2>Topologies</h2>
+        <p>
+        To get expensive computations faster, a common approach nowadays is establishing a cluster of more or less convenient hardware, let's say PCs. In computer 
+        graphics we can imagine several configurations using a cluster of PCs as you can see in following scenarios.
+        </p>
+        <p>
+        Most common systems look like the illustration below, several PCs are connected over a network to render and display a virtual scene together on multiple displays. 
+        The advantage is a high resolution but as one PC is responsible for exactly one display the system is only as fast as the PC which has the highest render load.
+        </p>
+        <div class="imgContainer"><img src="net1a.png" align="center"/><div class="imgCaption">Image: Multi display cluster configuration</div></div>
+        <p>
+        To render complex geometries a configuration shown below is possible. The scene has to be distributed to PCs in a cluster, they compute their task 
+        and send the results back to the PC which composes and displays the final image. In this case we use a cluster to render complex scenes 
+        but we lose the high resolution of a multi display system.
+        </p>
+        <div class="imgContainer"><img src="net2a.png" align="center"/><div class="imgCaption">Image: Single display cluster configuration</div></div>
+        <p>
+        If we like to benefit of both advantages, i.e. high resolution and effective rendering of complex models, we need a flexible system. In this system we have 
+        several PCs in a network where some are playing a role as display and others that are not. This topology can also be used as stereo setup for instance. 
+        </p>
+        <div class="imgContainer"><img src="net3a.png" align="center"/><div class="imgCaption">Image: Multi display configuration with load balancing</div></div>
+        <p>
+        The InstantReality system provides the concept of using an arbitrary number of displays in a specified alignment together with an arbitrary number of PCs. 
+        Those can be connected to a display or not. This flexible concept allows each of the above basic setups. But it can also be used to create more complex 
+        configurations like cave environments with displays which are orthogonal to each other or even displays in an arbitrary angle. To see how simple a cluster 
+        is configured please read the following tutorials in the Clustering section. But you should finish this one for load balancing aspects and basic IR cluster 
+        setup information.
+        </p>
+        
+        
+        <h2>Load balancing</h2>
+        <p> 
+        In a cluster, PCs should share the overall load equally between each other to be effective and to get the best performance. In computer graphics all of them 
+        generate an equally cost intensive part of the scene. A proper and fast precomputation of the scene takes place before distributing parts of it to the PCs. 
+        Finally every rendered section which belongs to another display PC is copied over the network to its target. This approach offers arbitrary setups like 
+        single display and multi display systems, both as mono or stereo solution with an effective balancing of the upcoming load. 
+        </p>
+        <p>
+        There are several approaches to balance the load of 3D scenes. Two big categories are image space distribution and geometry distribution. 
+        </p>
+          <h2>Image space balancing (Sort-First)</h2>
+          <p> 
+          In image space distributed balancing, also called <i>Sort-First</i>, a precomputation takes place which transforms only bounding boxes of objects 
+          into camera space to get the approximate position of geometries on the displays. By this information a cost function is estimated. This is based on 
+          transformation costs as well as the rasterization costs and therefore takes the number of vertices and size of rendered bounding boxes into account. 
+          </p>
+          <p>
+          Now that each PC has it's estimated costs, parts of viewports are distributed to render on another PC which has only low costs. The resulting rendered 
+          parts are sent back to the display PC over network. If you want to learn more about the implemented cost estimation and load balancing algorithms, 
+          please check the <i>Technical Details</i> section at the end of this tutorial.
+          </p>
+          <div class="imgContainer"><img src="loadbalancingsf.png" align="center"/><div class="imgCaption">Image: Image space based load balancing</div></div>
+          <h2>Geometry based balancing (Sort-Last)</h2>
+          <p> 
+          In this kind of load balancing, parts of the scenegraph are distributed. That means geometries are distributed between PCs and after rendering the pixel data 
+          including the depth information is copied back to the display PC. On the display PC all received images are composed to one image again by involving 
+          the depth. This approach 
+          shouldn't be used on multi display systems for one reason. Geometries can be bigger than a single display resolution, so it can't be rendered by only one 
+          graphics card as it doesn't fit to the framebuffer. But on a single display cluster system it is very fast and a better choice than <i>Sort-First</i>. 
+          </p>
+          <div class="imgContainer"><img src="loadbalancingsl.png" align="center"/><div class="imgCaption">Image: Geometry based load balancing</div></div>          
+          <p class="important"><b>Important: </b>To use load balancing effectively it is very important to have 1000Mbit network, because pixel data has to be sent over network. Otherwise you won't have the advantages of load balancing.</p>
+        <h2>Network configuration</h2>
+        <p> 
+        Setup your network. Each host must be reachable by name from each other host. Try this with <tt>ping host</tt>. If you have a local network 
+        (no access to the internet), you have to define a dummy gateway eg. 192.168.1.254 if your network uses the IP-Range 192.168.1.0 - 192.168.1.253. 
+        On Linux, if your /etc/hosts file contains a line like <tt>127.0.0.1 myHostname</tt> where myHostname is not localhost, then remove this line.
+        </p>
+        <h2>InstantPlayer and InstantCluster</h2>
+        <p> 
+        Doing cluster rendering with the InstantReality framework you have one instance of the InstantPlayer running your X3D application. This 
+        application provides the user interface, loads the x3d file including the engine configuration and does all the simulation for your scene. To be 
+        able to produce a graphics output on another host, you have to run an InstantCluster on this host. Start the "InstantCluster" entry in your 
+        menu or application directory or use an autostart mechanism to run it all the time. It only needs resources while rendering and otherwise 
+        sleeps and waits for connections.
+        </p>        
+        <h2>Technical Details</h2>
+        <p>
+        For technical details about the algorithms of the load balancing and some benchmarks I suggest to have a look into the paper 
+        <a href="C29-full.pdf">Load Balancing on Cluster-Based Multi Projector Display Systems</a>. 
+        </p>
+        <p>
+        With sort-first approach, i.e. image space 
+        based distribution, we got a speedup of 3 to 6 for a single display setup and 16 PCs in a cluster. On multi display systems with 48 PCs (24 PCs 
+        for displaying in 6 x 4 alignment) animations were 3 to 4 times faster.
+        </p>
+        <p>
+        Sort-last balancing with a model of Standford's David Statue and 56 millions of polygons achieved a speedup of 10 with 16 PCs in the cluster and 
+        even over 20 with more than 32 PCs. For the composition of image parts it uses a new pipeline approach.
+        </p>
+    </div>
+</div>

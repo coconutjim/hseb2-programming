@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Creating X3D Applications</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Creating X3D Applications</h2>
+  <p class="description"><strong>Keywords:</strong><br/>IRViewer<br/><strong>Author(s): </strong>Johannes Behr<br/><strong>Date: </strong>2007-11-10</p>
+  <p><strong>Summary: </strong>
+	This tutorial is the first in a group of tutorials which tries to teach how
+to develop VR/AR applications with the InstantReality Framework. This tutorial
+tries to explain some basics but is mainly a starting point to get you pushed
+into the right direction. These tutorials are no tutorials on VR/AR in general or
+developer tutorials for framework internals. 
+    </p>
+  <div id="content">
+		<h2>Relation to X3D</h2>
+		<p>
+One goal of the Instant Player design was to make it really easy to write immersive
+VR and AR applications. 
+One basic idea was, not to use a single GUI-Tool or method but a
+software abstraction layer which would allow us to define rich, dynamic and
+highly interactive content.  
+Since there is no ISO/ANSI/whatever standard for such an VR/AR
+application-interface, we tried to adapt something which is well known,
+practical and very close to our domain: X3D. 
+</p>
+ <div class="imgContainer"><img src="graphic_vrml_x3d_avalon.jpg" align="center"/><div class="imgCaption">Image: X3D as feature and node subset of Instant Player</div></div>
+<p>
+The <a href="http://www.Web3d.org">X3D</a> standard is a royalty-free ISO standard file format and run-time architecture to represent and communicate 3D scenes and objects using XML. The standard itself is a successor of the VRML97 ISO standard.  We utilized and extended this standard to fit the requirements we had from the VR/AR domain. This way our nodes and features are really a superset of X3D/VRML, and every X3D application is a valid Instant Player application. 
+</p>
+
+<h2>X3D Sources to read</h2> 
+<p>
+To get started you have at least to understand the basic concepts of VRML/X3D.
+The official web-page has the <a href="http://www.Web3d.org">X3D spec</a> online
+which is not what you would like to read in the beginning. The 
+<a href="http://www.Web3d.org/x3d">developer section</a> on the Web3d page holds
+some interesting links to tutorials and software tools. If you prefer some text
+books you should check out the <a href="http://x3dgraphics.com/">X3D Book</a>
+from Don Brutzman and Leonard Daly. Sometimes you can find some interesting, 
+possibly used and really cheap VRML books, like the "VRML Handbook" or e.g. 
+"VRML - 3D-Welten im Internet".
+</p>
+
+<h2>X3D Basic Elements</h2> 
+After reading the X3D information you should be familiar with the concepts of
+Nodes, Fields, InSlots, OutSlots and Routes. 
+Inside of the Instant Player system really everything (from the application programmers 
+point of view) is described by nodes and node relations. In general a node is a
+component which is registered in a single namespace. The node has normally various 
+relations to other node instances. Some relations describe the hierarchy of your
+scene (e.g. parents/ children), and other control mechanisms of the event flow 
+(e.g. routes). 
+
+VRML97 uses all those features in a single encoding with 54 nodes.
+X3D has more than 100 nodes and 3 encodings, whereas 
+Instant Player has more than 400 nodes, 3 encodings and some further extensions.
+      
+<h2>X3D Conformance</h2>
+<p>
+Most VRML/X3D files should work right away. If you have some files that do not 
+perform right, please visit the <a href="http://forum.instantreality.org/">forum</a> 
+or write us a mail including the file and/or a short description. 
+</p>
+<p>
+However, there are some known bugs and not yet implemented VRML/X3D features. The 
+<a href="http://www.instantreality.org/documentation">online documentation</a> should
+list the state of every implementation.
+</p>
+
+<h2>Growing number of Nodes and Components</h2>
+<p>
+VRML was a static ISO standard which only defined a fixed set of 54 nodes. X3D
+almost doubled this number in the first version and indroduced Components and
+Profiles to group and organize all nodes. X3D, in contrast to VRML, was designed
+to be extensible and therefore people keep revising the standard or build
+application specific node-sets like we did.
+If you look at the documentation you can see how the node-sets were growing over 
+time from VRML 2.0, X3D 3.0, X3D 3.1 up to X3D 3.2. In addition to the nodes new
+components (e.g. for shaders) where also introduced.
+</p>
+
+<h2>Mimetypes and encodings</h2>
+<p>
+X3D supports not just a single data encoding but three in order to fulfill different
+application requirements. First of all there is an XML based encoding, which is easy to read
+and write for humans as well as for computers. 
+</p>
+
+<div class="code"><h3>Code: XML Encoding, mimetype: model/x3d+xml, file-suffix: x3d</h3><pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;X3D profile='Immersive'&gt;
+  &lt;Scene&gt;
+    &lt;Shape&gt;
+      &lt;Text string="Hello world!" /&gt;
+    &lt;/Shape&gt;
+  &lt;/Scene&gt;
+&lt;/X3D&gt;</pre></div>
+
+<p>
+The VRML syntax has some disadvantages concerning parsing and the like. 
+However for historical reasons the VRML encoding
+is still supported in X3D as the so-called classic encoding:
+</p>
+    
+<div class="code"><h3>Code: Classic Encoding, mimetype: model/x3d+vrml, file-suffix: x3dv,wrl</h3><pre>
+#X3D 3.0 utf8
+Shape {
+	geometry <a href='/documentation/nodetype/Text'>Text</a> { 
+		string "Hello, World"
+	}
+}
+</pre></div>
+
+<p>
+The binary format can be loaded very efficiently but is is not readable by human
+beings at all (well I know somebody that can read parts of it but this is
+another story).
+</p>
+    
+<div class="code"><h3>Code: Binary Encoding, mimetype: model/x3d+x3db, file-suffix: x3db</h3><pre>
+0000000 00e0 0100 7800 02cf 7378 2864 7468 7074
+0000010 2f3a 772f 7777 772e 2e33 726f 2f67 3032
+0000020 3130 582f 4c4d 6353 6568 616d 692d 736e
+0000030 6174 636e f065 023c 3358 7844 7006 6f72
+0000040 6966 656c 4643 6c75 786c 7606 7265 6973
+0000050 6e6f 3342 302e 817b 1881 6f6e 614e 656d
+0000060 7073 6361 5365 6863 6d65 4c61 636f 7461
+0000070 6f69 086e 6826 7474 3a70 2f2f 7777 2e77
+0000080 6577 3362 2e64 726f 2f67 7073 6365 6669
+0000090 6369 7461 6f69 736e 782f 6433 332d 302e
+00000a0 782e 6473 3cf0 5304 6563 656e 043c 6853
+00000b0 7061 7c65 5403 7865 7874 7305 7274 6e69
+00000c0 0867 2205 6548 6c6c 206f 6f77 6c72 2164
+00000d0 ff22 ffff                              
+</pre></div>
+
+<p>
+All those data files can be gzip-compressed and the system loader can
+handle the compression automatically. The loader/writer framework supports all
+three encodings and VRML 2.0 equally well and in addition tools (e.g. aopt) to
+convert between these formats. You can not mix different encodings in the same
+file but you are free to mix the encodings in a single application (e.g. having
+a foo.wrl inline in you bar.x3d world) .
+</p>
+
+<p>
+Right now we are using the XML and VRML encoding through-out the tutorials. 
+But we will include some translation mechanisms later on.
+</p>
+
+		
+    Files:
+    <ul class="files"><li><a href="helloworld.x3d">helloworld.x3d</a></li><li><a href="helloworld.x3db">helloworld.x3db</a></li><li><a href="helloworld.x3dv">helloworld.x3dv</a></li></ul>    
+	</div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D>
+    <Engine DEF='engine'>
+        <TimerJob DEF='timer'/>
+        <SynchronizeJob DEF='synchronize'/>
+        <RenderJob DEF='render'>
+            <WindowGroup>
+                <Window position='10 50' size='640,480' fullScreen='false' />
+            </WindowGroup>
+        </RenderJob>
+    </Engine>
+    
+    <Scene DEF='scene'>
+        <IOSensor DEF='VisionLib' type='VisionLib' configFile='TutorialMarkerTracking_TwoMarkers.pm'>
+            <field accessType='outputOnly' name='VideoSourceImage' type='SFImage'/>
+            <field accessType='outputOnly' name='TrackedObject1Camera_ModelView' type='SFMatrix4f'/>
+            <field accessType='outputOnly' name='TrackedObject1Camera_FOV_horizontal' type='SFFloat'/>
+            <field accessType='outputOnly' name='TrackedObject1Camera_FOV_vertical' type='SFFloat'/>
+            <field accessType='outputOnly' name='TrackedObject1Camera_PrincipalPoint' type='SFVec2f'/>
+            <field accessType='outputOnly' name='TrackedObject1Camera_CAM_aspect' type='SFFloat'/>
+            <field accessType='outputOnly' name='TrackedObject2Camera_ModelView' type='SFMatrix4f'/>
+        </IOSensor>
+
+        <PerspectiveViewpoint DEF='vp' position='0 0 0' fovMode='VERTICAL'/>
+
+        <PolygonBackground fixedImageSize='640 480' mode='VERTICAL'>
+            <Appearance>
+                <PixelTexture2D DEF='tex' autoScale='false'/>
+                <TextureTransform scale='1 -1'/>
+            </Appearance>
+        </PolygonBackground>
+        
+        <MatrixTransform DEF='TransfObj1RelativeToCamPosition'>
+            <Transform DEF='transfObj1RelativeToMarker' translation='2.5 2.5 0' rotation='1 0 0 1.57'>
+                <Shape>
+                    <Appearance>
+                        <Material emissiveColor='1 0.5 0' />
+                    </Appearance>
+                    <Teapot size='5 5 5' />
+                </Shape>
+            </Transform>
+        </MatrixTransform>
+    
+        <MatrixTransform DEF='TransfObj2RelativeToCamPosition'>
+            <Transform DEF='transfObj2RelativeToMarker' translation='2.5 2.5 0' rotation='1 0 0 1.57'>
+                <Shape>
+                    <Appearance>
+                        <Material emissiveColor='0 0.5 1' />
+                    </Appearance>
+                    <Teapot size='5 5 5' />
+                </Shape>
+            </Transform>
+        </MatrixTransform>
+
+        <ROUTE fromNode='VisionLib' fromField='VideoSourceImage' toNode='tex' toField='image'/>
+        <ROUTE fromNode='VisionLib' fromField='TrackedObject1Camera_PrincipalPoint' toNode='vp' toField='principalPoint'/>
+        <ROUTE fromNode='VisionLib' fromField='TrackedObject1Camera_FOV_vertical' toNode='vp' toField='fieldOfView'/>
+        <ROUTE fromNode='VisionLib' fromField='TrackedObject1Camera_CAM_aspect' toNode='vp' toField='aspect'/>
+        <ROUTE fromNode='VisionLib' fromField='TrackedObject1Camera_ModelView' toNode='TransfObj1RelativeToCamPosition' toField='matrix'/>
+        <ROUTE fromNode='VisionLib' fromField='TrackedObject2Camera_ModelView' toNode='TransfObj2RelativeToCamPosition' toField='matrix'/>
+    </Scene>
+</X3D>

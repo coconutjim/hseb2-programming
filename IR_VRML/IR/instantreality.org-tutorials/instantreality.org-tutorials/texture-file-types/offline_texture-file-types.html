@@ -1,0 +1,559 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Texture file types</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Texture file types</h2>
+  <p class="description"><strong>Keywords:</strong><br/>BMP,
+        DDS,
+        DXT1a,
+        DXT1c,
+        DXT3,
+        DXT5,
+        EXR,
+        GIF,
+        HRD,
+        JP2,
+        JPG,
+        MTD,
+        NRRD,
+        PNG,
+        PNM,
+        PSD,
+        SGI,
+        TGA,
+        TIF,
+        Advantages,
+        Compression algorithm,
+        Disadvantages,
+        File extension,
+        Magic-Word,
+        MIME-Type<br/><strong>Author(s): </strong>Jürgen Müller<br/><strong>Date: </strong>2007-08-14</p>
+  <p><strong>Summary: </strong>
+      This tutorial show you the advantages and disadvantages from the different texture file types, which are supportet by instantPlayer.
+   </p>
+  <div id="content">
+      <h2>General</h2>
+      <p>
+         It is important to use not only one texture format, because they are not all perfect for every situation.
+         In some cases, it is more important to have a higher performance, in some other it has to be nearly realistic.
+         But if you use large BMP-Files for example to make your scene look good, you maybe become great problems because the performens goes down.
+         Nor is it reasonable to have a high detailed texture at a great distance from the viewer.
+         In this case you get better, if you use a format that supports MipMaps.
+         But in detail, I show you all things of interest in this tutorial.
+         As next, I told you, why I'd choosed the following topics, to present you the formats.
+      </p>
+      <h2>File Extensions</h2>
+      <p>
+         I will show you all extensions of each format.
+         So, you will be able to know the file format of the file you currently have, only by looking at the extension.
+      </p>
+      <h2>Magic-Word</h2>
+      <p>
+         But, if the file maybe does not have an extension, you are able to detect the format, by looking inside of it.
+         Mostly the first four bytes are containing the so called "Magic-Word", which names the image format of the current file.
+         To read it, you have to convert these four bytes into ASCII, for example using an hex editor.
+      </p>
+      <h2>MIME-Types</h2>
+      <p>
+         The "Multipurpose Internet Mail Extensions" is a standard that extends the support from e-mails.
+         If a texture format has such one, you can identify it, only by looking on that extension.
+      </p>
+      <h2>Color Modes</h2>
+      <p>
+         One possibility to reduce the size of an image is to reduce the color depth.
+         In some cases you don't recognize the difference but save a lot of memory space.
+         But not all formats support any color depth, so I list you the supported depths at each format.
+      </p>
+      <h2>Compression Algorithm</h2>
+      <p>
+         The most important way to reduce the size is to compress the file with an compression algorithm.
+         But there are a lot of different algorithms and with different advantages and disadvantages.
+         For example there are lossy and lossless compression algorithms.
+         If it is unacceptable to reduce the quality you have to take a lossless algorithm because the quality is still the same, but the size can be reduced up to 30%.
+         But if performance is the important point, you drive much better, using lossy compressions, because they can produce much smaller files.
+      </p>
+      <h2>Supporting Tools</h2>
+      <p>
+         Under this caption I give you a list, of some well known (if there any) tool, that can handle the actual file format.
+      </p>
+      <h2>Advantages / Disadvantages</h2>
+      <p>
+         And last but not least, I list some advantages and disadvantages of the formats for an quick overview of the format.
+      </p>
+
+      
+      
+      <h2>BMP</h2>
+      <h2>General Informations</h2>
+      <p>
+         The "Windows Bitmap" format was introduced by the "Microsoft Corporation".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.bm (very unusual)</li><li>.bmp</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>BM</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>image/bmp</li><li>image/x-bmp</li><li>image/x-ms-bmp (unofficial)</li><li>image/x-windows-bmp (unofficial)</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>1 bit</li><li>4 bit</li><li>8 bit</li><li>16 bit</li><li>24 bit</li><li>32 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>None</li><li>Run-length encoding</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Corel Paint Shop Pro</li><li>Krita</li><li>Microsoft Paint</li><li>Paint.NET</li><li>The GIMP</li><li>Ulead PhotoImpact</li><li>... and many more.</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>Lossless</li><li>Meta-data supported</li><li>Supported by web-browser</li><li>Transparency supported</li><li>Widely adopted</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>Low uncompression rate</li><li>No animations supported</li><li>No multipages supported</li></ul>
+      <div class="imgContainer"><img src="test_image.bmp" align="center"/><div class="imgCaption">Image: An example of an BMP image.</div></div>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.bmp">test_image.bmp</a></li></ul>
+      
+      
+      
+      <h2>DDS</h2>
+      <h2>General Informations</h2>
+      <p>
+         The "DirectDraw Surface" format was introduced by the "Microsoft Corporation".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.dds</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>DDS</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>None</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>4 bit (integer)</li><li>8 bit (integer)</li><li>16 bit (integer)</li><li>16 bit (floating-point)</li><li>32 bit (floating-point)</li><li>64 bit (floating-point)</li><li>128 bit (floating-point)</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>None</li><li>DXGI_FORMAT_BC1 (DXT1c)</li><li>DXGI_FORMAT_BC1 (DXT1a)</li><li>DXGI_FORMAT_BC2 (DXT3)</li><li>DXGI_FORMAT_BC3 (DXT5)</li><li><i>DXGI_FORMAT_BC4 (ATI1N)</i> [not supported by instantPlayer]</li><li><i>DXGI_FORMAT_BC5 (ATI2N / 3Dc)</i> [not supported by instantPlayer]</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop (with plug-in)</li><li>Corel Paint Shop Pro (with plug-in)</li><li>DirectX <a href='/documentation/nodetype/Texture'>Texture</a> Editor (partial)</li><li>NVIDIA DDS Utilities (partial)</li><li>NVIDIA <a href='/documentation/nodetype/Texture'>Texture</a> Tools 2 Alpha</li><li>Paint.NET (partial)</li><li>The Compressionator (ATI)</li><li>The GIMP (with plug-in)</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>Known image size</li><li>Meta-data supported</li><li>Mipmaps supported</li><li>Multipage supported</li><li>Native execution from the GPU</li><li>Normalmap supported</li><li>Transparency supported</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>No animations supported</li></ul>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.dds">test_image.dds</a></li><li><a href="test_image-bc1a.dds">test_image-bc1a.dds</a></li><li><a href="test_image-bc1c.dds">test_image-bc1c.dds</a></li><li><a href="test_image-bc2.dds">test_image-bc2.dds</a></li><li><a href="test_image-bc3.dds">test_image-bc3.dds</a></li><li><a href="test_image-bc4.dds">test_image-bc4.dds</a></li><li><a href="test_image-bc5.dds">test_image-bc5.dds</a></li></ul>
+
+
+
+    <h2>EXR</h2>
+      <p>
+         The "OpenEXR" format was introduced by "Industrial <a href='/documentation/nodetype/Light'>Light</a> &amp; Magic".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.exr</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>None</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>None</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>16 bit (floating-point)</li><li>32 bit (floating-point)</li><li>32 bit (integer)</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>None</li><li>Run length encoding</li><li>ZIP (per scanline)</li><li>ZIP (16 scanline blocks)</li><li>PIZ (wavelet compression)</li><li>PXR24 (24 bit data conversion then zipped compression)</li><li>B44</li><li>...easily addition of new compression methods</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Krita</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>EXIF Header</li><li>Meta-data supported</li><li>Mipmappes supported</li><li>Transparency supported</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>No animations supported</li><li>No multipages supported</li><li>Not yet widely adopted</li></ul>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.exr">test_image.exr</a></li></ul>
+
+
+
+      <h2>GIF</h2>
+      <p>
+         The "Graphics Interchange Format" was introduced by "CompuServe".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.gif</li></ul>
+      <h2>Magic-Word</h2>
+      <p>
+         The number specifies the version of gif.
+      </p>
+      <ul><li>GIF87a</li><li>GIF89a</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>image/gif</li><li>image/giff</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>1 bit</li><li>2 bit</li><li>3 bit</li><li>4 bit</li><li>5 bit</li><li>6 bit</li><li>7 bit</li><li>8 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>Lempel-Ziv-Welch-Algorithmus</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Corel Paint Shop Pro</li><li>Krita</li><li>Microsoft Paint</li><li>Paint.NET</li><li>The GIMP</li><li>Ulead PhotoImpact</li><li>... and many more.</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>Animation supported</li><li>Lossless (till 8 bit color depth)</li><li>Meta-data supported</li><li>Multipage supported</li><li>Supported by web-browser</li><li>Transparency supported</li><li>Widely adopted</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>Only 1 bit alpha value</li><li>Only up to 8 bit color depth</li></ul>
+      <div class="imgContainer"><img src="test_image.gif" align="center"/><div class="imgCaption">Image: An example of an GIF image.</div></div>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.gif">test_image.gif</a></li></ul>
+
+
+
+    <h2>HDR</h2>
+      <p>
+         The "High Dynamic Range" format was introduced by "???".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.hdr</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>#?RADIANCE.#</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>None</li><li>Run length encoding</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>24 bit</li><li>32 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>None</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Krita</li><li>Ulead PhotoImpact</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>EXIF Header</li><li>Meta-data supported</li><li>Photometrically correct color save</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>No animations supported</li><li>No multipages supported</li><li>No transparency supported</li><li>Not yet widely adopted</li></ul>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.hdr">test_image.hdr</a></li></ul>
+
+
+
+      <h2>JPEG</h2>
+      <p>
+         The "Joint Photographic Experts Group" format was introduced by the "Joint Photographic Experts Group".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.jpg</li><li>.jpeg</li><li>.jpe</li><li>.jfif</li><li>.jfi</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>JFIF</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>image/jpeg</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>8 bit (greyscale)</li><li>12 bit</li><li>24 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <p>
+          The compression runs in multiple pathes:
+      </p>
+      <ul><li>Color space transformation, mostly from RGB space to YCbCr space (lossless).</li><li>Chroma subsampling</li><li>Block splitting into 8×8-Blocks</li><li>Discrete cosine transform of the blocks</li><li>Quantization</li><li>Entropy coding</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Corel Paint Shop Pro</li><li>Krita</li><li>Microsoft Paint</li><li>Paint.NET</li><li>The GIMP</li><li>Ulead PhotoImpact</li><li>... and many more.</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>EXIF Header</li><li>Meta-data supported</li><li>Supported by web-browser</li><li>Widely adopted</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>No animations supported</li><li>No multipages supported</li><li>No transparency supported</li></ul>
+      <div class="imgContainer"><img src="test_image.jpg" align="center"/><div class="imgCaption">Image: An example of an JPEG image.</div></div>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.jpg">test_image.jpg</a></li></ul>
+
+
+
+    <h2>JPEG2000</h2>
+      <p>
+         The "Joint Photographic Experts <a href='/documentation/nodetype/Group'>Group</a> 2000" format was introduced by the "Joint Photographic Experts Group".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.jp2</li><li>.jpx</li><li>.j2c</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>jp2</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>image/jp2</li><li>image/jpeg2000</li><li>image/jpeg2000-image</li><li>image/x-jpeg2000-image</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>8 bit (greyscale)</li><li>12 bit</li><li>24 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <p>
+          The compression runs in multiple steps.
+      </p>
+      <ul><li>Tiling</li><li>Multiple component transform</li><li>Wavelet transform</li><li>Scalar quantization</li><li>Region of interest</li><li>Entropy coding</li><li>Rate allocation</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Corel Paint Shop Pro</li><li>Krita</li><li>Ulead PhotoImpact</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>Animation supported</li><li>Encoding regions of particular interest</li><li>EXIF Header</li><li>Meta-data supported</li><li>Multipage supported</li><li>Transparency supported</li></ul>
+      <h2>Disadvantages</h2>
+         Not yet widely adopted
+      <ul/>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.jp2">test_image.jp2</a></li></ul>
+
+
+
+    <h2>MTD</h2>
+      <p>
+         The "Multi <a href='/documentation/nodetype/Texture'>Texture</a> Data" format was introduced by a cooperation of nine research institutes into "OpenSG".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.mtd</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>None</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>None</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>16 bit</li><li>24 bit</li><li>32 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>None</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>OpenSG</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>Animations supported</li><li>Meta-data supported</li><li>Mipmaps supported</li><li>Multipages supported</li><li>Transparency supported</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>Not yet widely adopted</li></ul>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.mtd">test_image.mtd</a></li></ul>
+
+
+
+    <h2>NRRD</h2>
+      <p>
+         The "Nearly Raw Raster Data" format was introduced by "Gordon Kindlmann".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.nrrd</li><li>.nhdr</li></ul>
+      <h2>Magic-Word</h2>
+      <p>
+         The number specifies the version of nrrd.
+      </p>
+      <ul><li>NRRD0001</li><li>NRRD0002</li><li>NRRD0003</li><li>NRRD0004</li><li>NRRD0005</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>None</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>24 bit</li><li>32 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>None</li><li>gzip</li><li>bzip2</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li><a href="http://teem.sourceforge.net/">Teem</a></li></ul>
+      <h2>Advantages (from [FLY07])</h2>
+      <ul><li>Simple ascii header and raw image data</li><li>Implemented either in single combined .nrdd file or a .nhdr header file pointing to 1 or more data files</li><li>Same format includes well defined way to handle complex data</li><li>Handles all critical metadata including spatial calibration, axis definitions (including world axes and image axes)</li><li>Can handle voxels considered as single points or small cubic volumes</li><li>Can handle arbitrary key, value tags to record additional information</li><li>Header can contain comment lines</li><li>Open source cross-platform C IO library available to link into your applications</li><li>Separate header files can be used to turn almost any 'raw' image file format into a Nrrd compatible file</li><li>Medical imaging projects such as NA-MIC have adopted nrrd format and integrated it into ITK.</li></ul>
+      <h2>Disadvantages (from [FLY07])</h2>
+      <ul><li>Not yet widely adopted</li><li>No java wrapping of C library</li><li>Detached headers can lead to file clutter and possibly header info becoming separated from data file/s</li><li>Header is defined as ascii rather than UTF-8 so notes with accents etc. cannot officially be stored</li><li>Header is line based so more difficult to embed complex metadata.</li></ul>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.nrrd">test_image.nrrd</a></li></ul>
+
+
+
+    <h2>PNG</h2>
+      <p>
+         The "Portable <a href='/documentation/nodetype/Network'>Network</a> Graphics" format was introduced by the "World Wide <a href='/documentation/nodetype/Web'>Web</a> Consortium".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.png</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>.PNG</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>image/png</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>1 bit</li><li>2 bit</li><li>4 bit</li><li>8 bit</li><li>16 bit</li><li>24 bit</li><li>32 bit</li><li>48 bit</li><li>64 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>None</li><li>DEFLATE</li><li>ZIP</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Corel Paint Shop Pro</li><li>Krita</li><li>Microsoft Paint</li><li>Paint.NET</li><li>The GIMP</li><li>Ulead PhotoImpact</li><li>... and many more.</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>Meta-data supported</li><li>Supported by web-browser</li><li>Transparency support (alpha channel, 8- or 16-bit)</li><li>Widely adopted</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>No animations supported</li><li>No multipages supported</li></ul>
+      <div class="imgContainer"><img src="test_image.png" align="center"/><div class="imgCaption">Image: An example of an PNG image.</div></div>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.png">test_image.png</a></li></ul>
+
+
+
+    <h2>PNM</h2>
+      <p>
+         The "Portable AnyMap" format was introduced by "Sun Microsystems".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.pbm</li><li>.pgm</li><li>.pnm</li><li>.ppm</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>P1 (PBM)</li><li>P2 (PGM)</li><li>P3 (PPM)</li><li>P4 (PBM)</li><li>P5 (PGM)</li><li>P6 (PPM)</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>image/x-portable-pixmap (unofficial)</li><li>image/x-portable-graymap (unofficial)</li><li>image/x-portable-bitmap (unofficial)</li><li>image/x-portable-anymap (unofficial)</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>1 bit (PBM)</li><li>8 bit (PGM)</li><li>24 bit (PPM)</li></ul>
+      <h2>Compression algorithm</h2>
+      <p>
+         There is no compression algorithm in a portable anymap.
+      </p>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Corel Paint Shop Pro</li><li>Krita</li><li>The GIMP</li><li>Ulead PhotoImpact</li><li>... and many more.</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>Meta-data supported</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>No animations supported</li><li>No multipages supported</li><li>No transparency supported</li></ul>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.pnm">test_image.pnm</a></li></ul>
+
+
+
+    <h2>PSD</h2>
+      <p>
+         The "Photoshop Document" format was introduced by "Adobe Systems".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.psd</li><li>.psb</li><li>.pdd</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>BPS</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>image/psd</li><li>image/photoshop</li><li>image/x-photoshop</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>1 bit</li><li>2 bit</li><li>4 bit</li><li>8 bit</li><li>16 bit</li><li>24 bit</li><li>32 bit</li><li>64 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>None</li><li>Run-length encoding</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Corel Paint Shop Pro</li><li>Krita (partial)</li><li>The GIMP</li><li>Ulead PhotoImpact</li><li>... and many more.</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>Animation supported</li><li>Meta-data supported</li><li>Transparency supported</li><li>Widely adopted</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>No multipages supported</li></ul>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.psd">test_image.psd</a></li></ul>
+
+
+
+    <h2>SGI</h2>
+      <p>
+         The "Silicon Graphics Image" format was introduced by the "Silicon Graphics Inorporation".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.sgi</li><li>.rgb</li><li>.rgba</li><li>.int</li><li>.inta</li><li>.bw</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>None</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>image/sgi</li><li>image/x-sgi</li><li>image/x-sgi-rgba</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>8 bit (black and white)</li><li>16 bit (white and alpha)</li><li>24 bit (3 colour channels)</li><li>32 bit (3 colour channels and alpha)</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>None</li><li>Run-length encoding</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Corel Paint Shop Pro</li><li>Krita</li><li>The GIMP</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>EXIF Header</li><li>Meta-data supported</li><li>Transparency supported</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>No animations supported</li><li>No multipages supported</li></ul>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.sgi">test_image.sgi</a></li></ul>
+
+
+
+    <h2>TGA</h2>
+      <p>
+         The "Truevision Targa" format was introduced by "Truevision Incorporation".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.targa</li><li>.tga</li><li>.tpic</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>...</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>image/tga</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>1 bit</li><li>2 bit</li><li>4 bit</li><li>8 bit</li><li>16 bit</li><li>24 bit</li><li>32 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>Uncompressed, color-mapped images</li><li>Uncompressed, RGB images</li><li>Uncompressed, black and white images</li><li>Runlength encoded color-mapped images</li><li>Runlength encoded color-mapped images</li><li>Runlength encoded color-mapped images</li><li>Compressed color-mapped data, using Huffman, Delta, and runlength encoding</li><li>Compressed color-mapped data, using Huffman, Delta, and runlength encoding.  4-pass quadtree-type process</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Corel Paint Shop Pro</li><li>Krita</li><li>Paint.NET</li><li>The GIMP</li><li>Ulead PhotoImpact</li><li>... and many more.</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>Meta-data supported</li><li>Transparency supported</li><li>Widely adopted</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>No animations supported</li><li>No multipages supported</li></ul>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.tga">test_image.tga</a></li></ul>
+
+
+
+    <h2>TIFF</h2>
+      <p>
+         The "Tagged Image File Format" was introduced by "Adobe Systems".
+      </p>
+      <h2>File extensions</h2>
+      <ul><li>.tif</li><li>.tiff</li></ul>
+      <h2>Magic-Word</h2>
+      <ul><li>MM.* (Motorola - big endian)</li><li>II.* (Intel - little endian)</li></ul>
+      <h2>MIME-Types</h2>
+      <ul><li>image/tiff</li><li>image/tiff-fx</li></ul>
+      <h2>Color modes</h2>
+      <ul><li>1 bit</li><li>2 bit</li><li>4 bit</li><li>8 bit</li><li>16 bit</li><li>24 bit</li><li>32 bit</li></ul>
+      <h2>Compression algorithm</h2>
+      <ul><li>None</li><li>Lempel-Ziv-Welch</li><li>Run-length encoding</li><li>ZIP</li><li>other</li></ul>
+      <h2>Supporting Tools</h2>
+      <ul><li>Adobe Photoshop</li><li>Corel Paint Shop Pro</li><li>Krita</li><li>Microsoft Paint</li><li>Paint.NET (partial)</li><li>The GIMP</li><li>Ulead PhotoImpact</li><li>... and many more.</li></ul>
+      <h2>Advantages</h2>
+      <ul><li>EXIF Header</li><li>Flexible and adaptable</li><li>Meta-data supported</li><li>Multipage supported</li><li>Transparency supported</li><li>Widely adopted</li></ul>
+      <h2>Disadvantages</h2>
+      <ul><li>No animations supported</li></ul>
+      
+    Files:
+    <ul class="files"><li><a href="test_image.tif">test_image.tif</a></li></ul>
+
+      <h2>References</h2>
+      <dl><dt>[FLY07]</dt>:
+            <dd>Flybrain@Stanford, Nrrd - image interchange format, http://flybrain.stanford.edu/nrrd</dd><br/><dt>[LIG06]</dt>:
+            <dd>Light &amp; Magic, Technical Introduction to OpenEXR, http://www.openexr.com/TechnicalIntroduction.pdf</dd><br/></dl>
+   </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

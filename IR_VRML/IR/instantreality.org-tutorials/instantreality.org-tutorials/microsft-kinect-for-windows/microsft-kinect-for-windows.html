@@ -1,0 +1,168 @@
+<div id="tutorialContainer">
+  <h2 class="title">Microsft Kinect for Windows</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Microsoft,
+        Depth,
+        Sensor,
+        Kinect,
+        Skeleton<br/><strong>Author(s): </strong>Tobias Alexander Franke<br/><strong>Date: </strong>2013-10-06</p>
+  <p><strong>Summary: </strong>
+    This tutorial describes the Kinect node, which is an InstantIO implementation of the Microsoft Kinect SDK.
+  </p>
+  <div id="content">
+    <h2>Microsoft Kinect for Windows</h2>
+    <p>
+        Since Microsoft put out a standalon version of the Kinect camera for Windows, it also published its own
+        SDK. While there are many similarities to the OpenNI implementation, the differences, especially focusing
+        on skeleton tracking, may be worth looking into. Another potential benefit is the near field mode of
+        a Kinect camera for Windows, which is able to provide depth data closer to the camera.
+        
+        In this tutorial, we will create a Kinect node to access skeleton data.
+    </p>
+        
+    <h2>Prerequisites</h2>
+    <p>
+        Using the Kinect node requires an installation of the <a href="http://www.microsoft.com/en-us/kinectforwindows/">Microsoft Kinect SDK for Windows</a>.
+        The installer will take care of everything, including driver installation. Please note that this SDK can only be used with a 
+        Microsoft Kinect for Windows. You may also want to watch out for existing installations of OpenNI and NITE (both version 1.x)
+        and avin2 drivers, which can interfere with the regular driver installation.
+    </p>
+    
+    <p>    
+        Make sure your driver installation is correct by testing one of the sample apps in the <a href="http://www.microsoft.com/en-us/kinectforwindows/develop/developer-downloads.aspx">
+        Kinect for Windows Developer Toolkit.</a>
+    </p>
+        
+
+    <h2>The node</h2>
+    <h2>Instantiating a Kinect for Windows node</h2>
+    <p>
+        The <a href="http://doc.instantreality.org/documentation/nodetype/NI">Kinect node</a> 
+        in its complete instantiation is accessed via InstantIO as follows:
+    </p>
+    
+    <div class="code"><h3>Code: OpenNI InstantIO node</h3><pre>&lt;IOSensor DEF='kinect' type='Kinect' DeviceID='0' Width='640' Height='480' FPS='30' AlignViewpoints='TRUE' NormalizeDepth='TRUE' EnableNearMode='FALSE' FlipImages='FALSE'&gt;
+    &lt;field accessType='outputOnly'  name='Image'                type='SFImage'/&gt;
+    &lt;field accessType='outputOnly'  name='Depth'                type='SFImage'/&gt;
+    &lt;field accessType='outputOnly'  name='UserMask'             type='SFImage'/&gt;
+    &lt;field accessType='outputOnly'  name='TrackedUsers'         type='MFInt32'/&gt;
+    &lt;field accessType='outputOnly'  name='NumUsers'             type='SFInt32'/&gt;
+    &lt;field accessType='outputOnly'  name='JointPositions'       type='MFVec3f'/&gt;   
+    &lt;field accessType='outputOnly'  name='SkeletonConfidence'   type='MFFloat'/&gt;
+    &lt;field accessType='outputOnly'  name='ElevationAngle'        type='SFInt32'/&gt;
+    
+    &lt;field accessType='inputOnly'   name='ResetTrackedUsers'    type='SFBool'/&gt;
+    &lt;field accessType='inputOnly'   name='NewElevationAngle'    type='SFInt32'/&gt;
+&lt;/IOSensor&gt;
+</pre></div>
+
+    <p>
+        <ul><li>
+                Since a Kinect device comes with two cameras (a depth and an image sensor), there
+                are two fields to access these images: <tt>Image</tt>, which provides the color image of the first camera,
+                and <tt>Depth</tt>, which provides the depth data of the sensor. <b>Please note</b>: the color image
+                is a standard RGB 8bit image, whereas the depth image is a single channel 32bit float image.
+            </li><li>
+                Another image provided by the IOSensor is the <tt>UserMask</tt>: this is a simple greyscale image, in which
+                each pixel represents the ID of a user. So for instance to filter out all pixels of user 2, simply write
+                a shader that multiplies all other colors of the <tt>Image</tt> by 0 and leaves the rest unmodified.
+            </li><li>
+                <tt>Width</tt>, <tt>Height</tt> and <tt>FPS</tt> fields are self-explanatory configurations for the  camera capturing the scene. Note that the FPS parameter is 
+                highly device dependent and may be fixed to one value only.
+            </li><li>
+                The <tt>AlignViewPoints</tt> parameter controls if the node will align both the depth and color image to
+                a common viewpoint. If this parameter is set to <tt>FALSE</tt>, you will have to manually match the depth
+                image to the color image (since both cameras are slightly apart on the device).
+            </li><li>
+                Setting <tt>NormalizedDepth</tt> controls if the node will automatically rescale the float values of
+                the depth image to a range of 0.0 to 1.0. The scaling factor is a fixed, device-dependent number that 
+                is used internally by OpenNI. Setting this parameter to <tt>FALSE</tt> leaves the values untouched so you
+                can arbitrarily rescale them in your shader.
+            </li><li>
+                To set the special near mode that a Kinect for Windows provides, simply set <tt>EnableNearMode</tt> to true.
+                Objects may then be closer to the camera and still get valid depth results.    
+            </li><li>
+                If <tt>FlipImages</tt> is set to <tt>TRUE</tt>, both the depth and color images will be
+                flipped along both the x- and y-axis.
+            </li><li>
+                <tt>NumUsers</tt> is a simple counter which provides the number of humans detected in front of the
+                device.
+            </li><li>
+                <tt>JointPositions</tt> is a field which will output positions for each joint of one tracked user skeleton. This array
+                provides its joint data (please refer to the MSDN <a href="http://msdn.microsoft.com/en-us/library/jj131025.aspx">NUI specification on skeletons</a>)
+                in the following order:
+            
+                <tt>
+                    NUI_SKELETON_POSITION_HEAD,
+                    NUI_SKELETON_POSITION_SPINE,
+                    NUI_SKELETON_POSITION_SHOULDER_CENTER,
+                    NUI_SKELETON_POSITION_HIP_CENTER,
+                    NUI_SKELETON_POSITION_SHOULDER_LEFT,
+                    NUI_SKELETON_POSITION_ELBOW_LEFT,
+                    NUI_SKELETON_POSITION_WRIST_LEFT,
+                    NUI_SKELETON_POSITION_HAND_LEFT,
+                    NUI_SKELETON_POSITION_SHOULDER_RIGHT,
+                    NUI_SKELETON_POSITION_ELBOW_RIGHT,
+                    NUI_SKELETON_POSITION_WRIST_RIGHT,
+                    NUI_SKELETON_POSITION_HAND_RIGHT,        
+                    NUI_SKELETON_POSITION_HIP_LEFT,
+                    NUI_SKELETON_POSITION_KNEE_LEFT,
+                    NUI_SKELETON_POSITION_ANKLE_LEFT,
+                    NUI_SKELETON_POSITION_FOOT_LEFT,
+                    NUI_SKELETON_POSITION_HIP_RIGHT,
+                    NUI_SKELETON_POSITION_KNEE_RIGHT,
+                    NUI_SKELETON_POSITION_ANKLE_RIGHT,
+                    NUI_SKELETON_POSITION_FOOT_RIGHT
+                </tt>
+                
+                An additionl field <tt>SkeletonConfidence</tt> provides floating point confidence values between 0 (not confident) to 1
+                (confident) for each joint. These values can be used to ensure proper tracking and filter out unwanted updates.
+            </li><li>
+                <tt>TrackedUsers</tt> provides a sequence of IDs of currently tracked users. The list will be updated whenever someone enters
+                or leaves the sensor area. Note that the sequence of IDs is the same as the <tt>JointPositions</tt> and <tt>JointOrientations</tt>
+                fields provide joints for each skeleton: for instance, the sequence <tt>4,1,3</tt> will tell you that the first 15 entries of
+                <tt>JointOrientations</tt> belong to user 4, the next 15 to user 1 and so forth.
+            </li><li>
+                In case tracked users and skeleton tracking will produce incoherent results, get stuck or simply stop working, you can use this send
+                a <tt>TRUE</tt> value to this field to force an internal reset. This will wipe all user tracking and reset the tracker.
+            </li><li>
+                The elevation angle of the Kinect camera can be read from <tt>ElevationAngle</tt>. The integer value that is provided is the current angle in degrees.
+                The camera can automatically reposition itself to a new angle by sending it to <tt>NewElevationAngle</tt>. This may be helpful if you'll notice
+                in your application that parts of the users skeleton joints have gone missing, for instance by checking their confidence values.
+            </li></ul>
+    </p>
+    
+    <h2>Accessing a skeleton</h2>
+    <p>
+        The first step is to create a device in your X3D file. We will use an IOSensor node with two fields, <tt>Depth</tt> and <tt>JointPositions</tt>. We will also set up an <tt>ImageBackground</tt> where we display the Depth image, and two nodes to fill in the skeleton with connecting lines between joints.
+    </p>
+    
+        <div class="code"><h3>Code: Hooking up a kinect device to our X3D example</h3><pre>&lt;IOSensor DEF='kinect' type='Kinect' FlipImages='TRUE'&gt;
+    &lt;field accessType='outputOnly'  name='Depth'           type='SFImage'/&gt;
+    &lt;field accessType='outputOnly'  name='JointPositions'  type='MFVec3f'/&gt;
+&lt;/IOSensor&gt;
+
+&lt;ImageBackground&gt;
+    &lt;PixelTexture2D DEF='image'/&gt;
+&lt;/ImageBackground&gt;
+
+&lt;Group DEF='skeleton'&gt;
+&lt;/Group&gt;
+
+&lt;Shape DEF='lines'&gt;
+    &lt;Appearance&gt;
+        &lt;LineProperties linewidthScaleFactor='4'/&gt;
+        &lt;Material emissiveColor='0 1 0'/&gt;
+    &lt;/Appearance&gt;
+&lt;/Shape&gt;
+</pre></div>
+
+    <p>
+        After this setup we will need a script to grab the arrays provided by the Kinect node and create joints (made from boxes) and connect the right ones with lines together. Please have a look in the source file attached for more details!
+    </p>
+    
+    
+    Files:
+    <ul class="files"><li><a href="example/skeleton.x3d">skeleton.x3d - A skeleton tracker in X3D</a></li></ul>
+    
+  </div>
+</div>

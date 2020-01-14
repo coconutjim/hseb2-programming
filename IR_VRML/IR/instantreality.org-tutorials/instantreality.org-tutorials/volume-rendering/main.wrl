@@ -1,0 +1,72 @@
+#VRML V2.0 utf8
+
+Background {
+	skyColor .5 .5 .5
+}
+Viewpoint {
+    description "Default"
+    position 0 0 0.6
+	zNear 0.01 
+}
+NavigationInfo {
+    avatarSize [ 0.1, 1.6, 0.75 ]
+	headlight TRUE
+}
+
+Group {
+	children [
+    	Transform {
+    		scale 0.001 0.001 0.001
+    		children [
+        		DEF volume VolumeData {	 
+        			dimensions 256 256 110
+        			voxels [
+            			DEF voltex ImageTexture {	  
+							url "Engine.nrrd"  
+            			}
+        			]
+					renderSettings [
+						AccelerationVolumeSettings {
+							boundingVolumeType  "boundaryGeometry"	#"boxGeometry"
+							traversalFunction "simple" #"blockSkipping"
+						}
+						NormalVolumeSettings {
+							algorithm "onlineCentralDifferences"
+							#algorithm "onlineSobel"
+						}
+						RayGenerationVolumeSettings {	
+							type "simple" #"interleaved" 
+							stepSize 0.0039
+						}
+					]
+        			#renderStyle ProjectionVolumeStyle	{}
+					#renderStyle XRayVolumeStyle	{}
+					renderStyle ComposedVolumeStyle {
+						renderStyle [			   
+							ShadedVolumeStyle {
+								lighting TRUE  
+								#material Material {
+								#	diffuseColor  .7 .3 .2
+								#	specularColor 1 1 1
+								#	emissiveColor .5 .5 .5
+								#}
+							}
+							OpacityMapVolumeStyle {
+								transferFunction ImageTexture	{  
+									url "engineTransferSchnitt.png"	  
+								}	   
+								type "preintegrated"  #"simple"
+							}
+							BoundaryEnhancementVolumeStyle {
+								enabled	FALSE
+								boundaryOpacity 0.5 #kgs
+								retainedOpacity	0.5 #kgc
+								opacityFactor   4.0 #kge
+							}
+						]
+        			}
+        		}
+    		]
+    	}
+	]
+}

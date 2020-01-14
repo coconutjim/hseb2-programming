@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+
+<Engine desiredFrameRate="60">
+    <RenderJob DEF='render'>
+        <WindowGroup>
+            
+            <Window DEF='win1' fullScreen="true" drawCursor="false" sample="2" sampleFilterMode="fastest">
+                <Viewarea DEF="viewarea" />
+            </Window>
+            
+        </WindowGroup>
+    </RenderJob>   
+</Engine>   
+
+  <Scene DEF='scene'>
+    <OrthoViewpoint fieldOfView='-960 -540 960 540'/>
+    <NavigationInfo type='"NONE"' interactionType="projection"/>
+    <Group DEF='root'/>
+    <Shape>
+      <Appearance>
+        <Material emissiveColor='0 0 1'/>
+      </Appearance>
+      <IndexedLineSet coordIndex='0 1 2 3 0 -1'>
+        <Coordinate point='-960 -540 0 960 -540 0 960 540 0 -960 540 0'/>
+      </IndexedLineSet>
+    </Shape>
+    <Script DEF='script' directOutput="true" mustEvaluate="true">
+      <field accessType='inputOnly' name='set_positions' type='MFVec3f'/>
+      <field accessType='initializeOnly' name='blobShape' type='SFNode'>
+        <Shape containerField='blobShape'>
+          <Appearance>
+            <Material diffuseColor='1 0 0'/>
+          </Appearance>
+          <Sphere radius='10'/>
+        </Shape>
+      </field>
+      <field accessType='initializeOnly' name='blobCache' type='MFNode'/>
+      <field accessType='initializeOnly' name='root' type='SFNode'>
+        <Group USE='root' containerField='root'/>
+      </field><![CDATA[javascript:
+
+    function set_positions(value)
+    {
+      Browser.println('set_positions(' + value + ')');
+      root.children.length = 0;
+      for (var i = 0; i < value.length; ++i)
+      {
+        var trans;
+        if (i >= blobCache.length)
+        {
+          trans = new SFNode('Transform {}');
+          trans.children = new MFNode(blobShape);
+          blobCache[i] = trans;
+        }
+        else
+          trans = blobCache[i];
+        var pos = value[i];
+        trans.set_translation = new SFVec3f(pos.x-960, 540-pos.y, 0);
+        root.children[i] = trans;
+      }
+    }
+
+  ]]>
+    </Script>
+    <IOSensor DEF='nextWindow' type='NextWindow'>
+      <field accessType='initializeOnly' name='device' type='SFString' value='0'/>
+      <field accessType='outputOnly' name='Positions' type='MFVec3f'/>
+    </IOSensor>
+    <ROUTE fromNode='nextWindow' fromField='Positions' toNode='script' toField='set_positions'/>
+  </Scene>
+</X3D>

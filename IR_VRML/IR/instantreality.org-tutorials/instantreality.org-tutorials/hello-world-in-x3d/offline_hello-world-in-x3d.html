@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Hello world in X3D</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Hello world in X3D</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        hello world,
+        XML encoding<br/><strong>Author(s): </strong>Peter Eschler<br/><strong>Date: </strong>2005-11-10</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to create a "Hello world!" in X3D</p>
+  <div id="content">
+		<h2>What we need</h2>
+		
+        <p>
+		This tutorial will show you how to write the famous "Hello world!" program in X3D. All you need is a text-editor and a X3D-browser.
+		</p>
+		
+		<h2>How we do it</h2>		
+		<p>
+			First start up the text-editor and enter the following code:		
+		</p>		
+		<div class="code"><h3>Code: The simplest X3D world</h3><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;X3D profile='Immersive'&gt;
+	&lt;Scene&gt;
+	&lt;/Scene&gt;
+&lt;/X3D&gt;</pre></div>
+		
+		<p>
+			Save the file and call it <i>simple.x3d</i>
+		</p>
+		<p>
+			Sweet! You just created the most simplest X3D world possible - an empty one. You can check that it is empty by opening it with your favourite X3D browser and watch if the browser gives any warnings. If he does consult the browser documentation if it supports the X3D <i>XML encoding</i> - some browser might only support the X3D <i>Classic VRML</i> encoding.
+		</p>
+		<h2>Understanding the code</h2>
+		<p>
+			Let's have a look at the code: 
+		</p>
+		<div class="code"><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;</pre></div>
+		<p>
+			This is the XML file declaration and it's used for easy identification. The file declaration
+            should be present in every valid XML file so just copy-and-paste it there.
+        </p>
+        <p>
+            The file declaration is followed by the X3D document root element which specifies a <i>profile</i>:
+		</p>
+		<div class="code"><pre>&lt;X3D profile='Immersive'&gt;</pre></div>
+		<p>
+			A complete overview of the profiles concept can be found in the X3D <a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_+_Amendment1_to_Part1/Part01/concepts.html#Profiles">specification</a>. Simply put it tells the browser which kind of nodes the world uses so that the browser can check if he supports the profile (and the nodes associated to that profile). The <i>Immersive</i> profile used here is targeted at <i>"implementing immersive virtual worlds with complete navigational and environmental sensor control"</i>
+		</p>
+		
+		<p>
+			Next comes the empty <a href="/documentation/nodetype/Scene">Scene</a> element:
+		</p>
+		<div class="code"><pre>&lt;Scene&gt;&lt;/Scene&gt;</pre></div>
+		<p>In the following we will put some text into our scene.</p>		
+        
+		<h2>Show the words</h2>
+		<p>
+			What is missing in our world is the content. Since we want the two words "Hello world!" in fully blown 3D we add the following <a href="/documentation/nodetype/Text">Text</a> element to the <a href='/documentation/nodetype/Scene'>Scene</a> so that the code now looks like this:
+		</p>	
+		<div class="code"><h3>Code: Hello world! in X3D</h3><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;X3D profile='Immersive'&gt;
+  &lt;Scene&gt;
+    &lt;Shape&gt;
+      &lt;Text string="Hello world!" /&gt;
+    &lt;/Shape&gt;
+  &lt;/Scene&gt;
+&lt;/X3D&gt;</pre></div>
+		
+		<p>We added a <a href="/documentation/nodetype/Shape">Shape</a> which contains a <a href="/documentation/nodetype/Text">Text</a> geometry - and that's it! Save the file to
+            <tt>helloworld.x3d</tt> and start it up. The words "Hello World" should be shown by your X3D browser. 
+        </p>
+        <p>
+        You could now continue to play around with the <a href="/documentation/nodetype/Text">Text</a>, e.g. changing the <i>depth</i> or the <i>fontStyle</i>. 
+		</p>
+		
+    Files:
+    <ul class="files"><li><a href="simple.x3d">simple.x3d</a></li><li><a href="helloworld.x3d">helloworld.x3d</a></li></ul>    
+	</div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

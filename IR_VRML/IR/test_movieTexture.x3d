@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene>
+    <Viewpoint description='start' position='16 24 74'/>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+    <Group>
+        
+        <Transform translation='0 0 0'>
+            <Transform translation='12 0 0'>
+                <Shape>
+                    <Appearance DEF='ap' containerField='appearance'>
+                        <Material diffuseColor='1 1 1'/>
+                    </Appearance>
+                    <Text string='WMV: Windows Media Video 9 (WMV3)' depth='0.1' lit='false'>
+                        <FontStyle DEF='fs' family='SANS' size='2'/>
+                    </Text>
+              </Shape>
+            </Transform>
+            
+			<Shape>            
+				<Appearance>
+					<MovieTexture url='video/wheelie.wmv' loop='true'/>
+				</Appearance>
+				<Plane DEF='plane' size='20.48 10.24' lit='false'/>
+			</Shape>
+        </Transform>
+        
+        
+        <Transform translation='0 12 0'>
+            <Transform translation='12 0 0'>
+                <Shape>
+                    <Appearance USE='ap'/>
+                    <Text string='MP4: MPEG-4' depth='0.1' lit='false'>
+                        <FontStyle USE='fs'/>
+                    </Text>
+              </Shape>
+            </Transform>
+			<Shape>
+				<Appearance>
+					<MovieTexture url='video/wheelie.m4v.mp4' loop='true'/>
+				</Appearance>
+				<Plane USE='plane'/>
+			</Shape>
+        </Transform>
+
+      <Transform translation='0 24 0'>
+            <Transform translation='12 0 0'>
+                <Shape>
+                    <Appearance USE='ap'/>
+                    <Text string='MP4: H264' depth='0.1' lit='false'>
+                        <FontStyle USE='fs'/>
+                    </Text>
+              </Shape>
+            </Transform>
+			<Shape>
+				<Appearance>
+					<MovieTexture url='video/wheelie.h264.mp4' loop='true'/>
+				</Appearance>
+				<Plane USE='plane'/>
+			</Shape>
+        </Transform>
+        
+        
+        <Transform translation='0 36 0'>
+            <Transform translation='12 0 0'>
+                <Shape>
+                    <Appearance USE='ap'/>
+                    <Text string='MOV: SVQ-3' depth='0.1' lit='false'>
+                        <FontStyle USE='fs'/>
+                    </Text>
+              </Shape>
+            </Transform>
+			<Shape>
+				<Appearance>
+					<MovieTexture url='video/wheelie.mov' loop='true'/>
+				</Appearance>
+				<Plane USE='plane'/>
+			</Shape>
+        </Transform>
+        
+        
+        <Transform translation='0 48 0'>
+            <Transform translation='12 0 0'>
+                <Shape>
+                    <Appearance USE='ap'/>
+                    <Text string='MPG: MPG-1/2' depth='0.1' lit='false'>
+                        <FontStyle USE='fs'/>
+                    </Text>
+              </Shape>
+            </Transform>
+			<Shape>
+				<Appearance>
+					<MovieTexture url='video/wheelieMPEG2.mpg' loop='true'/>
+				</Appearance>
+				<Plane USE='plane'/>
+			</Shape>
+        </Transform>
+                
+    </Group>
+  </Scene>
+</X3D>

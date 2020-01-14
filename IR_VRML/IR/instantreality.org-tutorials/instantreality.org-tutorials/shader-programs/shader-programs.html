@@ -1,0 +1,201 @@
+<div id="tutorialContainer">
+  <h2 class="title">Shader programs</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        rendering<br/><strong>Author(s): </strong>Yvonne Jung<br/><strong>Date: </strong>2007-02-05</p>
+  <p><strong>Summary: </strong>This tutorial shows how to write a simple shader in X3D.</p>
+  <div id="content">
+        <h2>Shader program definition</h2>
+        <p>
+        First an example of a simple <a href="/documentation/nodetype/Shape">Shape</a> with a basic shader <a href="/documentation/nodetype/Appearance">Appearance</a>, which contains an <a href="/documentation/nodetype/ImageTexture">ImageTexture</a>, a <a href="/documentation/nodetype/ComposedShader">ComposedShader</a> and two <a href="/documentation/nodetype/ShaderPart">ShaderPart</a> nodes, is shown. GLSL- Shaders are written within a <a href="/documentation/nodetype/ShaderPart">ShaderPart</a>. The shader code can be either embedded within the X3D file or in another file containing only the shader program. There are three types of <a href="/documentation/nodetype/ShaderPart">ShaderPart</a> nodes: <tt>vertex</tt>, <tt>fragment</tt> and <tt>geometry</tt>. The latter is only supported on Shader Model 4.0/ Direct3D 10.0 hardware or later (e.g. NVidia GeForce 8800 graphics card). The program stages for the other two types are visualized in the following image (texture access for vertex shaders needs at least Shader Model 3.0 hardware).
+        </p>
+        <p>
+        Uniform parameters can be set via the dynamic field mechanism: For each uniform variable needed, a <tt>field</tt> or an <tt>exposedField</tt> with the same name and data type should be defined. This has to be done in the <a href="/documentation/nodetype/ComposedShader">ComposedShader</a> node. In order to define textures (uniform variables of any sampler type), an <tt>exposedField</tt> of type <tt>SFInt32</tt> referring to the appropriate texture unit has to be defined (in case of the following example this is the first one, i.e. unit 0, because no <a href="/documentation/nodetype/MultiTexture">MultiTexture</a> is used).
+	</p>
+	<p>
+	When writing a geometry shader, there are three other fields for defining input and output primitive types as well as the maximum number of vertices to be generated in the shader: <tt>geometryInputType</tt>, <tt>geometryOutputType</tt> and <tt>geometryVerticesOut</tt>.
+        </p>
+        <p>
+        Note: Generic vertex <tt>attribute</tt> parameters are currently not supported. If they are needed (e.g.tangents), they can be encoded in the <tt>texCoord</tt> or <tt>color</tt> field of the geometry node.
+        </p>
+<div class="code"><h3>Code: A basic shader appearance</h3><pre>
+	Shape {
+		appearance Appearance {
+			texture ImageTexture {
+				url "testImage.jpg"
+			}
+			shaders ComposedShader {
+				exposedField SFInt32 tex0    0
+				exposedField SFVec3f diffuse .7 .7 .7
+				
+				parts [
+					DEF vert ShaderPart {
+						type "vertex"
+						url "testShaderVP.glsl"
+					}
+					DEF fs ShaderPart {
+						type "fragment"
+						url "testShaderFP.glsl"
+					}
+				]
+			}
+		}
+		geometry Sphere	{}
+	}
+
+</pre></div>
+	<p>
+	If you want to use CG for your shader programs, you have to replace the <a href="/documentation/nodetype/ComposedShader">ComposedShader</a> node by a <a href="/documentation/nodetype/ProgramShader">ProgramShader</a> node with its <tt>language</tt> field set to <tt>"cg"</tt>. Additionally the <tt>parts</tt> field has to be replaced by the <tt>programs</tt> field and the <a href="/documentation/nodetype/ShaderPart">ShaderPart</a> nodes by  <a href="/documentation/nodetype/ShaderProgram">ShaderProgram</a> nodes.
+	</p>
+        <div class="imgContainer"><img src="progStages.png" align="center"/><div class="imgCaption">Image: Program Stages for Shader Model 3.0 graphics hardware.</div></div>
+        
+        <h2>Example: Phong shader</h2>
+        <p>
+        This example shows, how a simple glsl shader implementation is done within X3D. For additionally demonstrating how to access a texture, the diffuse color is taken from an earth texture. In order to ensure the correct mapping between the X3D field defining the texture unit and the sampler uniform definition, both variables must have the same name, which - in case of our example - is <tt>earthTex</tt>. By the way, the same goes for all other uniform variables likewise.
+        </p>
+<div class="code"><h3>Code: Uniform parameters</h3><pre>
+	Appearance {
+		texture ImageTexture {
+			url "earth.jpg"	
+		}
+		shaders ComposedShader {
+			exposedField SFInt32 earthTex 0
+			exposedField SFFloat ambient  .2
+			exposedField SFVec3f specular .7 .7 .7
+			
+			parts [
+				# ...
+			]
+		}
+	}
+
+</pre></div>
+        <div class="imgContainer"><img src="phong_compare.png" align="center"/><div class="imgCaption">Image: Left: standard OpenGL shading; right: per pixel phong shading.</div></div>
+        
+        <h2>Vertex shader</h2>
+        <p>
+        In the vertex shader the incoming vertex position is transformed with the current modelview-projection matrix with the help of the <tt>ftransform</tt> function. After that all varying parameters, which are required by the subsequent fragment shader and interpolated across the primitive during rasterization (like <tt>gl_TexCoord</tt> and the user defined ones for normal, eye vector and light vector) are calculated.
+        </p>
+<div class="code"><h3>Code: </h3><pre>
+	DEF vs ShaderPart {
+		type "vertex"
+			url "		
+			varying vec3 lightVec;
+			varying vec3 eyeVec;	
+			varying vec3 normalVec;	
+
+			void main(void)
+			{
+				gl_Position = ftransform();
+
+				gl_TexCoord[0] = gl_MultiTexCoord0;	 
+				normalVec = gl_Normal;
+
+				vec4 eyePos = gl_ModelViewMatrixInverse * vec4(0., 0., 0., 1.);
+				eyeVec = eyePos.xyz - gl_Vertex.xyz;
+
+				vec4 lightPos = gl_ModelViewMatrixInverse * vec4(gl_LightSource[0].position.xyz, 1.0);
+				lightVec = lightPos.xyz - gl_Vertex.xyz;
+			}
+		"
+	}
+
+</pre></div>
+        
+        <h2>Pixel Shader</h2>
+        <p>
+        The fragment shader realizes the Blinn-Phong lighting model, without attenuation factor (the complete formula is depicted in the following image). After texture access all vectors are normalized and the final fragment color is calculated. A good introductory text to glsl shader programming is the so-called <a href="http://www.3dshaders.com/joomla/">Orange Book</a>. Another application domain for shader programming is imaging; in the files section you will find examples for both.
+        </p>
+        <div class="imgContainer"><img src="blinn_phong.png" align="center"/><div class="imgCaption">Image: Blinn-Phong lighting formula without attenuation, the operator symbol defines the component-wise product.</div></div>
+<div class="code"><h3>Code: </h3><pre>
+	DEF fs ShaderPart {
+		type "fragment"
+		url "
+		uniform sampler2D earthTex;
+		
+		uniform vec3 specular;
+		uniform float ambient;
+		
+		varying vec3 lightVec;
+		varying vec3 eyeVec;
+		varying vec3 normalVec;
+		
+		void main(void)
+		{	
+			vec3 texCol = texture2D(earthTex, gl_TexCoord[0].st).rgb;
+			 
+			lightVec = normalize(lightVec);
+			eyeVec = normalize(eyeVec);
+			normalVec = normalize(normalVec);
+			vec3 halfVec = normalize( eyeVec + lightVec );
+			
+			float ndotl = max( dot( lightVec, normalVec ), 0.0 ); 
+			float ndoth = (ndotl &gt; 0.0) ? pow(max( dot( halfVec, normalVec ), 0.0 ), 128.) : 0.0;  
+			
+			vec3 color = 0.2*ambient + ndotl*texCol + ndoth*specular;
+			
+			gl_FragColor = vec4(color, 1.0);
+		}
+		"
+	}
+
+</pre></div>
+
+        <h2>Using HDR Images</h2>
+	<p>
+	Using hdr images within your shader is quite straightforward. Simply create a texture with your OpenEXR or Radiance image and set the <tt>internalFormat</tt> field to a floating point format like <tt>rgba16f</tt> as shown in the following code snippet, where a hdr cube texture is used. The texture look-up in your shader works just like already explained before, but additionally you should apply some kind of tone mapping before displaying the final color value. The field <tt>internalFormat</tt> can also be used in combination with ordinary ldr images in case you want to perform a texture look-up in your vertex shader e.g. for displacement mapping. Here you need "nearest" filtering, and your height map must internally be converted into floating point format by setting this field to something like <tt>luminance32f</tt>.
+	</p>
+<div class="code"><h3>Code: Using an hdr image of type OpenEXR</h3><pre>
+	ImageCubeMapTexture {
+		repeatS FALSE
+		repeatT FALSE
+		repeatR FALSE
+		internalFormat "rgba16f"
+		url "StageEnvCube.exr"
+	}
+
+</pre></div>
+        
+	<h2>Geometry Shader Extensions</h2>
+	<p>
+	Geometry shaders (an example is shown below, additionally you find a simple test in the files section) require to set some additional fields:
+    </p>
+	<ul><li><tt>geometryInputType</tt> defines the input primitive type for the geometry shader, possible values are "auto", "points", "lines", "triangles", "lines_adjacency", "line_strip_adjacency", "triangles_adjacency", "triangle_strip_adjacency";</li><li><tt>geometryOutputType</tt> defines the output primitive type for the geometry shader, possible values are "auto", "points", "lines", "line_strip", "triangles", "triangle_strip";</li><li><tt>geometryVerticesOut</tt> sets the maximum number of vertices to be generated by the geometry shader, which is important for performance.</li></ul>
+
+<div class="code"><h3>Code: </h3><pre>
+	ComposedShader {
+		geometryInputType  "points"
+		geometryOutputType "triangle_strip"
+		geometryVerticesOut 16
+		
+		exposedField SFInt32 dataFieldTex 0
+		exposedField SFInt32 edgeTableTex 1
+		exposedField SFInt32 triTableTex 2
+		exposedField SFVec3f dataStep 0.02 0.02 0.04
+		exposedField SFFloat isolevel 0.2
+		#[...]
+		
+		parts [
+			DEF vert ShaderPart {
+				type "VERTEX"
+				url "TestG80_VS.glsl"
+			}
+			DEF geo ShaderPart {
+				type "GEOMETRY"
+				url "TestG80_GS.glsl"
+			}
+			DEF frag ShaderPart {
+				type "FRAGMENT"
+				url "TestG80_FS.glsl"
+			}
+		]
+	}
+
+</pre></div>
+	
+	
+    Files:
+    <ul class="files"><li><a href="phongBspGLSL.wrl">phongBspGLSL.wrl</a></li><li><a href="edge.wrl">edge.wrl</a></li><li><a href="geoShader.wrl">geoShader.wrl</a></li></ul>
+    </div>
+</div>

@@ -1,0 +1,9 @@
+buttons beschreiben
+
+init - wann wozu
+     - wenn "Verbindungen" in der AP geaendert wurden
+     - aber auch wenn Kamera driver geaendert wurde
+     - nicht noetig bei attribut aenderungen
+     
+Beziehung zw. XML code und gui representation
+

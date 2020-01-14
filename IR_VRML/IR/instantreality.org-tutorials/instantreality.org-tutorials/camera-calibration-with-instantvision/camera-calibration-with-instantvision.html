@@ -1,0 +1,58 @@
+<div id="tutorialContainer">
+  <h2 class="title">Camera calibration with InstantVision</h2>
+  <p class="description"><strong>Keywords:</strong><br/>InstantVision,
+        camera,
+        calibration,
+        vision<br/><strong>Author(s): </strong>Mario Becker<br/><strong>Date: </strong>2008-06-10</p>
+  <p><strong>Summary: </strong>This tutorial is about calibration of camera intrinsic (optical) parameters.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        
+            <p>
+            This is done in the CameraCalibActivity in InstantVision. Click the CameraCalib button <img class="icon" src="camcalib.png"/> in the left toolbar. A dock window will open on the right side.
+            </p>
+        
+            <div class="imgContainer"><img src="cameracalib01.png" align="center"/><div class="imgCaption">Image: </div></div>
+
+        <h2>Preparation</h2>
+            <p>
+            Print the Marker Pattern, it can be found in your InstantReality installation directory under Resources/apps/CameraCalib/calibPattern.pdf
+            </p>
+        
+        <h2>Record Images</h2>
+            <div class="imgContainer"><img src="cameracalib02.png" align="center"/><div class="imgCaption">Image: </div></div>
+            <p>
+            For the calibration you need images of the calibration pattern taken with the camera to be calibrated. Click the "Take Images" button in the activities dock window to record these images now or click the "Select Images" button if you already have these images somewhere on disk. When you take the images, the camera selection dialog will be presented, select the camera as described in CameraSetup and click ok. Then press the run button in the top toolbar to start image aquisition.
+            </p>
+            <div class="imgContainer"><img src="cameracalib04.jpg" align="center"/><div class="imgCaption">Image: </div></div>
+            <p>
+            Whenever you click the "Take Snapshot" button is pressed an image is stored and shown in the gallery. Take 10 or more images from different viewing positions. Then finished press the "Done" button to get back to the main menu.
+            </p>
+
+        <h2>Start Calibration</h2>
+            <p>
+            Simply press the "Start Calibration" button to do the calibration.
+            </p>
+        
+        <h2>Exporting Results</h2>
+            <div class="imgContainer"><img src="cameracalib06.png" align="center"/><div class="imgCaption">Image: </div></div>
+            <p>
+            After successful calibration you will see a results window, giving you a routh representation of the calibration quality.
+            </p>
+            <p>
+            To store the result, find the "save" row, enter a usefull description of your camera and save the result into a XML file.
+            </p>
+            <div class="imgContainer"><img src="cameracalib07.png" align="center"/><div class="imgCaption">Image: </div></div>
+            <p>
+            You can also evaluate the calibration by watching the tracking and optimization results. To do so click an image in the gallery. The colorfull dots show the estimation results, consult the help viewer for information about the colors.
+            </p>
+
+        <h2>Options</h2>
+            <p>
+            There is also an "Options" Button which brings up the following dialog, allowing the selection of what parameters should be calibrated. The ToolTips will a show an explanation for each option. 
+            </p>
+            <div class="imgContainer"><img src="cameracalib05.png" align="center"/><div class="imgCaption">Image: </div></div>
+
+
+    </div>
+</div>

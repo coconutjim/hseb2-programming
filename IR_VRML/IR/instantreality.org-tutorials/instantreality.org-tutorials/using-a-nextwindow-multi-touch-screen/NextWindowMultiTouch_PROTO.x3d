@@ -1,0 +1,220 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+<Scene DEF='scene'>
+
+    <!-- current:  1   1   1   2   x   x
+                       2   2
+                       
+         prev:     x   1   1   1   2   x
+                           2   2
+    -->
+    
+    <ExternProtoDeclare name='MTUserBody' url="MTUserBody_PROTO.x3d" />
+
+    <ProtoDeclare name='NextWindowMultiTouch' component='NMY'
+                  documentation='A proto for managing touch positions from the NextWindow multi-touch frame.'>
+        <ProtoInterface>
+            <field name='device' type='SFString' accessType='initializeOnly' value="0" />
+            <field name='positions' type='MFVec4f' accessType='inputOutput' value="" />
+            <field name='displayPixelSize' type='MFInt32' accessType='inputOutput' value="1920 1080" />
+            <field name='allBlobsReleased' type='SFTime' accessType='outputOnly' />
+            <field name='touchReleaseDuration' type='SFFloat' accessType='inputOutput' value="80"
+                   documentation="in ms. Values&lt;=60ms) will lead to wrong release events." />
+			<field name='viewareaName' type='SFString' accessType='initializeOnly' value="" />
+            <field name='userBodyHot' type='SFBool' accessType='initializeOnly' value="true" />
+        </ProtoInterface>
+        <ProtoBody>
+            <Group>
+			
+                <Group DEF="userBodyGrp" />
+
+                <IOSensor DEF='nextWindow' type='NextWindow'>
+                    <IS><connect protoField='device' nodeField='device' /></IS>
+                    <field accessType='outputOnly' name='Positions' type='MFVec3f'/>
+                </IOSensor>
+                
+                <Script DEF='script' directOutput="true" mustEvaluate="true">                        
+                    <field name='set_nextWindowPositions' accessType='inputOnly' type='MFVec3f'/>
+                    <field name='displayPixelSize' type='MFInt32' accessType='inputOutput' value="1920 1080" />
+                    <field name='allBlobsReleased' type='SFTime' accessType='outputOnly' />
+                    <field name='touchReleaseDuration' type='SFFloat' accessType='inputOutput' value="80" />
+                    <field name='positions_changed' type='MFVec4f' accessType='outputOnly' />
+					<field name='viewareaName' type='SFString' accessType='initializeOnly' value="" />		
+                    <field name='userBodyHot' type='SFBool' accessType='initializeOnly' value="true" />                    
+                    <IS>
+                        <connect protoField='allBlobsReleased' nodeField='allBlobsReleased' />
+                        <connect protoField='touchReleaseDuration' nodeField='touchReleaseDuration' />
+                        <connect protoField='displayPixelSize' nodeField='displayPixelSize' />
+                        <connect protoField='positions' nodeField='positions_changed' />
+						<connect protoField='viewareaName' nodeField='viewareaName' />
+                        <connect protoField='userBodyHot' nodeField='userBodyHot' />
+                    </IS>                       
+                    <![CDATA[javascript:
+                    
+                    var lastPosUpdateTime = null;
+                    var currentTime = 0;
+                    var prevIds = new Array();
+                    var currentIds = new Array();
+					var updateIds, newIds, oldIds = new Array();
+                    var userBodyGrp = null;
+                    var mappedPositions = new MFVec4f();   
+                    
+                    function initialize(t)
+                    {   
+                        userBodyGrp = Browser.currentScene.getNamedNode("userBodyGrp");
+                        if (!userBodyGrp)  {
+                            Browser.println("NextWindowMultiTouch::init: could not find 'userBodyGrp'");
+                            userBodyGrp = new SFNode("Group");
+                        }						
+                    }
+                      
+                    function set_nextWindowPositions(values) 
+                    {
+                        //Browser.println("set_nextWindowPositions: " + values);
+                        
+                        // Store the update time to be able to detect the release of
+                        // the last blob in the prepareEvents() function.
+                        lastPosUpdateTime = new Date().getTime();
+                        
+                        mappedPositions.length = values.length;
+                        currentIds.length = values.length;
+                        var value = null;
+                        for (var i = 0; i < values.length; ++i)
+                        {   
+                            value = values[i];
+                            var view = Browser.getView(viewareaName); 
+							if (!view) {
+								Browser.println("NextWindowMultiTouch::set_nextWindowPositions: Error getting view '" + viewareaName + "'.");
+							}
+                            var t = new SFVec2f( value.x/displayPixelSize[0],
+                                                 value.y/displayPixelSize[1]);
+                            
+                            var pos = new SFVec3f(0,0,0), 
+                                norm = new SFVec3f(0,0,0),
+                                pane = new SFVec3f(0,0,0);
+
+                            // last param is 3d pos on viewport pane in world coords
+                            view.buildRay(t, pos, norm, pane);	
+          
+                            // Browser.println("set_nextWindowPositions: " + pane); 
+                            mappedPositions[i] = new SFVec4f(pane.x, pane.y, pane.z, value.z);
+                            positions_changed = mappedPositions;                            
+                            // Browser.println("set_nextWindowPositions: t=" + t + ", pos=" + mappedPositions[i].x.toFixed(2) + " " + mappedPositions[i].y.toFixed(2) + " " + mappedPositions[i].z.toFixed(2));
+                            
+                            // the z-coord of the incoming positions is the ID of the blob
+                            currentIds[i] = value.z;   
+                        }   
+                        
+                        // Get all new ids
+                        newIds = currentIds.slice();  // slice makes a copy of the array
+                        for (var i=currentIds.length-1; i>=0; i--) {
+                            // When an id is not present in the prev id array it is a new id
+                            for (var j=prevIds.length-1; j>=0; j--) {
+                                if (currentIds[i] == prevIds[j]) {
+                                    newIds.splice(i, 1);                                     
+                                }                                    
+                            }
+                        }                                                
+                        
+                        // Get all old ids
+                        oldIds = prevIds.slice();
+                        for (var i=currentIds.length-1; i>=0; i--) {
+                            // When an id is present in the prev id array but not
+                            // in the current it is an old id.
+                            for (var j=prevIds.length-1; j>=0; j--) {
+                                if (currentIds[i] == prevIds[j]) {
+                                    oldIds.splice(j, 1);                                     
+                                }                                    
+                            }
+                        }   
+                        // Derive update ids
+                        updateIds = currentIds.slice();
+                        for (var i=updateIds.length-1; i>=0; i--) {
+                            // If an id is present in the old or new id array, it is not
+                            // an update id and therefore is removed from the final array.
+                            for (var j=0; j<newIds.length; j++) {
+                                if (newIds[j] == updateIds[i])
+                                    updateIds.splice(i, 1);
+                            }
+                            for (var j=0; j<oldIds.length; j++) {
+                                if (oldIds[j] == updateIds[i])
+                                    updateIds.splice(i, 1);
+                            }
+                        }
+                        
+                        // Browser.println("prevIds=" + prevIds + "  currentIds=" + currentIds + "  newIds=" + newIds + ", oldIds=" + oldIds + ", updateIds=" + updateIds); 
+                        updateUserBodies();                        
+                        prevIds = currentIds.slice();
+                    };
+                    
+                    /* Updates the UserBody nodes.
+                       It removes all UserBody nodes with an old id.
+                       It adds a UserBody for every new id.
+                       It updates the position of the UserBody nodes with an update id.
+                     */
+                    function updateUserBodies() 
+                    {                        
+                        // Remove all UserBody nodes with an old id
+                        if (oldIds.length > 0) {
+                            var bodiesToRemove = new MFNode();
+                            for (var i=userBodyGrp.children.length-1; i>=0; i--) {
+                                for (j=oldIds.length-1; j>=0; j--) {
+                                    if (userBodyGrp.children[i].id == oldIds[j]) {                                    
+                                        userBodyGrp.removeChild( userBodyGrp.children[i] );                                        
+                                        break;
+                                    }                                    
+                                }     
+                            }
+                        }
+						
+                        // Create a new UserBody object for every new id.
+                        for (var i=0; i<newIds.length; i++) {
+                            var userBody = new SFNode("MTUserBody");
+							userBody.render = false;
+                            userBody.size = new SFVec2f(3, 3);
+                            userBody.hot = userBodyHot;
+                            userBody.string[0] = "UB#" + newIds[i].toString();
+                            userBody.translation = new SFVec3f(mappedPositions[i].x, 
+															   mappedPositions[i].y, 
+                                                               mappedPositions[i].z);
+                            userBody.id = newIds[i];
+                            userBodyGrp.addChild(userBody);
+                        }
+                        
+                        // Update all existing and still used ids                        
+                        for (var i=0; i<userBodyGrp.children.length; i++) {
+                            for (var j=0; j<updateIds.length; j++) {
+                                if (userBodyGrp.children[i].id == updateIds[j])
+                                    userBodyGrp.children[i].translation = new SFVec3f(mappedPositions[i].x, 
+                                                                                      mappedPositions[i].y, 
+                                                                                      mappedPositions[i].z);
+                            }
+                        }
+                    };
+                    
+					
+                    function prepareEvents() 
+                    {    
+                        currentTime = new Date().getTime();
+                        if (lastPosUpdateTime && currentTime-lastPosUpdateTime > touchReleaseDuration) {
+                            Browser.println("all blobs removed...");                            
+                            userBodyGrp.removeChildren = userBodyGrp.children;
+                            userBodyGrp.children.length = 0;
+                            lastPosUpdateTime = null;
+                            allBlobsReleased = currentTime;                            
+                            positions_changed = new MFVec4f();                            
+                            prevIds.splice(0, prevIds.length);  // clear the prevId array                                                        
+                        }
+                    };
+					
+                    ]]>
+                </Script>
+                <ROUTE fromNode="nextWindow" fromField="Positions" toNode="script" toField="set_nextWindowPositions" />
+            </Group>
+        </ProtoBody>
+    </ProtoDeclare>
+    
+</Scene>
+</X3D>
+

@@ -1,0 +1,321 @@
+<div id="tutorialContainer">
+  <h2 class="title">Vision Tracking</h2>
+  <p class="description"><strong>Keywords:</strong><br/>InstantVision,
+        devices,
+        vision<br/><strong>Author(s): </strong>Mario Becker<br/><strong>Date: </strong>2008-06-10</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to do vision based tracking. As an example we will create a marker tracker.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        
+        This examples shows some internals of InstantVision (short: IV). For information about integrating tracking in InstantPlayer refere to <a href="http://www.instantreality.org/tutorial/marker-tracking/">MarkerTracker tutorial</a>.
+        
+        <h2>Tracking in General</h2>
+        
+        <p>The Tracking module is based on a secondary library, which is why the configuration of a tracking system is somewhat out of the X3D or VRML style and is located in an additional xml file which must be referenced from your scene definition.
+        The tracking configuration can be done by editing the xml file or with the <a href="http://www.instantreality.org/tutorial/introduction-to-instantvision/">InstantVision GUI</a> which is described in the linked tutorial. Here we focus in the xml describtion and some internals.</p>
+        
+        Some terms used in this tutorial...
+        <dl><dt>World</dt>:
+            <dd>The desciption of the world how the tracking system sees it. It contains one ore more TrackedObjects.</dd><br/><dt>TrackedObject</dt>:
+            <dd>Describes the objects to be tracked, thus this node contains all information about an object which should be tracked</dd><br/><dt>Marker</dt>:
+            <dd>One way to track things is the use of a marker. To describe a TrackedObject with a marker this node is added to the TrackedObject</dd><br/><dt>Camera</dt>:
+            <dd>A camera is used in every vision tracking system. The node contains one Intrinsic and one Extrinsic data node.</dd><br/><dt>ExtrinsicData</dt>:
+            <dd>Part of the camera description, contains the parameters descibing the position and orientation of the camera in the world.</dd><br/><dt>IntrinsicData</dt>:
+            <dd>Second part of the camera description, describes the internal parameters of a camera like resolution, focal length or distortion.</dd><br/><dt>ActionPipe</dt>:
+            <dd>The execution units (Actions) in InstantVision are arranged in an execution pipe which is called an ActionPipe.</dd><br/><dt>DataSet</dt>:
+            <dd>All data used in InstantVision are placed in the DataSet and have a key(name) to refere to them.</dd><br/></dl>
+    <h2>The Example</h2>
+
+    <p>
+    The examples below can be testet by opening the in InstantVision. Here we construct a simple marker tracker step by step.
+    </p>
+
+    <p>
+    First an "empty" IV config, it contains a section ActionPipe and a DataSet.
+    </p>
+    
+<div class="code"><h3>Code: The visionlib.pm file</h3><pre>
+&lt;?xml version="1.0" encoding="UTF-8" standalone="no" ?&gt;
+&lt;VisionLib2 Version="2.0"&gt;
+
+  &lt;ActionPipe category="Action" name="AbstractApplication-AP"&gt;
+  &lt;/ActionPipe&gt;
+
+  &lt;DataSet key=""&gt;
+  &lt;/DataSet&gt;
+
+&lt;/VisionLib2&gt;
+
+</pre></div>
+
+<h2>VideoSource</h2>
+
+    <p>
+    To get some live to it we add a VideoSourceAction. This will read in an image from a connected camera. 
+    </p>
+<div class="code"><h3>Code: The visionlib.pm file</h3><pre>
+&lt;?xml version="1.0" encoding="UTF-8" standalone="no" ?&gt;
+&lt;VisionLib2 Version="2.0"&gt;
+
+  &lt;ActionPipe category="Action" name="AbstractApplication-AP"&gt;
+  
+    &lt;VideoSourceAction category="Action" name="VideoSourceAction"&gt;
+      &lt;Keys size="2"&gt;
+        &lt;key val="VideoSourceImage"/&gt;
+        &lt;key val=""/&gt;
+      &lt;/Keys&gt;
+      &lt;ActionConfig source_url="ds"/&gt;
+    &lt;/VideoSourceAction&gt;
+    
+  &lt;/ActionPipe&gt;
+
+  &lt;DataSet key=""&gt;
+  &lt;/DataSet&gt;
+
+&lt;/VisionLib2&gt;
+
+</pre></div>
+
+
+The setup of a videosource might become simpler by reading <a href="http://www.instantreality.org/tutorial/camera-setup-with-instantvision/">tuturial about camera setup</a>.
+<p>
+The example above uses DirectShow (or QT on the Mac) to access a camera. This should work for all cameras which support it, these will usually have a WDM driver to be installed. To use other cameras you need to change the VideoSourceAction/ActionConfig:source_url field. There are also a number of arguments which can be passed to the video source driver. The arguments are added to the source url like this: <i>driver://parameter1=value;parameter2=value</i>.
+</p>
+<p>Some drivers and their parameters are (available on platform in parentheses):</p>
+<dl><dt>ds</dt>:
+            <dd>(win32, darwin) Windows driver as mentioned above, on a Mac this is the same as "qtvd"   Parameters are: device - string name of the camera, mode - string name of the mode, framerate - integer. The driver compares the given parameters to whatever DS reports about the camera, if there is a mach, the parameters are used, other values are ignored.
+    </dd><br/><dt>vfw</dt>:
+            <dd>(win32) Old VideoForWindows driver. That is a good luck driver, no parameters implemented.</dd><br/><dt>v4l2</dt>:
+            <dd>(linux) Works with video4linux2. Parameters are device = string with string beeing a path to the device like "/dev/video0", width=x and height=y are also understood and the next best videoimage size supported by the driver is selected</dd><br/><dt>ieee1394</dt>:
+            <dd>(win32) FireWire DC cameras which run with the CMU driver        http://www.cs.cmu.edu/~iwan/1394/index.html on windows. No parameters available for now.
+    </dd><br/><dt>ieee1394</dt>:
+            <dd>(linux) FireWire DC cameras which run with the video1394 kernel module and libdc1394 (coriander), which includes PGR devices.
+           Parameters are:
+           unit - integer value for selecting a camera at the bus, 
+           trigger - boolean [0,1] 1 switches on external trigger, 
+           downsample - boolean [0,1] downsamples a bayer coded image to half size, 
+           device - string like "/dev/video1394/0" the device file to use.
+    </dd><br/><dt>ieee1394pgr</dt>:
+            <dd>(win32) PointGreyResearch cameras, license needed
+        Parameters are:
+        unit - integer value for selecting a camera at the bus, 
+        trigger - boolean [0,1] 1 switches on external trigger, 
+        downsample - boolean [0,1] downsamples a bayer coded image to half size, 
+        mode - string value to select a mode, when passing "mode=320"
+        some mode with a resolution of 320x240 is selected.
+    </dd><br/><dt>ueye</dt>:
+            <dd>(win32, linux) IDS imaging uEye cameras, license needed (more adjustments then the ds drivers)
+        Parameters: downsample - boolean [0,1] downsamples a bayer coded image to half size, 
+    </dd><br/><dt>vrmc</dt>:
+            <dd>(win32) VRmagic cameras, license needed, No parameters supported yet.</dd><br/><dt>qtvd</dt>:
+            <dd>(darwin) MacOSX QuickTimeVideoDigitizer, parameter unit=int selects a capture device if there is more then one.</dd><br/></dl>
+<p>
+Some of these drivers require additional libs/dlls which must be installed on your system and in the path.
+</p>
+
+<h2>MarkerTracker</h2>
+<p>
+Now we add a ImageConvertActionT__ImageT__RGB_FrameImageT__GREY_Frame :-) this simply converts the RGB Image from the VideoSourceAction, named "VideoSourceImage", into a greyscale image as it is needed by the MarkerTrackerAction. The grey image is stored as "ConvertedImage".
+</p>
+<p>
+We also add the MarkerTrackerAction itself. Its first 3 keys are interesting, the first is the image from which the markers should be extracted, the second is an named "IntrinsicData" which we add later to the DataSet, it is a camera description. The third key points to a World object which defines the markers to be tracked.
+</p>
+<p>
+Finally there is a TrackedObject2CameraAction. This is not realy needed here but later when you want to transfer the tracking results to InstantPlayer it creates Camera object which is needed by the interface between InstantVision and InstantPlayer. A Camera object encapsulates IntrinsicData and ExtrinsicData - both describe the camera parameters and thus the tracking result.
+</p>
+<div class="code"><h3>Code: The visionlib.pm file</h3><pre>
+&lt;?xml version="1.0" encoding="UTF-8" standalone="no" ?&gt;
+&lt;VisionLib2 Version="2.0"&gt;
+
+  &lt;ActionPipe category="Action" name="AbstractApplication-AP"&gt;
+    &lt;ImageConvertActionT__ImageT__RGB_FrameImageT__GREY_Frame category="Action" name="ImageConvertActionT"&gt;
+      &lt;Keys size="2"&gt;
+        &lt;key val="VideoSourceImage"/&gt;
+        &lt;key val="ConvertedImage"/&gt;
+      &lt;/Keys&gt;
+    &lt;/ImageConvertActionT__ImageT__RGB_FrameImageT__GREY_Frame&gt;
+    &lt;MarkerTrackerAction category="Action"&gt;
+      &lt;Keys size="5"&gt;
+        &lt;key val="ConvertedImage"/&gt;
+        &lt;key val="IntrinsicData"/&gt;
+        &lt;key val="World"/&gt;
+        &lt;key val="MarkerTrackerInternalContour"/&gt;
+        &lt;key val="MarkerTrackerInternalSquares"/&gt;
+      &lt;/Keys&gt;
+      &lt;ActionConfig MTAThresh="140" MTAcontrast="0" MTAlogbase="10" WithKalman="0" WithPoseNlls="1"/&gt;
+    &lt;/MarkerTrackerAction&gt;
+    &lt;TrackedObject2CameraAction category="Action" name="TrackedObject2Camera"&gt;
+      &lt;Keys size="3"&gt;
+        &lt;key val="World"/&gt;
+        &lt;key val="IntrinsicData"/&gt;
+        &lt;key val="Camera"/&gt;
+      &lt;/Keys&gt;
+    &lt;/TrackedObject2CameraAction&gt;
+  &lt;/ActionPipe&gt;
+
+  &lt;DataSet key=""&gt;
+  &lt;/DataSet&gt;
+
+&lt;/VisionLib2&gt;
+
+</pre></div>
+
+<h2>Viewer for InstantVision</h2>
+
+You can add a Viewer to visualize the data. The Action which wraps it is called "MegaWidgetActionPipe", which is what you get then you click on "new viewer" in IV. It also has a bunch of keys for image, 2d geometry and other stuff. The GenericDrawAction in the Viewer was created by drag'n'drop the "World.MarkerTrackerInternals.MarkerTrackerInternalContour" from the dataset on the Viewer, it shows the squares detected in the images. By adding these lines to the config file you will not need to open a viewer each time you load this config in IV.
+
+<div class="code"><h3>Code: The visionlib.pm file</h3><pre>
+&lt;?xml version="1.0" encoding="UTF-8" standalone="no" ?&gt;
+&lt;VisionLib2 Version="2.0"&gt;
+
+  &lt;ActionPipe category="Action" name="AbstractApplication-AP"&gt;
+    &lt;ImageConvertActionT__ImageT__RGB_FrameImageT__GREY_Frame category="Action" name="ImageConvertActionT"&gt;
+      ... skipped...
+    &lt;/TrackedObject2CameraAction&gt;
+    
+    &lt;MegaWidgetActionPipe height='549' name='Viewer' show='1' viewerid='0' width='738' x='0' y='0'&gt;
+      &lt;Keys size='8'&gt;
+        &lt;key val='mwap' what='internal use, do not set or change!'/&gt;
+        &lt;key val='VideoSourceImage' what='background, Image*, in'/&gt;
+        &lt;key val='MarkerCorrespondencies' what='2D geometry, GeometryContainer, in'/&gt;
+        &lt;key val='' what='3D geometry, GeometryContainer, in'/&gt;
+        &lt;key val='' what='Camera extrinsic parameters, ExtrinsicData, in'/&gt;
+        &lt;key val='' what='Camera intrinsic parameters, IntrinsicDataPerspective, in'/&gt;
+        &lt;key val='' what='OSG 3D Models, OSGNodeData, in'/&gt;
+        &lt;key val='' what='caption string, StringData, in'/&gt;
+      &lt;/Keys&gt;
+      &lt;GenericDrawAction category='Action' enabled='1' name='World.MarkerTrackerInternals.MarkerTrackerInternalContour'&gt;
+        &lt;Keys size='3'&gt;
+          &lt;key val='World.MarkerTrackerInternals.MarkerTrackerInternalContour' what='data to draw, in'/&gt;
+          &lt;key val='' what='extrinsic data, in'/&gt;
+          &lt;key val='' what='intrinsic data, in'/&gt;
+        &lt;/Keys&gt;
+        &lt;ActionConfig Draw3D='0' DrawCross='1' DrawId='1'/&gt;
+      &lt;/GenericDrawAction&gt;
+    &lt;/MegaWidgetActionPipe&gt;
+    
+  &lt;/ActionPipe&gt;
+
+  &lt;DataSet key=""&gt;
+  &lt;/DataSet&gt;
+
+&lt;/VisionLib2&gt;
+
+</pre></div>
+
+
+
+<h2>IntrinsicData</h2>
+... describes how the image is projected onto the sensor and how the image is distorted by the optics. These values can be determined by calibrating the camera which is described in <a href="http://www.instantreality.org/tutorial/camera-calibration-with-instantvision/">this tutorial</a>. The markertracker is not so sensitive to badly calibrated cameras as long as the radial distortion is below noticeablity, so you can just copy the date from here.
+
+<div class="code"><h3>Code: The visionlib.pm file</h3><pre>
+&lt;?xml version="1.0" encoding="UTF-8" standalone="no" ?&gt;
+&lt;VisionLib2 Version="2.0"&gt;
+
+  &lt;ActionPipe category="Action" name="AbstractApplication-AP"&gt;
+  ... as above
+  &lt;/ActionPipe&gt;
+
+  &lt;DataSet key=""&gt;
+    &lt;IntrinsicDataPerspective calibrated='1' camerainfo='unknown vendor and type' key='IntrinsicData' opticsinfo='unknown vendor and type'&gt;
+      &lt;comment value='Image resolution (application-dependant)'/&gt;
+      &lt;Image_Resolution h='480' w='640'/&gt;
+      &lt;comment value='Normalized principal point (invariant for a given camera)'/&gt;
+      &lt;Normalized_Principal_Point cx='5.0037218855e-001' cy='5.0014036507e-001'/&gt;
+      &lt;comment value='Normalized focal length and skew (invariant for a given camera)'/&gt;
+      &lt;Normalized_Focal_Length_and_Skew fx='1.6826109287e+000' fy='2.2557202465e+000' s='-5.7349563803e-004'/&gt;
+      &lt;comment value='Radial and tangential lens distortion (invariant for a given camera)'/&gt;
+      &lt;Lens_Distortion k1='-1.6826758076e-001' k2='2.5034542035e-001' k3='-1.1740904370e-003' k4='-4.8766380599e-003' k5='0.0000000000e+000'/&gt;
+    &lt;/IntrinsicDataPerspective&gt;
+  &lt;/DataSet&gt;
+
+&lt;/VisionLib2&gt;
+
+</pre></div>
+
+<h2>Marker</h2>
+<p>
+A marker in IV is described by a 4x4 code mask and four corner points.
+You can easily change the marker code by editing the fields DataSet:World:TrackedObject:Marker:Code:LineX.
+
+The marker is made of 4 lines
+Line1 = 1100
+Line2 = 1100
+Line3 = 0100
+Line4 = 0000
+where 0 = black and 1 = white, 
+e.g.
+</p>
+<div class="imgContainer"><img src="marker1_4x4.png" align="center"/><div class="imgCaption">Image: marker code</div></div>
+<p>
+the real marker must have a black square around this and another white square around. It will look like
+</p>
+<div class="imgContainer"><img src="marker1.png" align="center"/><div class="imgCaption">Image: full marker</div></div>
+<p>
+One way to create and print whose things is to go into word and create a 8x8 table, make the rows and cols the same size and color the cell background with black'n'white.
+</p>
+
+<div class="code"><h3>Code: The visionlib.pm file</h3><pre>
+&lt;?xml version="1.0" encoding="UTF-8" standalone="no" ?&gt;
+&lt;VisionLib2 Version="2.0"&gt;
+
+  &lt;ActionPipe category="Action" name="AbstractApplication-AP"&gt;
+  ... as above
+  &lt;/ActionPipe&gt;
+
+  &lt;DataSet key=""&gt;
+    &lt;IntrinsicDataPerspective calibrated='1' camerainfo='unknown vendor and type' key='IntrinsicData' opticsinfo='unknown vendor and type'&gt;
+      &lt;Image_Resolution h='480' w='640'/&gt;
+      &lt;Normalized_Principal_Point cx='5.0037218855e-001' cy='5.0014036507e-001'/&gt;
+      &lt;Normalized_Focal_Length_and_Skew fx='1.6826109287e+000' fy='2.2557202465e+000' s='-5.7349563803e-004'/&gt;
+      &lt;Lens_Distortion k1='-1.6826758076e-001' k2='2.5034542035e-001'
+                        k3='-1.1740904370e-003' k4='-4.8766380599e-003' k5='0.0000000000e+000'/&gt;
+    &lt;/IntrinsicDataPerspective&gt;
+    
+    &lt;World key="World"&gt;
+      &lt;TrackedObject key='TrackedObject'&gt;
+        &lt;ExtrinsicData calibrated='0' t='0'&gt;
+          &lt;R rotation='[1.94006 1.8784 0.5568 ]'/&gt;
+          &lt;t translation='[21.0199 -15.4131 126.97 ]'/&gt;
+          &lt;Cov covariance='[0.197138  -0.10784  1.11672  0.00494553  0.00655673  -0.00420995  ;
+                                    -0.10784  0.0681589  -0.642015  -0.00208031  -0.00403554  0.00560319  ;
+                                    1.11672  -0.642015  6.67529  0.0342651  0.0392421  -0.0447934  ;
+                                    0.00494553  -0.00208031  0.0342651  0.000935732  0.000448397  6.00177e-005  ;
+                                    0.00655673  -0.00403554  0.0392421  0.000448397  0.000896986  -0.000299469  ;
+                                    -0.00420995  0.00560319  -0.0447934  6.00177e-005  -0.000299469  0.00270854  ]'/&gt;
+        &lt;/ExtrinsicData&gt;
+        &lt;Marker BitSamples='2' MarkerSamples='6' NBPoints='4' key='Marker1'&gt;
+          &lt;Code Line1='1100' Line2='1100' Line3='0100' Line4='0000'/&gt;
+          &lt;Points3D nb='4'&gt;
+            &lt;HomgPoint3Covd Cov3x3='[0  0  0  ; 0  0  0  ; 0  0  0  ]' w='1' x='0' y='6' z='0'/&gt;
+            &lt;HomgPoint3Covd Cov3x3='[0  0  0  ; 0  0  0  ; 0  0  0  ]' w='1' x='6' y='6' z='0'/&gt;
+            &lt;HomgPoint3Covd Cov3x3='[0  0  0  ; 0  0  0  ; 0  0  0  ]' w='1' x='6' y='0' z='0'/&gt;
+            &lt;HomgPoint3Covd Cov3x3='[0  0  0  ; 0  0  0  ; 0  0  0  ]' w='1' x='0' y='0' z='0'/&gt;
+          &lt;/Points3D&gt;
+        &lt;/Marker&gt;
+      &lt;/TrackedObject&gt;
+    &lt;/World&gt;
+    
+  &lt;/DataSet&gt;
+
+&lt;/VisionLib2&gt;
+
+</pre></div>
+
+
+<p>
+You can also change the position of the marker in the world by changing ...Marker:Points3D:HomgPoint3Covd:[xyz] values,
+make sure the marker stays rectangular and planar.
+The points describe the outer black border (6x6 field) not the white surrounding, they corrospond to 
+upper left, upper right, lower right, lower left corners of the image.
+</p>
+
+<p>
+You can also use multiple markers in one TrackedObject, just duplicate DataSet:World:TrackedObject:Marker and change one of them to reflect its physical position on the object you want to track.
+</p>
+
+        
+    Files:
+    <ul class="files"><li><a href="markertracker.pm">markerTracker.pm (complete example config file)</a></li><li><a href="marker3.pdf">marker3.pdf (marker for printing)</a></li></ul>
+    </div>
+</div>

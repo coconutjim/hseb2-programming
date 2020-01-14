@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <Viewpoint DEF='view1' position='0 0 12'/>
+    <DirectionalLight direction='0 0 1'/>
+    <GradientBackground DEF='back' position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+    <Transform DEF='trans1' translation='-2 2 0'>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='1 0 0'/>
+        </Appearance>
+        <Box/>
+      </Shape>
+    </Transform>
+    <Transform DEF='trans2' translation='2 2 0'>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='0 1 0'/>
+        </Appearance>
+        <Cone/>
+      </Shape>
+    </Transform>
+    <Transform DEF='trans3' translation='-2 -2 0'>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='0 0 1'/>
+        </Appearance>
+        <Cylinder/>
+      </Shape>
+    </Transform>
+    <Transform DEF='trans4' translation='2 -2 0'>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='1 1 0'/>
+        </Appearance>
+        <Sphere/>
+      </Shape>
+    </Transform>
+    <Transform DEF='trans' translation='0 0 -20'>
+      <MatrixTransform DEF='matTrans'>
+        <Shape>
+          <Appearance>
+            <RenderedTexture DEF='RT' minFilter='linear' magFilter='linear' update='always' dimensions='1024 1024 4'>
+              <Rectangle2D DEF='node' containerField='excludeNodes' solid='false' size='10 10'/>
+              <GradientBackground USE='back' containerField='background'/>
+            </RenderedTexture>
+            <ComposedShader DEF='com'>
+              <field accessType='inputOutput' name='tex' type='SFInt32' value='0'/>
+              <ShaderPart><![CDATA[
+										void main(void)
+										{
+                                            gl_Position = ftransform();
+											gl_TexCoord[0] = gl_MultiTexCoord0;
+                                            	
+											vec4 pos = gl_ModelViewMatrix * gl_Vertex;
+											vec3 eye = normalize(pos.xyz);
+											vec3 norm = normalize(gl_Normal);
+											
+											vec3 refl = reflect(eye, norm);
+											refl = normalize(refl) + vec3(0,0,1);
+											
+											float m = 0.5 * sqrt( dot(refl, refl) );
+											gl_TexCoord[1].st = vec2( 1.0-(refl.x/m+0.5), (refl.y/m+0.5) );	
+										}
+										]]>
+              </ShaderPart>
+              <ShaderPart type='FRAGMENT'><![CDATA[
+										uniform sampler2D tex;
+                                        
+										void main(void)
+										{
+										  gl_FragColor = texture2D(tex, gl_TexCoord[1].st);
+										}
+										]]>
+              </ShaderPart>
+            </ComposedShader>
+          </Appearance>
+          <Rectangle2D USE='node'/>
+        </Shape>
+      </MatrixTransform>
+      <SpaceSensor DEF='space' description='Left Button: Rotate. Middle Button: Pan. Right Button: Zoom.'/>
+    </Transform>
+    <TimeSensor DEF='ts' cycleInterval='10' loop='true' startTime='1'/>
+    <OrientationInterpolator DEF='oi' key='0 0.25 0.5 0.75 1' keyValue='0 1 1 0 0 1 1 1.57 0 1 1 3.14 0 1 1 4.71 0 1 1 6.28'/>
+    <ROUTE fromNode='space' fromField='matrix_changed' toNode='matTrans' toField='set_matrix'/>
+    <ROUTE fromNode='ts' fromField='fraction_changed' toNode='oi' toField='set_fraction'/>
+    <ROUTE fromNode='oi' fromField='value_changed' toNode='trans1' toField='set_rotation'/>
+    <ROUTE fromNode='oi' fromField='value_changed' toNode='trans2' toField='set_rotation'/>
+    <ROUTE fromNode='oi' fromField='value_changed' toNode='trans3' toField='set_rotation'/>
+    <ROUTE fromNode='oi' fromField='value_changed' toNode='trans4' toField='set_rotation'/>
+  </Scene>
+</X3D>

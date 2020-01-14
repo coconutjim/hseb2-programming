@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Developing InstantIO C++-Plugins</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Developing InstantIO C++-Plugins</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Plugins InstantIO devices<br/><strong>Author(s): </strong>Johannes Behr,
+        Peter Eschler,
+        Tobias Alexander Franke,
+        Sabine Webel<br/><strong>Date: </strong>2009-02-24</p>
+  <p><strong>Summary: </strong>Short tutorial and template on how to write an InstantIO-Plugin in C++</p>
+  <div id="content">
+    <h2>Introduction</h2>
+    <p>This tutorial should help you to write, build and install an InstantIO C++-Plugin for your own device, device-system, filter or whatever you would like to be a node in the InstantIO network. You can also write plugins in pure Java but this is not the topic of this how-to. Further information and the reference documentation is available in the <a href="http://www.instantreality.org/apidocs/instantio/">InstantIO-section</a> of the instantReality page.</p>
+	
+    <h2>Requirements</h2>
+    <p class="warning"><b>Warning: </b>For Windows you need to use the Visual Studio 2008 SP1 compiler!</p>
+    <p>You need a C++ compiler and the InstantIO-SDK, i.e. for Linux and Mac use the current commandline g++ or XCode compiler, and on Windows you need the Visual Studio 2008 SP1 release. The InstantIO-SDK is included in every InstantPlayer package, which you can download from the <a href="http://www.instantreality.org/downloads/">instantReality download</a> page. You probably have it already installed if you read this document.</p>    
+    
+    <h2>Write a plugin</h2>
+
+    <p>You only need to write a single class to get a new IO-Node. Use the included <b>FooNode.h</b> and <b>FooNode.cpp</b> files as a template.</p>
+    
+    <p>Nodes in the IO-subsystem are described by a type, have fields for attributes and In/Out-Slots for communication. You can use Routes to connect In-/Out-Slot of the same type (e.g. <tt>SFVec3f</tt>) to transfer data between Nodes. The exact mapping given below.</p>
+    <p>The concept is very similar to X3D nodes, however there are some main differences in the IO-subsystem.</p> 
+    <p>First of all the Routes can connect local nodes or different applications running on the same or a network-connected machine. X3D-Routes only connect nodes inside of a single application. Second, routes can connect not just a single In-/Out-Slot, like in X3D, but any number with the help of a flexible wildcard-system. Last but not least, IO-Nodes have different states than X3D-nodes and they are only active if at least one slot is connected.</p>
+
+    <p>To implement you own InstantIO node you only really have to know the states and fill in some handler methods. For further explanation look at the manual in the <a href="http://www.instantreality.org/apidocs/instantio/">InstantIO-section</a>.</p>
+
+    <h2>IO-Node states</h2>
+
+    <ul><li><b>SLEEPING</b> The node is constructed and all fields and field-values are available and set.</li><li><b>RUNNING</b> The node is connected to another node and the data-read/write thread-code is running.</li><li><b>ERROR</b> Some ERROR occurred. Look e.g. at the web-interface to get more detail.</li><li><b>DISABLED</b> The node is disabled from outside.</li></ul>
+    
+    <p>To handle these state changes and to read/write data from/to your node you have to implement the following functions in your node.</p>
+
+    <h2>IO-State handler</h2>
+
+    <ul><li><b>initialize</b> Use the field-values to initialize your node and build dynamic In/Out-Slots from your current device/system configuration.</li><li><b>processData</b> Somebody connected a Route and the worker-thread for the node has been started. Every node has a single thread as worker-thread to read and write the data. The <tt>processData()</tt> method is called by the worker-thread and has to open the device/system and read/write data to/from the Slots.</li><li><b>shutdown</b> This method is called when the node is dismissed your node. Delete all dynamic In/Out-Slots and do other cleanups. </li></ul>
+    
+    <p>This should help you to get a first idea. Look at the code and the ADDCODE-comments and really look at the <a href="http://www.instantreality.org/apidocs/instantio/">online documentation</a>.</p>
+
+    <h2>X3D-Field to InstantIO-Slot Mapping</h2>
+
+    <p>X3D's field types map to the following InstantIO <tt>InSlot</tt> types (<tt>OutSlot</tt>s map analogously):</p>
+    <table>
+      <tr>
+        <th>X3D</th><th>InstantIO</th>
+      </tr>
+      <tr>
+        <td>SFBool</td><td>InSlot&lt;bool&gt;</td>
+      </tr>
+      <tr>
+        <td>SFFloat</td><td>InSlot&lt;float&gt;</td>
+      </tr>
+      <tr>
+        <td>SFVec2f</td><td>InSlot&lt;Vec2f&gt;</td>
+      </tr>
+      <tr>
+        <td>SFVec3f</td><td>InSlot&lt;Vec3f&gt;</td>
+      </tr>
+      <tr>
+        <td>SFInt32</td><td>InSlot&lt;long&gt;</td>
+      </tr>
+      <tr>
+        <td>SFTime</td><td>InSlot&lt;Time&gt;</td>
+      </tr>
+      <tr>
+        <td>SFColor</td><td>InSlot&lt;Color&gt;</td>
+      </tr>
+      <tr>
+        <td>SFColorRGBA</td><td>InSlot&lt;ColorRGBA&gt;</td>
+      </tr>
+      <tr>
+        <td>SFRotation</td><td>InSlot&lt;Rotation&gt;</td>
+      </tr>
+      <tr>
+        <td>SFMatrix4f</td><td>InSlot&lt;Matrix4f&gt;</td>
+      </tr>
+      <tr>
+        <td>SFImage</td><td>InSlot&lt;ImagePtr&gt;</td>
+      </tr>
+      <tr>
+        <td>MFFloat</td><td>InSlot&lt;MFFloatPtr&gt;</td>
+      </tr>
+      <tr>
+        <td>MFVec3f</td><td>InSlot&lt;MFVec3fPtr&gt;</td>
+      </tr>
+      <tr>
+        <td>MFVec2f</td><td>InSlot&lt;MFVec2fPtr&gt;</td>
+      </tr>
+      <tr>
+        <td>MFVec4f</td><td>InSlot&lt;MFVec4fPtr&gt;</td>
+      </tr>
+      <tr>
+        <td>MFInt32</td><td>InSlot&lt;MFInt32Ptr&gt;</td>
+      </tr>
+      <tr>
+        <td>MFString</td><td>InSlot&lt;MFStringPtr&gt;</td>
+      </tr>
+      <tr>
+        <td>MFRotation</td><td>InSlot&lt;MFRotationPtr&gt;</td>
+      </tr>
+      <tr>
+        <td>MFColor</td><td>InSlot&lt;MFColorPtr&gt;</td>
+      </tr>
+    </table>
+
+    <h2>Build, test and install</h2>
+    
+    <p>Now you have to compile, test and install your plugin. The PluginName must be the node-name plus an "<tt>.iio</tt>" (for InstantIO) suffix. </p>
+    <p>Use the included test.x3d or test.wrl to run your plugin. The test plugin produces some random vec3f and rotation data. The test.x3d/wrl example prints the received values on the screen. If the plugin is not loaded you get a simple "Pos: undef, Rot: undef" text</p>
+
+    <div class="imgContainer"><img src="instantIO-test-noplugin.png" align="center"/><div class="imgCaption">Image: Plugin is not loaded, no data printouts</div></div>
+
+    <p>If you successfully compiled and installed the plugin (by copying it into the folder where your executable is located) you will get the random values printed to your screen.</p>
+
+    <div class="imgContainer"><img src="instantIO-test-plugin.png" align="center"/><div class="imgCaption">Image: Plugin is loaded, random data printouts</div></div>
+
+    <h2>Setting up your build environment</h2>
+    
+    The example package provides a CMake file to create your build environment. You can <a href="http://www.cmake.org/cmake/resources/software.html">download CMake here</a> for your operating system. Open up CMake and point it to the plugin source directory. Make sure that the variable IR_ROOT in the CMake window is pointing to the correct installation path of Instant Reality (on Windows this is generally a subpath of <b>C:\Program Files (x86)</b>, on Mac <b>/Applications</b> or on Linux in <b>/opt</b>). Configure the project and click <b>Generate</b> to create a project file for your build environment (for instance XCode or Visual Studio).
+    
+    <div class="imgContainer"><img src="cmake.png" align="center"/><div class="imgCaption">Image: Configure and create your build environment with CMake</div></div>
+    
+    The second path will now contain your project files to build the InstantIO plugin.
+    
+    
+    Files:
+    <ul class="files"><li><a href="instantIOPlugin.zip">instantIOPlugin.zip</a></li></ul>
+    
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

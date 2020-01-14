@@ -1,0 +1,32 @@
+#VRML V2.0 utf8
+
+Viewpoint {
+	position 0 0 7
+}
+
+Group {
+	children [
+		DEF	ts TouchSensor {}
+		Shape {
+			appearance Appearance {
+				material DEF mat Material {
+					diffuseColor 0 0 1
+				}
+			}
+			geometry Sphere	{
+				radius .5
+			}
+		}
+	]
+}
+
+
+DEF AvalonSimpleJava Script {
+  directOutput TRUE
+  eventIn SFBool set_colorChange
+  eventOut SFColor color_changed
+  url "InstantJNI.class"
+}
+
+ROUTE ts.isActive TO AvalonSimpleJava.set_colorChange
+ROUTE AvalonSimpleJava.color_changed TO	mat.diffuseColor

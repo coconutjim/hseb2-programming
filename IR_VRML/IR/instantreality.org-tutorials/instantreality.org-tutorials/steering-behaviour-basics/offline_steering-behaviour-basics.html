@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Steering behaviour basics</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Steering behaviour basics</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        steering,
+        behaviour<br/><strong>Author(s): </strong>Peter Eschler<br/><strong>Date: </strong>2006-06-06</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to use steering behaviours to add some life to your world.</p>
+  <div id="content">
+        <h2>What are steering behaviours?</h2>		
+            <p>
+                Citing Craig Reynolds GDC 1999 paper:
+            </p>
+            <blockquote><p>Steering behaviours are a solution for one requirement of autonomous characters in animation and games: the ability to navigate around their world in a life-like and improvisational manner.</p></blockquote>
+            <p>
+                By combining predefined <i>behaviours</i> a variety of  autonomous systems can be simulated. The basics of steering behaviours are described in <a href="http://www.red3d.com/cwr/steer/">Craig Reynolds paper</a> and there are plenty of other resources out on the web (e.g. <a href="http://www.steeringbehaviors.de/">www.steeringbehaviors.de</a>) - just google for "steering behaviours". Make sure you have read and understood the basic principles (vehicles with behaviours) as the rest of this tutorial focuses on how to use them with Instant Player.
+            </p>
+		
+        <h2>The steering sytem</h2>		
+        <p>
+            We start with creating a <a href="/documentation/nodetype/SteeringSystem">SteeringSystem</a> node and giving it a nice name:
+        </p>
+        <div class="code"><h3>Code: The steering system.</h3><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;X3D profile='Immersive'&gt;
+	&lt;Scene&gt;
+            &lt;SteeringSystem DEF='steerSystem'&gt;
+            &lt;/SteeringSystem&gt;
+	&lt;/Scene&gt;
+&lt;/X3D&gt;</pre></div>
+        <p>The parameters of the steering system will be discussed later. First we'll insert some vehicles into our system.
+        </p>
+        
+        <h2>Adding vehicles</h2>
+        <p>
+        Within a steering system one or more vehicles represent autonomous agent(s) parameterized with behaviours. The vehicle class used in Instant Player is based on a point-mass approximation which allows for a simple physically-based model (for example, a point mass has velocity (linear momentum) but no moment of inertia (rotational momentum)). 
+        </p>
+        <p>Adding a vehicle to the steering system looks like this:</p>
+        <div class="code"><h3>Code: Adding two vehicles to the system</h3><pre>&lt;SteeringSystem DEF='steerSystem'&gt;
+    &lt;SteeringVehicle DEF='vehicle1' maxSpeed='2' maxForce='4' /&gt;
+    &lt;SteeringVehicle DEF='vehicle2' maxSpeed='6' maxForce='12' /&gt;
+&lt;/SteeringSystem&gt;        
+        </pre></div>
+        <p class="warning"><b>Warning: </b>A <a href='/documentation/nodetype/SteeringVehicle'>SteeringVehicle</a> can only be a child of exactly one <a href='/documentation/nodetype/SteeringSystem'>SteeringSystem</a> at a time. Re-
+        USEing a vehicle in another system is not supported and will lead to undefined results.
+        </p>
+        <h2>Parameterizing the vehicle</h2>
+        <p>
+        A vehicle has a few attributes, which can be read and set at any time:
+        </p>
+        <dl><dt>mass</dt>:
+            <dd>the mass of the vehicle</dd><br/><dt>radius</dt>:
+            <dd>the radius of the vehicle (used for obstacle and neighbour avoidance)</dd><br/><dt>maxSpeed</dt>:
+            <dd>the maximum speed of the vehicle</dd><br/><dt>maxForce</dt>:
+            <dd>the maximum force of the vehicle</dd><br/></dl>
+        
+        <p>
+        There two additional inputOutput fields named <tt>useFixedY</tt> and <tt>fixedY</tt>. If <tt>useFixedY</tt> 
+        is <tt>true</tt> the value of <tt>fixedY</tt> is used as the y-component of the vehicles position. By setting a
+        fixed value the vehicle can be constrained to stay on a fixed plane. If you dynamically route values to the field more 
+        interesting effects are possible.(e.g. terrain following). If <tt>useFixedY</tt> is <tt>false</tt> the value of
+        <tt>fixedY</tt> is ignored.
+        </p>
+        
+        <h2>Adding behaviours to the vehicles</h2>
+        <p>	
+        After our steering system is equipped with some vehicles we need to add behaviour(s) to them, otherwise they won't do anything 
+        (which isn't very interesting). The available behaviours are:
+        </p>
+        <dl><dt>SeekBehaviour</dt>:
+            <dd>A Seek behaviour acts to steer the character towards a specified position in global space.</dd><br/><dt>FleeBehaviour</dt>:
+            <dd>Flee is the inverse of seek and acts to steer the character away from the target.</dd><br/><dt>AvoidNeighborBehaviour</dt>:
+            <dd>Tries to keep characters which are moving in arbitrary directions from running into each other.</dd><br/><dt>AvoidObstaclesBehaviour</dt>:
+            <dd>Gives a character the ability to avoid obstacles.</dd><br/><dt>EvasionBehaviour</dt>:
+            <dd>Evasion is similar to Flee except that the menace (target) is another moving character.</dd><br/><dt>PursuitBehaviour</dt>:
+            <dd>Pursuit is similar to Seek except that the quarry (target) is another moving character.</dd><br/><dt>WanderBehaviour</dt>:
+            <dd>Wander is a type of random steering.</dd><br/></dl>
+        <div class="code"><h3>Code: Adding behaviours to the vehicles</h3><pre>&lt;SteeringSystem DEF='steerSystem'&gt;
+        
+    &lt;SteeringVehicle DEF='vehicle1' maxSpeed='2' maxForce='4' mass='1.4'&gt;
+        &lt;SeekBehaviour DEF='seekBehaviour' factor='1.0' containerField='behaviours'  /&gt;    
+        &lt;WanderBehaviour DEF='wanderBehaviour' factor='0.2' containerField='behaviours' /&gt;    
+    &lt;/SteeringVehicle&gt;
+    
+    &lt;SteeringVehicle DEF='vehicle2' maxSpeed='2' maxForce='4' mass='1.1' &gt;
+        &lt;PursuitBehaviour DEF='pursuitBehaviour' containerField='behaviours' &gt;
+            &lt;SteeringVehicle USE='vehicle1' containerField='quarry' /&gt;
+        &lt;/PursuitBehaviour&gt;
+    &lt;/SteeringVehicle&gt;
+    
+&lt;/SteeringSystem&gt;        
+        </pre></div>
+        <p>The example above shows a <a href="/documentation/nodetype/SteeringSystem">SteeringSystem</a> that contains two vehicles. The vehicles contain different behaviours.</p>
+        <p>
+        The first vehicle is called <i>vehicle1</i> and contains two behaviours: a <a href="/documentation/nodetype/SeekBehaviour">SeekBehaviour</a> and a <a href="/documentation/nodetype/WanderBehaviour">WanderBehaviour</a>. 
+        That way <i>vehicle1</i> is seeking the target while wandering a little (seek has a factor of 1.0 while wander has 0.1). The <i>target</i> of the
+        <a href="/documentation/nodetype/SeekBehaviour">SeekBehaviour</a> is not specified explicitly so the default value (0,0,0) will be used. This results in <i>vehicle1</i> seeking around
+        the origin.        
+        </p>
+        <p>
+        The <i>vehicle2</i> only contains a <a href="/documentation/nodetype/PursuitBehaviour">PursuitBehaviour</a> which is parameterized to pursue <i>vehicle1</i>. This results in
+        <i>vehicle2</i> following <i>vehicle1</i>.
+        </p>
+        <h2>Updating the vehicles</h2>
+        <p>
+        In order to run the steering behaviour simulation the vehicle's <tt>update</tt> field has to be called continously.
+        This could be achieved by connecting a <a href="/documentation/nodetype/TimeSensor">TimeSensor</a>.time field to the <tt>update</tt> field.
+        In practice the <a href="/documentation/nodetype/SteeringSystem">SteeringSystem</a> does this job for you. Instead of connecting the <a href="/documentation/nodetype/TimeSensor">TimeSensor</a>
+        to every single vehicle, you simply connect it to the <a href="/documentation/nodetype/SteeringSystem">SteeringSystem</a>.time field which calls the
+        update field on all it's child vehicles.
+        </p>
+        <div class="code"><h3>Code: Connecting a timer to the system</h3><pre>&lt;TimeSensor DEF='timeSensor' loop='true' /&gt;
+&lt;ROUTE fromNode='timeSensor' fromField='time' toNode='steerSystem' toField='time' /&gt;
+ </pre></div>
+        <h2>I don't see anything!?</h2>
+        <p>
+        Right. Until now we have setup a <a href="/documentation/nodetype/SteeringSystem">SteeringSystem</a>, inserted some vehicles and added behaviours to them. But there is nothing to see!
+        </p>
+        <p>
+        That's because the <a href="/documentation/nodetype/SteeringSystem">SteeringSystem</a> is a simulation node, that is: it has no visual output. All it does is simulating an autonomous behaviour by calculating a new position and orientation for every vehicle. So after each simulation step triggered by the <a href="/documentation/nodetype/TimeSensor">TimeSensor</a> connected to a SteeringSystem's <i>time</i> field the vehicles of the system contain a new position and orientation in their <i>translation</i> and <i>rotation</i> fields.
+        </p>
+        <p>
+        It's up to you what to do with these values. The most common practice is connecting the simulated position and rotation to a <a href="/documentation/nodetype/ComponentTransform">ComponentTransform</a> which is the parent of a subgraph containing the geometry which visually represents the vehicle.
+        </p>
+        <h2>Moving some boxes</h2>
+        <p>As an example we will add two boxes representing our vehicles.</p>
+        <div class="code"><h3>Code: Adding and moving boxes</h3><pre>&lt;ComponentTransform DEF='trans1'&gt;
+    &lt;Shape&gt;
+        &lt;Box containerField='geometry' size='0.1 0.1 0.1' /&gt;
+        &lt;Appearance&gt;&lt;Material diffuseColor='1 0 0' /&gt;&lt;/Appearance&gt;
+    &lt;/Shape&gt;
+&lt;/ComponentTransform&gt;
+
+&lt;ComponentTransform DEF='trans2'&gt;
+    &lt;Shape&gt;
+        &lt;Box containerField='geometry' size='0.1 0.1 0.1' /&gt;
+        &lt;Appearance&gt;&lt;Material diffuseColor='0 0 1' /&gt;&lt;/Appearance&gt;
+    &lt;/Shape&gt;
+&lt;/ComponentTransform&gt;
+
+&lt;ROUTE fromNode='vehicle1' fromField='translation_changed' toNode='trans1' toField='translation' /&gt;
+&lt;ROUTE fromNode='vehicle2' fromField='translation_changed' toNode='trans2' toField='translation' /&gt;
+&lt;ROUTE fromNode='vehicle1' fromField='rotation_changed' toNode='trans1' toField='rotation' /&gt;
+&lt;ROUTE fromNode='vehicle2' fromField='rotation_changed' toNode='trans2' toField='rotation' /&gt;
+ </pre></div>
+        
+        <h2>Debugging vehicles and behaviours</h2>
+        <p>
+        A vehicle offers more attributes which are read-only and can be used for displaying the internal state of the vehicle in the case of debugging.
+        </p>
+        <h2>Vehicle's outputOnly fields</h2>
+        <dl><dt>speed</dt>:
+            <dd>The current speed of the vehicle (which is the length of the velocity vector).</dd><br/><dt>velocity</dt>:
+            <dd>The current velocity vector of the vehicle.</dd><br/><dt>forward</dt>:
+            <dd>The current forward vector of the vehicle.</dd><br/><dt>seekForce</dt>:
+            <dd>The current seek force of the vehicle (a null vector if no <a href='/documentation/nodetype/SeekBehaviour'>SeekBehaviour</a> is used).</dd><br/><dt>avoidObstaclesForce</dt>:
+            <dd>The current avoid obstacle force of the vehicle (a null vector if no AvoidObstacles behaviour is used).</dd><br/></dl>
+		
+		<div class="imgContainer"><img src="steer.png" align="center"/><div class="imgCaption">Image: Screenshot showing four instances of the Boxman character walking around. The boxes are obstacles, which are avoided, and the golden ball symbolizes an attractor for the seek behaviour.</div></div>
+        
+        
+    Files:
+    <ul class="files"><li><a href="steeringBasics.x3d">steeringBasics.x3d</a></li></ul>    
+        
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

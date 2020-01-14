@@ -1,0 +1,248 @@
+<div id="tutorialContainer">
+  <h2 class="title">Using OpenNI devices</h2>
+  <p class="description"><strong>Keywords:</strong><br/>OpenNI,
+        Depth,
+        Sensor,
+        Kinect<br/><strong>Author(s): </strong>Tobias Alexander Franke<br/><strong>Date: </strong>2013-10-06</p>
+  <p><strong>Summary: </strong>
+    This tutorial introduces the OpenNI2 framework and shows how to write an X3D scene with a 
+    depth-displaced image from an OpenNI device such as the Microsoft Kinect.
+  </p>
+  <div id="content">
+    <h2>OpenNI</h2>
+    <p>
+        The open framework <a href="http://www.openni.org/">OpenNI2</a> 
+        is an API for so called "natural interfaces", of
+        which the foremost examples are the Microsoft Kinect for Windows or the ASUS Xtion.
+        Through the API programmers can not only receive access to the camera data, but to a collection
+        of generators which produce different kinds of tracking data. Such generator data might include
+        hand tracking, gesture recognition or user identification, and OpenNI provides interfaces
+        for third party vendors to enhance and create proprietary enhancements.
+        
+        InstantReality provides a node to access the functionality given through the OpenNI framework.
+        In this tutorial, this node is explained in detail to build a demo application of a camera image
+        on a height field generated with a depth map.
+    </p>
+    
+    <p class="warning"><b>Warning: </b>
+        The previous version of the OpenNI node, which built on OpenNI 1.x is now retired. Please
+		install the OpenNI2 and NiTE2 frameworks and use the NI2 node.
+    </p>
+    
+    <h2>Prerequisites</h2>
+    <p>
+        To get going, you will need a standard OpenNI installation. You can either 
+        <a href="http://www.openni.org/">download the current stable or alpha binaries</a> 
+        or build them yourself. In any case, it is important that the OpenNI library is inside your path environment! If you
+        use the standard installer, this should be taken care of already.
+    </p>
+    
+    <p>    
+        Make sure your driver installation is correct by testing your NI device with one of the samples that come with
+        OpenNI, for instance the <b>NiViewer</b>: if one of the samples produces output such as the depth image, you are
+        ready to go. Alternatively, if you do not own an NI device such as the Kinect, read on below on how to use prerecorded
+        streams.
+    </p>
+	
+	<p class="warning"><b>Warning: </b>
+		As of OpenNI 2.2 Alpha there is still a bug which causes a search for specific driver DLLs
+		in the current working directory. The search will fail and OpenNI won't initialize correctly. To counter this behavior, please add the following 
+		environment variable: OPENNI2_DRIVERS_PATH64 for 64bit windows, OPENNI2_DRIVERS_PATH. The variable should contain the path to
+		the Redist driver directory, e.g. C:\Program Files\OpenNI2\Redist\OpenNI2\Drivers.
+	</p>
+	
+	<p class="warning"><b>Warning: </b>
+		As of NiTE 2.2 there is still a bug which causes a search for pre-stored tracking data 
+		in the current working directory. The search will fail and NiTE won't initialize the UserTracker, which is essential for sekelton tracking.
+		You can drop the INI file below in your Instant Reality installation path (e.g. C:\Program Files\Instant Reality\bin) or, if you're using
+		sav, into the same directory you're exectuing sav in. Inside the INI file a custom path is set to the NiTE Redist directory, which you may
+		need to modify.
+	</p>
+        
+
+    <h2>The node</h2>
+    <h2>Instantiating a standard NI2 device</h2>
+    <p>
+        The <a href="http://doc.instantreality.org/documentation/nodetype/NI">NI2 node</a> 
+        in its complete instantiation is accessed via InstantIO as follows:
+    </p>
+    
+    <div class="code"><h3>Code: OpenNI InstantIO node</h3><pre>&lt;IOSensor DEF='kinect' type='NI2' DeviceID='0' Width='640' Height='480' FPS='30' AlignViewpoints='TRUE' NormalizeDepth='TRUE' Mirror='FALSE' RecordingFile=''&gt;
+    &lt;field accessType='outputOnly'  name='Image'                type='SFImage'/&gt;
+    &lt;field accessType='outputOnly'  name='Depth'                type='SFImage'/&gt;
+    &lt;field accessType='outputOnly'  name='UserMask'             type='SFImage'/&gt;
+    &lt;field accessType='outputOnly'  name='TrackedUsers'         type='MFInt32'/&gt;
+    &lt;field accessType='outputOnly'  name='NumUsers'             type='SFInt32'/&gt;
+    &lt;field accessType='outputOnly'  name='HandPosition'         type='SFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='Gesture'              type='SFString'/&gt;
+    &lt;field accessType='outputOnly'  name='GestureJSON'          type='SFString'/&gt;
+    &lt;field accessType='outputOnly'  name='JointPositions'       type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='JointOrientations'    type='MFRotation'/&gt;
+    &lt;field accessType='outputOnly'  name='SkeletonConfidence'   type='MFFloat'/&gt;
+	
+	&lt;field accessType='inputOnly'   name='ResetTrackedUsers'    type='SFBool'/&gt;
+&lt;/IOSensor&gt;
+</pre></div>
+
+    <p>
+        <ul><li>
+                Since a Kinect device comes with two cameras (a depth and an image sensor), there
+                are two fields to access these images: <tt>Image</tt>, which provides the color image of the first camera,
+                and <tt>Depth</tt>, which provides the depth data of the sensor. <b>Please note</b>: the color image
+                is a standard RGB 8bit image, whereas the depth image is a single channel 32bit float image.
+            </li><li>
+				Another image provided by the IOSensor is the <tt>UserMask</tt>: this is a simple greyscale image, in which
+				each pixel represents the ID of a user. So for instance to filter out all pixels of user 2, simply write
+				a shader that multiplies all other colors of the <tt>Image</tt> by 0 and leaves the rest unmodified.
+			</li><li>
+                <tt>Width</tt>, <tt>Height</tt> and <tt>FPS</tt> fields are self-explanatory configurations for the  camera capturing the scene. Note that the FPS parameter is 
+                highly device dependent and may be fixed to one value only.
+            </li><li>
+                The <tt>AlignViewPoints</tt> parameter controls if the node will align both the depth and color image to
+                a common viewpoint. If this parameter is set to <tt>FALSE</tt>, you will have to manually match the depth
+                image to the color image (since both cameras are slightly apart on the device).
+            </li><li>
+                Setting <tt>NormalizedDepth</tt> controls if the node will automatically rescale the float values of
+                the depth image to a range of 0.0 to 1.0. The scaling factor is a fixed, device-dependent number that 
+                is used internally by OpenNI. Setting this parameter to <tt>FALSE</tt> leaves the values untouched so you
+                can arbitrarily rescale them in your shader.
+            </li><li>
+                If <tt>Mirror</tt> is set to <tt>TRUE</tt>, both the depth and color images will be
+                flipped y-axis.
+            </li><li>
+                If <tt>RecordingFile</tt> can be optionally set to a prerecorded .oni file. See below.
+            </li><li>
+                <tt>NumUsers</tt> is a simple counter which provides the number of humans detected in front of the
+                device.
+            </li><li>
+                <tt>Gesture</tt> will provide a string of a given hand gesture recognized by the device.
+            </li><li>
+                <tt>GestureJSON</tt> will provide a JSON container with the recognized gesture and additional metadata about it. This data is dependent on the
+				current detection framework. In this case, NiTE2 is used. Please consult to <a href="http://dl.acm.org/citation.cfm?doid=2338714.2338743">
+				A flexible approach to gesture recognition and interaction in X3D</a> by <tt>T. Franke, M. Olbrich and D. Fellner</tt> for more information.
+            </li><li>
+                <tt>JointPositions</tt> and <tt>JointOrientations</tt> are two fields which will output positions and rotation
+                matrices for each joint of one tracked user skeleton. Both arrays
+                provide their joint data in the same order as described in the NiTE2 documentation (refer to <tt>NiteEnums.h</tt>):
+            
+                <tt>
+					JOINT_HEAD, JOINT_NECK, JOINT_LEFT_SHOULDER, JOINT_RIGHT_SHOULDER, 
+					JOINT_LEFT_ELBOW, JOINT_RIGHT_ELBOW, JOINT_LEFT_HAND, JOINT_RIGHT_HAND, 
+					JOINT_TORSO, JOINT_LEFT_HIP, JOINT_RIGHT_HIP, JOINT_LEFT_KNEE, 
+					JOINT_RIGHT_KNEE, JOINT_LEFT_FOOT, JOINT_RIGHT_FOOT
+                </tt>
+				
+				An additionl field <tt>SkeletonConfidence</tt> provides floating point confidence values between 0 (not confident) to 1
+				(confident) for each joint. These values can be used to ensure proper tracking and filter out unwanted updates.
+            </li><li>
+				<tt>TrackedUsers</tt> provides a sequence of IDs of currently tracked users. The list will be updated whenever someone enters
+				or leaves the sensor area. Note that the sequence of IDs is the same as the <tt>JointPositions</tt> and <tt>JointOrientations</tt>
+				fields provide joints for each skeleton: for instance, the sequence <tt>4,1,3</tt> will tell you that the first 15 entries of
+				<tt>JointOrientations</tt> belong to user 4, the next 15 to user 1 and so forth.
+			</li><li>
+				In case tracked users and skeleton tracking will produce incoherent results, get stuck or simply stop working, you can use this send
+				a <tt>TRUE</tt> value to this field to force an internal reset. This will wipe all user tracking and reset the tracker.
+			</li></ul>
+    </p>
+    
+    <h2>Using prerecorded .oni files</h2>
+    <p>
+        The OpenNI framework can dump recordings of input generators into so called .oni containers. These files
+        can be used in place of a standard NI device such as the Microsoft Kinect camera for testing purposes. 
+        If you just want to test your application without any camera hooked up, or if you do not own any NI compatible device, 
+        simply record a sequence and load it with the <tt>RecordingFile</tt> parameter.
+    </p>
+    
+    <div class="code"><h3>Code: Loading a .oni file</h3><pre>&lt;IOSensor DEF='kinect' type='NI' RecordingFile='MyFile.oni'&gt;
+    &lt;field accessType='outputOnly'  name='Image'  type='SFImage'/&gt;
+    &lt;field accessType='outputOnly'  name='Depth'  type='SFImage'/&gt;
+    ...
+&lt;/IOSensor&gt;
+</pre></div>
+    
+    <p>
+        <b>Please note</b>: prerecorded streams cannot be reconfigured. Therefore parameters <tt>Width</tt>, 
+        <tt>Height</tt>, <tt>FPS</tt> and <tt>AlignViewports</tt> <b>are ignored</b>.
+    </p>
+    
+    <h2>Creating a device</h2>
+    <p>
+        The first step is to create a device in your X3D file. We'll use a standard configuration to extract
+        both the color and depth image and route them to two respective PixelTextures that will later be used
+        by a shader.
+    </p>
+    
+        <div class="code"><h3>Code: Hooking up a kinect device to our X3D example</h3><pre>&lt;IOSensor DEF='kinect' type='NI' AlignViewpoints='TRUE'&gt;
+    &lt;field accessType='outputOnly' name='image' type='SFImage'/&gt;
+    &lt;field accessType='outputOnly' name='depth' type='SFImage'/&gt;
+&lt;/IOSensor&gt;
+
+&lt;Shape&gt;
+    &lt;Appearance&gt;
+        &lt;MultiTexture&gt;
+            &lt;PixelTexture2D DEF='image'/&gt;
+            &lt;PixelTexture2D DEF='depth'/&gt;
+        &lt;/MultiTexture&gt;
+        
+        &lt;ComposedShader DEF='shader'&gt;
+            &lt;field accessType='inputOutput' name='image' type='SFInt32' value='0'/&gt;
+            &lt;field accessType='inputOutput' name='depth' type='SFInt32' value='1'/&gt;
+            
+            &lt;ShaderPart type='vertex'   url='"vp.glsl"'/&gt;
+            &lt;ShaderPart type='fragment' url='"fp.glsl"'/&gt;
+        &lt;/ComposedShader&gt;
+    &lt;/Appearance&gt;
+
+    ...
+&lt;/Shape&gt;
+
+&lt;ROUTE fromNode='kinect' fromField='image' toNode='image' toField='set_image'/&gt;
+&lt;ROUTE fromNode='kinect' fromField='depth' toNode='depth' toField='set_image'/&gt;
+</pre></div>
+    
+    
+    <h2>Handling the depth data</h2>
+    <p>
+        Each pixel of the depth image represents a depth value in some coordinate system that is given
+        by the camera. In order to get meaningful results, you'll often times need to scale or calibrate these
+        values depending on their usage within your application. In this example, we'll use a simple
+        plane with as many vertices as there are pixels. The vertex shader will simply set each vertex' z-value
+        to the calibrated depth value of the camera.
+    </p>
+    
+    <div class="code"><h3>Code: A GLSL shader to displace vertices on a geometry according to the depth image</h3><pre>uniform sampler2D depth;
+
+float getdepth(vec2 tc)
+{
+    return texture2D(depth, tc).r*10.0;
+}
+
+void main()
+{
+    gl_TexCoord[0] = gl_MultiTexCoord0;
+    vec2 tc = gl_TexCoord[0].st;
+
+    float d = getdepth(tc);
+    
+    vec3 ray = gl_Normal.xyz;
+    vec4 pos = gl_Vertex;
+    
+    pos.xyz = normalize(ray) * d + gl_Vertex.xyz;
+    
+    gl_Position = gl_ModelViewProjectionMatrix * pos;
+}
+</pre></div>
+
+    <p>
+        In this shader, the depth value is fetched the depht sampler and modified. For each vertex, we calculate its
+        new position by moving it along its respective normal multiplied by the depth value. As you'll play around with
+        the data, you'll undoubtly notice some border issues and depth values that are out of range. In these cases a
+        simple filtering mechanism can significantly improve the image quality of your application. An example is included in
+        the vertex shader below.
+    </p>
+
+    
+    Files:
+    <ul class="files"><li><a href="example/simple_displacement.x3d">simple_displacement.x3d - The main scene file</a></li><li><a href="example/fp.glsl">fp.glsl - Fragment shader</a></li><li><a href="example/vp.glsl">vp.glsl - Vertex shader</a></li><li><a href="example/NiTE.ini">NiTE.ini - configuration file to locate correct folder for tracking data</a></li></ul>
+  </div>
+</div>

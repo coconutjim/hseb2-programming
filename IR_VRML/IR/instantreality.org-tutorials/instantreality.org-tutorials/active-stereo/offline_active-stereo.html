@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Active Stereo</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Active Stereo</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        engine,
+        stereo,
+        active<br/><strong>Author(s): </strong>Patrick Riess<br/><strong>Date: </strong>2007-12-20</p>
+  <p><strong>Summary: </strong>
+    This tutorial describes the configuration of the engine to achieve an active stereoscopic view of scenes by 
+    using synchronized shutter glasses.
+    </p>
+  <div id="content">
+        <h2>Preconditions for this tutorial</h2>
+        <p> 
+        Please read the tutorials "Multiple Windows and Views" as well as "Stereo Basics" in this category to get a  
+        good overview about stereo approaches and basic configuration issues regarding multiple views in Instant Reality. 
+        </p>
+        
+        <h2>Hardware</h2>
+        <p>
+        A "normal" graphics card uses a double buffer approach, a back buffer to write into and a front buffer to display in the 
+        meantime to avoid flickering. To use active stereo you should take a graphics card with quad buffer, i.e. four buffers. 
+        That means it uses a front and a back buffer for each eye.
+        </p>
+        <p>
+        As display you can either use a monitor or a video beamer which is able to display active stereo images interleaved 
+        in time. 
+        </p>
+        <p>
+        Now you just need some shutter glasses which let you see the correct image for the appropriate eye. It is synchronized 
+        with the graphics card, mostly using infrared as you can see in the image below.
+        </p>
+        <div class="imgContainer"><img src="shutterglasses.png" align="center"/><div class="imgCaption">Image: Infrared synchronized shutter glasses</div></div>
+
+        <h2>Stereo modifier</h2>
+        <p>
+        If we want to do stereo, then we need two view areas. One for the left eye and one for the right eye. For stereo it is neccessary to 
+        modify viewing parameters. For this kind of modification there exists a number of modifiers in Instant Reality. For a simple stereo projection 
+        we have to use the <a href="/documentation/nodetype/ShearedStereoViewModifier">ShearedStereoViewModifier</a>: 
+        </p>
+        <div class="code"><h3>Code: <a href='/documentation/nodetype/ShearedStereoViewModifier'>ShearedStereoViewModifier</a> node</h3><pre>
+...
+Viewarea {
+  modifier [
+    <a href='/documentation/nodetype/ShearedStereoViewModifier'>ShearedStereoViewModifier</a> {
+       leftEye  TRUE
+       rightEye FALSE
+       eyeSeparation 0.08   
+       zeroParallaxDistance 1
+    }
+  ]
+}
+...
+        </pre></div>
+        <p>
+        Depending on the eye which should be represented by this modifier, <i>leftEye</i> and <i>rightEye</i> has to be set to TRUE or FALSE. 
+        <i>zeroParallaxDistance</i> and <i>eyeSeparation</i> values are in metres, so they have good default values, if your scene is also 
+        modeled in metres. Otherwise you could either adapt the values or as a better approach, you should use a <a href="/documentation/nodetype/NavigationInfo">NavigationInfo</a> 
+        node in the <i>Scene</i> namespace and set the <i>sceneScale</i> field to 0.01 if the scene is modeled in centimetres or 0.001 if 
+        the scene is modeled in millimetres and so on. The advantage is you can keep the stereo configuration fix for your setup and each 
+        scene and just need to change one value.
+        </p>
+        <div class="code"><h3>Code: <a href='/documentation/nodetype/NavigationInfo'>NavigationInfo</a> node</h3><pre>
+...
+Scene {
+  children [
+    <a href='/documentation/nodetype/NavigationInfo'>NavigationInfo</a> {
+      sceneScale 0.01
+    }
+    ...
+  ]
+}
+        </pre></div>
+        
+        <h2>Quad Buffer Stereo</h2>
+        <p>
+        Active stereo configuration is simple. First you have to tell the <a href="/documentation/nodetype/LocalWindow">LocalWindow</a> to use 
+        four instead of two buffers, the default setting.
+        </p>
+        <div class="code"><h3>Code: Quad buffer configuration</h3><pre>
+...
+LocalWindow {
+  buffer 4
+  ...
+}
+...
+        </pre></div>
+        <p>
+        In the window we need two view areas, one for the left and one for the right eye. 
+        These areas are overlapping as we don't set specific regions for them. For each <a href="/documentation/nodetype/Viewarea">Viewarea</a> 
+        we define a <a href="/documentation/nodetype/ShearedStereoViewModifier">ShearedStereoViewModifier</a> which is responsible for the camera modification of the left 
+        or right eye respectively. It has also to be defined which buffers on the graphics card should be used by which view area. 
+        Therefore we set 
+        </p>
+        <div class="code"><h3>Code: Left buffer definition in view area</h3><pre>
+...
+Viewarea {
+  leftBuffer TRUE
+  rightBuffer FALSE
+  ...
+}
+...
+        </pre></div>
+        <p>
+        for the left eye view area and 
+        </p>
+        <div class="code"><h3>Code: Right buffer definition in view area</h3><pre>
+...
+Viewarea {
+  leftBuffer FALSE
+  rightBuffer TRUE
+  ...
+}
+...
+        </pre></div>
+        <p>
+        for the right eye view area.
+        </p>
+        <p>
+        After all the configuration looks like the one below:
+        </p>
+        
+        
+        <div class="code"><h3>Code: Stereo configuration with Quad-Buffer</h3><pre>
+RenderJob { 
+  windowGroups [
+    <a href='/documentation/nodetype/WindowGroup'>WindowGroup</a> {
+      windows [
+        <a href='/documentation/nodetype/LocalWindow'>LocalWindow</a> {
+        buffer 4
+        size 1024 768
+          views [
+            <a href='/documentation/nodetype/Viewarea'>Viewarea</a> {
+              leftBuffer TRUE
+              rightBuffer FALSE
+              modifier [
+                <a href='/documentation/nodetype/ShearedStereoViewModifier'>ShearedStereoViewModifier</a> {
+                  leftEye  TRUE
+                  rightEye FALSE
+                }
+              ]
+            }
+            <a href='/documentation/nodetype/Viewarea'>Viewarea</a> {
+              leftBuffer FALSE
+              rightBuffer TRUE
+              modifier [
+                <a href='/documentation/nodetype/ShearedStereoViewModifier'>ShearedStereoViewModifier</a> {
+                  leftEye  FALSE
+                  rightEye TRUE
+                }	
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+        </pre></div>
+        
+        
+    Files:
+    <ul class="files"><li><a href="activeStereo.wrl">activeStereo.wrl</a></li><li><a href="tie.wrl">tie.wrl (test model)</a></li></ul>
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

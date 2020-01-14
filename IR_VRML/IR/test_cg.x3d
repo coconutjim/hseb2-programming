@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+
+<!-- Shaded earth with Cg -->
+    <Transform translation='-2 0 0'>
+    <Shape>
+      <Appearance>
+        <Material diffuseColor="1 0 1"/>
+
+        <MultiTexture mode='BLENDTEXTUREALPHA' source='DIFFUSE'>
+          <ImageTexture url='"texture/cg.tga"'/>
+        </MultiTexture>
+        <ProgramShader DEF='prog' language='cg'>
+          <field accessType='inputOutput' name='L' type='SFVec3f' value='0.577 0.577 0.577'/>
+          <ShaderProgram DEF='v' type='VERTEX'><![CDATA[
+						struct a2v
+						{
+                    		float4 Position     : POSITION;
+							float2 Texcoord     : TEXCOORD0;
+							float4 Normal       : NORMAL;
+						};
+						struct v2p
+						{
+							float4 Position     : POSITION;
+							float2 Texcoord     : TEXCOORD0;
+							float4 Diffuse      : TEXCOORD1;
+						};
+			
+						void main(
+                            in a2v IN,
+                            out v2p OUT,
+                            uniform float3 L
+                        )
+						{
+							float4x4 ModelViewProj = glstate.matrix.mvp;
+			
+							OUT.Position = mul(ModelViewProj, IN.Position);
+							// Normal and L are given in object space, so
+							// we can dot them in object space.
+                            OUT.Diffuse = max(0.,dot(IN.Normal.xyz,L));
+							OUT.Texcoord = IN.Texcoord;
+						}
+                        ]]>
+          </ShaderProgram>
+          <ShaderProgram DEF='f' type='FRAGMENT'><![CDATA[
+						struct v2p
+						{
+							float4 Position     : POSITION;
+							float2 Texcoord     : TEXCOORD0;
+							float4 Diffuse      : TEXCOORD1;
+						};
+						struct p2f
+						{
+							float4 Color : COLOR0;
+						};
+			
+						void main(in v2p IN,
+								  out p2f OUT,
+								  uniform sampler2D tex0)
+						{
+							float4 color = tex2D(tex0, IN.Texcoord);
+			
+			                OUT.Color = float4(IN.Diffuse.rgb * color.rgb, 1);
+						}
+                        ]]>
+          </ShaderProgram>
+        </ProgramShader>
+      </Appearance>
+      <Sphere/>
+    </Shape>
+    </Transform>
+
+<!-- Shaded earth with CgFX (multipass) -->
+      <Shape>
+      <Appearance>
+        <PackagedShader url="cgfx/simple_multipass.cgfx"
+          language="CGFX">
+          
+          <field accessType="inputOutput" name="L"
+            type="SFVec3f" value="0.577 0.577 0.577"/>
+            
+          <field accessType="inputOutput" name="TestSampler" type="SFNode" >
+            <ImageTexture url='"texture/bcgfx.tga"'/>
+          </field>
+
+        </PackagedShader>
+        <Material diffuseColor="1 0 1"/>
+      </Appearance>
+      <Sphere/>
+    </Shape>
+  
+<!-- Shaded earth with CgFX (shader interfaces)-->
+
+    <Transform translation='2 0 0'>
+    <Shape>
+      <Appearance>
+        <Material diffuseColor="1 0 1"/>
+
+        <PackagedShader url="cgfx/shader_interfaces.cgfx" language="CGFX">
+          
+          <field accessType="inputOutput" name="__additionalIncludeDirectories__"
+            type="MFString" value="&quot;cgfx&quot;"/>
+
+          <field accessType="inputOutput" name="light"
+            type="SFString" value="DirectionalLight"/>
+          <field accessType="inputOutput" name="light.radiance"
+            type="SFVec3f" value="1 1 1"/>
+          <field accessType="inputOutput" name="light.direction"
+            type="SFVec3f" value="0.577 0.577 0.577"/>
+
+
+          <field accessType="inputOutput" name="brdf"
+            type="SFString" value="LambertBRDF"/>
+          <field accessType="inputOutput" name="brdf.rho"
+            type="SFVec3f" value="3.1415 3.1415 3.1415"/>
+
+          <field accessType="inputOutput" name="TestSampler" type="SFNode" >
+            <ImageTexture url='"texture/acgfx.tga"'/>
+          </field>
+        </PackagedShader>
+      </Appearance>
+      <Sphere/>
+    </Shape>
+    </Transform>
+
+  </Scene>
+</X3D>

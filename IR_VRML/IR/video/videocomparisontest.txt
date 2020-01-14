@@ -1,0 +1,57 @@
+Video Codec Test 5/2005
+from CodecTest.com
+copyright OceanStreetVideo.com
+
+Windows Media 9 vs. Flash vs. Quicktime vs. H.264/MPEG-4 AVC vs. MPEG-2
+
+All files encoded using Sorenson Squeeze 4, except as noted in the file name. The Nero Recode application was used to encode the Nero AVC file. The Quicktime player was used to encode the Sorenson2cbr.mov file.
+
+All files encoded at 400kbps video, two-pass variable bitrate(where possible), 640x480 frame size, all audio 96kbps stereo.
+
+All files "constrain file size" option NOT selected.
+
+H.264 Sorenson AVC Pro: Key Frame every 300 frames, Auto Key Frame on Scene Change(50), B-Frames on Auto, Minimum Quality NOT selected, Fraunhofer AAC(32khz only choice), Non-Streaming. The slightly larger file size was due to the inability of the Squeeze software to control the bitrate, even with the "constrain file size" option enabled. By comparison, the Nero H.264 AVC file size matched it's target bitrate far better.
+
+Flash:
+Sorenson Spark Pro Video codec, keyframe every 50 frames, auto keyframes every 50 frames, Fraunhofer MP3, Image Smoothing & Playback Scalability selected. The file size for this video clip is larger, but it's because the player interface is included in the clip.
+
+Quicktime:
+Sorenson Video 3 Pro Video, Bi-directional Frames Allow, MPEG-4 Audio(44khz). Notice how the Flash clip looks identical to the Quicktime clip, they appear to use the same codec.
+
+RealVideo:
+RealVideo 10, Video Mode "Normal", RealAudio Cook.
+
+Squeeze MPEG-2: 
+Included as a comparison reference only, MPEG-2 is designed for use at much higher bitrates. Progressive Field Encoding(because computer screens are not interlaced like televisions are), I Frame Rate 15 frames, 1-pass VBR because there was no option for 2-pass encoding. The author is under the impression that Squeeze uses the Mainconcept MPEG encoder, which definitely has 2-pass encoding capability, so it's not clear why that option wasn't available in the Squeeze application. 
+
+Final file sizes:
+Windows Media(wheelie.wmv): 1.2 mb
+Flash(wheeliesparkpro.swf): 2 mb
+Quicktime(wheelie.mov): 1.3 mb
+Quicktime(wheeliesorenson2cbr.mov): 1.64 mb
+Quicktime(wheeliesorensonvideo3provbr.mov): 1.3 mb
+Quicktime generic MPEG-4(wheelie.mp4): 1.7 mb
+RealMedia(wheelie.rm): 1.1 mb
+H.264/AVC(wheelieAVCnero.mp4): 1.2 mb
+H.264/AVC(wheelieAVCsorenson.mp4): 1.5 mb
+Squeeze MPEG-2(wheelieMPEG2.mpg): 1.6 mb
+
+
+Relevant info:
+
+The relatively poor quality of the Flash video format is probably due in part to it's roots in the old H.263 codec. That history is detailed in the pdf document that comes with the Flash FLV exporter software. The Quicktime Video 3 Pro clip looks identical to the Flash Spark Pro clip, they appear to be the same "Pro" codec from the same company. The Flash version is bigger because the Flash player is included in the file.
+
+Sorenson Squeeze 4 for Macromedia Flash MX Questions:
+
+What is the difference between the Sorenson Spark (Standard) and Sorenson Spark Pro codecs?
+
+Sorenson Spark is the standard version of the codec, which is integrated within Macromedia Flash MX. Its interface allows for adjustment of quality, keyframe interval and scale, as well as the ability to import audio and synchronize your video to a Flash movie's frame rate.
+
+Sorenson Spark Pro is the professional version of the codec, which is only available with Sorenson Squeeze for Macromedia Flash MX (or the Compression Suite). The professional version is for Flash producers who want higher quality and smaller file sizes than are possible using the standard codec. It offers local or remote batch compression, Two-Pass Variable Bit Rate (VBR) encoding, and better support for high-motion video.
+
+Is the new codec inside Macromedia Flash MX Professional 2004 better than the old one?
+
+In our experience there is not a noticeable increase in the quality of video produced by the new codec, but the Macromedia Flash Player 7 has improved significantly. Even your old files will look better in the new Player. 
+
+http://sorenson.com/support/faq.php 
+

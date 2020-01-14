@@ -1,0 +1,205 @@
+<div id="tutorialContainer">
+  <h2 class="title">Multi-touch Interaction</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Multi-touch,
+        UserBody,
+        HypersurfaceSensor<br/><strong>Author(s): </strong>Yvonne Jung<br/><strong>Date: </strong>2008-01-02</p>
+  <p><strong>Summary: </strong>
+	This tutorials shows how to enable multi-touch for pointing sensor interaction in case your screen or touch-pad do not natively support the standard multi-touch API.
+    </p>
+  <div id="content">
+		<h2>Basics</h2>
+		<p>
+		In the following it is assumed that the reader is already familiar with user bodies and the basic interaction concepts as explained in the tutorial about high-level sensor interaction.
+		</p>
+        <p>
+        For doing multi-touch first (in case your monitor or touch-pad do not natively support multi-touch) you need a touch table or a similar setup. In this tutorial a Computer Vision (CV)/ tracking-based system is described. The simplified setup uses only one camera, which is positioned under the table's surface/ screen. The CV component first undistorts the camera image of the screen, detects the 2D blobs in this image and finally undistorts the blobs.
+        The calibration process is rather easy and always the same, independent of the chosen input device (VisionLib or even Wii). If the "camera" is positioned almost orthogonal to the interaction surface, the mapping can be approximated by an affine transformation, otherwise four points for calculating the complete projective mapping (i.e. the homography) are needed, which will not be explained here.
+        </p>
+        <p>
+        For calibration, first three non-collinear points on the screen, defining the viewing plane, are selected successively. Then, because 2D information is sufficient, the plane with maximum projection is determined. This is done by calculating the coordinate with the highest absolute value of the plane normal. By only using the other two coordinates in subsequent calculations and doing a simple window-viewport transformation beforehand based on the screen size, mouse-like 2D coordinates for an easily to understand interaction are obtained.
+        A code example on how to do this can be found in the files section. Please note, that these calculations require that the Viewpoint node uses a fixed z-near value.
+        </p>
+        
+<div class="code"><h3>Code: Javascript snippet for processing blobs and accessing viewport data</h3><pre>
+
+// get blob id and pixel pos of blobs
+var ID = val[i].z;
+trans = transform(val[i]);						
+
+var view = Browser.getView('default');
+var s = view.size; 
+var w = s.x - 1, h = s.y - 1;			 
+
+if (w &gt; 0 &amp;&amp; h &gt; 0)
+{
+	var t = new SFVec2f( trans.x / w, trans.y / h );
+	var pos = new SFVec3f(0,0,0), 
+	    norm = new SFVec3f(0,0,0),
+	    pane = new SFVec3f(0,0,0);
+
+	// last param is 3d pos on viewport pane in world coords
+	view.buildRay ( t, pos, norm, pane );	
+
+	paneBlobPosIDs[i] = new SFVec4f(pane.x, pane.y, pane.z, ID);				 
+}
+
+</pre></div>
+
+    <p>
+    The corresponding world positions of the tracked 2D positions can be obtained with the help of some scripting via the last parameter of the buildRay() method of the View object. As can be seen in the next code fragment, this is used for updating the translation field of the corresponding user bodies (defined in the PROTO file). Here, all <a href="/documentation/nodetype/UserBody">UserBody</a> nodes are dynamically inserted/ removed based on the values of the "blob_positions" MFVec3f field of the VisionLib <a href="/documentation/nodetype/IOSensor">IOSensor</a> node, whose z value contains the blob ID. (Therefore, you need to set the TransferIdInPosVector flag in the Blobs2GeometryAction of the VisionLib config file.)
+    </p>
+  
+<div class="code"><h3>Code: Obtaining the tracking data and mapping it to screen-coordinates</h3><pre>
+
+EXTERNPROTO USER_BODY_MANAGER [] "ProtoUB.wrl#USER_BODY_MANAGER"
+
+DEF UBManger USER_BODY_MANAGER {}
+
+DEF CursorScript Script {				
+    eventIn  MFVec3f set_camtrans  
+    eventOut MFVec4f pickedPanePositionsIDs_changed
+
+    url	"javascript:
+    //[...]
+
+    function transform(value)
+    {
+        var win = new SFVec2f(value[ix], value[iy]);
+        
+        // Window-Viewport-Transformation
+        win.x = sx * win.x + tx;
+        win.y = sy * win.y + ty;
+
+        return win;
+    }
+
+    function set_camtrans(val, ts)
+    {
+        var i, n = val.length;
+
+        if (!calibDone)	
+        {
+            //[...]
+        }
+        else 
+        {
+            var paneBlobPosIDs = new MFVec4f();
+
+            for (i=0; i&lt;n; i++)
+            {
+                // See the first code snippet above!
+            }
+
+            pickedPanePositionsIDs_changed = paneBlobPosIDs; 
+        }
+    }
+    "
+}
+
+DEF VisionLib IOSensor {
+    type "VisionLib"
+    field SFString configFile "blob_tracker.pm"
+    eventOut MFVec3f blob_positions
+}
+
+ROUTE VisionLib.blob_positions TO CursorScript.set_camtrans
+ROUTE CursorScript.pickedPanePositionsIDs_changed TO UBManger.set_panePositionsIDs
+
+</pre></div>
+		
+        <h2>Pointing Sensors and Multi-Touch</h2>
+        <p>
+        With these helpers the usage of standard X3D pointing sensors is now as easy as when using a normal computer mouse, with the exception, that you can't click with your fingers. For getting around this, two possibilities seem equally natural: Touching the same position twice like in a laptop touchpad or activating with a second finger. 
+        We decided to use the latter alternative, because on the one hand, the X3D specification states, that an isActive TRUE event is sent upon activation of the pointing device while being over the sensor's geometry, and on the other hand it's simply due to the fact, that after having removed a finger, the next time it touches the surface again, it receives an other ID.
+        </p>
+        <p>
+        Besides this, it is also possible to already generate the user bodies being hot, which is conceptually the same as holding down the mouse button all the time. This works quite well, because other than with more 'continuous' devices like the mouse pointer, in the case of multi-touch the user bodies are not part of the scene until the fingers have touched the surface, and they are automatically removed from the scene after they have left the table.
+        As mentioned, a bit problematic in this context is only the handling of the "touchTime" field of the TouchSensor node, because this eventOut is only generated, when the pointing device was -- and still is -- pointing towards the geometry when it is deactivated. Therefore the touchTime event can only be generated X3D compliantly with the help of a second finger: Whereas the first one generates the isOver event, the second one generates the isActive TRUE/ FALSE event.
+        </p>
+		<p>
+		When having the ability to use both hands (or at least all your finger tips on a table top) more real worlds like interaction schemes can be facilitated. Assume an architectural review where some architects are sitting around a table with lots of blueprints of new buildings and they want to discuss about this. By putting their fingers on a sheet of paper they can move it around and with at least two fingers or enough friction they can rotate it. 
+		More elastic material like a rubber band can even be "scaled" this way. Hence, it is not surprising that those are the first interaction types that come to one's mind when thinking about multi-touch interaction, and they are certainly the ones, which can almost directly be mapped to the X3D pointing sensor concept. 
+		In this spirit we propose the <a href="/documentation/nodetype/HypersurfaceSensor">HypersurfaceSensor</a> node that will be described next.
+		</p>
+        
+<div class="code"><h3>Code: Using the HypersurfaceSensor node.</h3><pre>
+
+Viewpoint {
+    zNear 1
+}
+
+Transform {					
+    children [
+        DEF multiTrafo Transform {
+            children [
+                Shape {
+                    appearance Appearance {
+                        texture	ImageTexture {
+                            url "froekk.jpg"
+                        }
+                    }
+                    geometry Box {
+                        size 4.5 4.5 0.1
+                    }
+                }
+            ]
+        }
+        DEF multiTouch HypersurfaceSensor {	
+            minScale .5 .5 1
+            maxScale 5 5 1
+            #transformRestriction "rotateTranslate"
+            ROUTE multiTouch.translation_changed TO	multiTrafo.translation
+            ROUTE multiTouch.rotation_changed TO	multiTrafo.rotation
+            ROUTE multiTouch.scale_changed TO		multiTrafo.scale
+        }
+    ]
+}
+
+</pre></div>
+        
+        <p>
+        The HypersurfaceSensor node is similar in usage like any other X3DDragSensorNode and certainly works for single touch (i.e. mouse based) applications, too, although the different eventOuts (translation_changed, rotation_changed, scale_changed), which contain the sum of relative changes plus the offset value, are mapped to the three mouse buttons respectively.
+        When having activated the sensor geometry it can be moved around with one finger, IR-LED or whatsoever. This works quite similar to the PlaneSensor, with the exception, that the plane in which the translation_changed events are calculated is parallel to the viewing plane and goes through the initial point of intersection.
+        </p><p>
+        Analogously, the rotation_changed is a rotation around the axis perpendicular to the viewing plane. Rotating an object can be achieved by using two fingers, whose initial positions define the axis of zero rotation. Only the scale_changed event, which also is activated by using two fingers and whose initial distance defines a scaling of 1, sends out a uniform scaling by default, if not restricted via the minScale and maxScale fields (the values are ignored if they are smaller than or equal to 0 or if maxScale is smaller than minScale).
+        </p><p>
+        As already explained, the isActive event can be triggered in two ways, whereas when using the mouse it simply maps to pressing/ releasing the mouse button. The sensor's name is derived from the mathematical term hypersurface that defines a subspace of dimension n-1 of an n-dimensional space, because when translating or rotating an object with the help of this pointing sensor, it cannot leave the initial surface (which is parallel to the viewing plane). Although this is not true for scaling we only allow uniform scaling because scaling along an arbitrary axis is usually of no interest.
+        </p><p>
+        Especially for multi-touch and multi-user applications it is not so easy to determine, which object was chosen, therefore we extended all sensor nodes with an additional eventOut slot hitObject_changed. Because sometimes one might not (only) be interested in relative, cumulated transformation values we also have the hitNormalizedCoords_changed eventOut slot. It sends values for all fingers whereas the first two fingers still can keep on manipulating the object or simply holding it.
+        Just like the hitTexCoord_changed event of the TouchSensor it also works in texture space and sends out the hit texCoord for all fingers, which is quite useful in that with the correct mapping those values can be used absolutely e.g. for camera control.
+        </p>
+        
+        <div class="imgContainer"><img src="demo.png" align="center"/><div class="imgCaption">Image: Multi-touch demo with tracked image and two positions in foregrounds.</div></div>
+        
+<div class="code"><h3>Code: Interface for TUIO backend (in XML encoding)</h3><pre>
+
+&lt;IOSensor DEF='tuio' type='TUIO'&gt;
+   &lt;field accessType='outputOnly' name='isActive'    type='SFBool'/&gt;
+   &lt;field accessType='outputOnly' name='sequenceID'  type='SFInt32'/&gt;
+
+   &lt;field accessType='outputOnly' name='position'    type='MFVec3f'/&gt;
+   &lt;field accessType='outputOnly' name='eventMap'    type='MFInt32'/&gt;
+
+   &lt;field accessType='outputOnly' name='addID'       type='MFInt32'/&gt;
+   &lt;field accessType='outputOnly' name='removeID'    type='MFInt32'/&gt;
+
+   &lt;field accessType='outputOnly' name='visionLib'   type='MFVec3f'/&gt;
+&lt;/IOSensor&gt;
+
+</pre></div>
+        
+        <p>
+        Alternatively, you can use TUIO, if your screen supports it. Above, the interface for accessing TUIO is shown. TUIO typically runs on Port 3333, and the TUIO backend provides the multi-touch information in a similar way as already described above. The out-slots isActive and sequenceID are sent every frame after having received the data (the latter slot contains the frame id). The out-slots position and eventMap contain the relevant information. Positions are usually 2D (x and y, though 3D is possible, too), and the touch IDs are given in the latter slot. The out-slots addID and removeID are triggered whenever a finger is removed or added.
+        The final out-slot visionLib is of special interest. As you probably already have guessed, it tries to mimic the VisionLib interface. Therefore, the slot contains an array of screen positions and corresponding IDs provided in a SFVec3f field: (x, y, id). The first file in the files section provides a simple test.
+        </p>
+        
+        <p>
+        With Windows 7, multi-touch devices are now natively supported in InstantPlayer and in the saq viewer (but still not in sav), and thus multi-touch navigation and interaction are also possible in these two players.
+        The last file in the list below contains the same scenario as previously described, but with a much simpler setup. Note, that the UserBody nodes are no longer required for this type of setup, which means that you can directly start the file "mainMouse_2.wrl" instead.
+        </p>
+		
+		
+    Files:
+    <ul class="files"><li><a href="TUIO.x3d">Simple TUIO example</a></li><li><a href="ProtoUB.wrl">Proto for dynamic user body handling</a></li><li><a href="multiTouch_0.edv">An exemplarily engine setup</a></li><li><a href="multiTouchUB_1.wrl">Scene independent interaction setup</a></li><li><a href="mainMouse_2.wrl">The test scene with HypersurfaceSensor</a></li><li><a href="main.x3d">Alternative example that uses the standard multi-touch API</a></li></ul>    
+	</div>
+</div>

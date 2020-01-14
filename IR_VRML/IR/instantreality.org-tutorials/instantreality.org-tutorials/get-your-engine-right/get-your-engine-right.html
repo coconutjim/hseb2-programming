@@ -1,0 +1,179 @@
+<div id="tutorialContainer">
+  <h2 class="title">Get your engine right</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        context,setup,scene,engine<br/><strong>Author(s): </strong>Peter Eschler, Johannes Behr<br/><strong>Date: </strong>2006-02-20</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to build up different elements of a more complex application by providing a scene, engine and context-setup description. The different parts allow the author to cluster and specify various aspects of your final application. The Scene contains the dynamic spatial content, the Engine contains device and environment specific parts (e.g. window or cluster setup) and the ContextSetup defines the application independent parts like the path of your java installation. The ContextSetup parameter are normally stored in the system preferences (e.g. plist-files on Mac or registry entries on Windows) but this tutorials shows how to overwrite the settings per application</p>
+  <div id="content">
+	<h2>Scene</h2>
+	<p>
+	The Scene defines the default SAI execution context and the root node of your spatial world. As shown in the following example it is only valid as X3D element. There is only one Scene per execution context or file allowed. However you can Inline extra X3D-files which must include a Scene element.
+	</p>
+<div class="code"><h3>Code: XML encoded Scene</h3><pre>
+&lt;X3D&gt;
+    &lt;Scene&gt;
+        &lt;Shape&gt;
+            &lt;Box size='1 2 9'/&gt;
+        &lt;/Shape&gt;
+    &lt;/Scene&gt;
+&lt;/X3D&gt;
+
+</pre></div>
+        <h2>Engine</h2>
+        <p>
+        The scene describes the content of and interaction with the world - they do not describe on which kind of output device or how the content should be displayed. This is where the engine file comes in. Imagine you want to display your world in red/green stereo, or you want it to be displayed on a three-sided power-wall, etc. This can all be done via an engine setting without even touching your world. This separation between the world and the engine file allows you to visualize your world on a variety of output devices without changing the world itself. 
+        </p>
+        <p>
+	The next example shows a very simple engine setting as an example of a basic engine file, which only contains a <a href="/documentation/nodetype/RenderJob">RenderJob</a>. The RenderJob includes a WindowGroup, an abstraction used to combine render threads, which itself includes two windows. Therefore the engine will start two windows on the desktop showing the same scene and camera. 
+        </p>
+	<p>
+	The Engine sub-tree is a own X3D-namespace and can include any nodes which are not SceneBaseNodes. For example scripts and event-filter are very usefull as part of your engine.
+	The Engine also does not have to be complete. Missing jobs will automatically be inserted by using the Engine.requiredJobList values. More complex engine settings can be found in the cluster section.
+	</p>
+<div class="code"><h3>Code: XML encoded Engine and Scene</h3><pre>
+&lt;X3D&gt;
+&lt;Engine&gt;
+    &lt;RenderJob DEF='render'/&gt;
+        &lt;WindowGroup&gt;
+           &lt;Window DEF='win1'/&gt;    
+           &lt;Window DEF='win2'/&gt;    
+        &lt;/WindowGroup&gt;
+    &lt;/RenderJob&gt;
+&lt;/Engine&gt;
+&lt;Scene&gt;
+  &lt;Inline url='theWorld.X3D'/&gt;
+&lt;Scene&gt;
+&lt;/X3D&gt;
+
+</pre></div>
+
+	<h2>ContextSetup</h2>
+        <p>
+	The <a href="/documentation/nodetype/ContextSetup">ContextSetup</a> stores all setup and preferences per execution context which are related to specific nodes or components but independent of a specfic instance of a node. You can set different limits, e.g. texture size and system pathes (like the Java classpath and various other properties which are usual stored in the player plist or registry entry).
+	</p>
+	<p>
+	If and only if you really <i>have</i> to overwrite it in the application file you can create an extra ContextSetup child as part of the X3D element.
+	</p>
+<div class="code"><h3>Code: XML encoded ContextSetup</h3><pre>
+&lt;X3D&gt;
+&lt;ContextSetup maxTexSize='2048'&gt;
+&lt;Engine&gt;
+  ...
+&lt;/Engine&gt;
+&lt;Scene&gt;
+  ...
+&lt;Scene&gt;
+&lt;/X3D&gt;
+
+</pre></div>
+	<p>
+	The attributes and the values are not fixed and dynamically build up from the loaded component. Use the WebInterface access point in order to see the configuration of your running system. The following section includes a list of attributes for the beta3 player including all components.
+	</p>
+<div class="code"><h3>Code: ContextSetup attribute list</h3><pre>
+  cdfPath /Users/jbehr/src/Avalon/tmp/cdfFolder ()
+    defines the for the cdf data
+  multiContext FALSE ()
+    Run more than one context
+  appThreadCount 16 ()
+    The number of application threads
+  forbidFieldFree FALSE ()
+    forbid Field free optimize
+  forbidNodeFree FALSE ()
+    forbid Node free optimize
+  rayIntersectMode auto (auto,lowMem,fast,fastest)
+    defines the ray intersection mode
+  forceSingleDataTypeRoute FALSE ()
+    force routes to connect only slots with same type
+  explicitGZIPTest FALSE ()
+    use the explicit gzip test
+  forbidReindex FALSE ()
+    forbid geos to reindex to share properties
+  forbidStripFan FALSE ()
+    forbid geos to strip/fan the mesh data
+  forbidVertexResort FALSE ()
+    forbid vertex resort to improve cache usage
+  forbidSingleIndex FALSE ()
+    forbid singe-index opt. for static/unshared obj.
+  forbidIndexResize FALSE ()
+    forbid optimized-index opt. for static/unshared obj.
+  forbidDList FALSE ()
+    forbid DisplayLists for static obj
+  forbidVBO FALSE ()
+    forbid VertexBufferObjects for static obj
+  forbidNormalUpdate FALSE ()
+    forbid normal updates for dynamic obj.
+  geoPropertyUpdateMode memcpy (none,memcpy,stl-assign,stl-swap)
+    mode used to update backend geoProps
+  maxTexSize 4096 ()
+    max texture u,v,w size, 0 means hardware limit
+  forceTexCompress FALSE ()
+    force textures to use compressed internal types
+  frontCollision TRUE ()
+    do front-collision check while navigating
+  zRatio 20000 ()
+    ratio to specify the z-near limit
+  defaultJobList TimerJob,InteractionJob,ExternalInterfaceJob,WebServiceJob,CollisionJob,SoundJob,CombinerJob,SynchronizeJob,RenderJob ()
+    Defines the default jobs
+  showStatusMessage true ()
+    show the status message in render view
+  infoScreenAnimationTime 0.5 ()
+    info screen animation time in seconds
+  logoMode auto (auto,on,off)
+    logo mode
+  forceSingleThread FALSE ()
+    force single thread app/render cycle
+  keyAssignMode ctrlMod (autoSwitch,app,sys,ctrlMod,altMod,shiftMod)
+    defines how key-events are assigned to sys/app
+  binSearchKeyIndex FALSE ()
+    use binSearch to find the key value
+  tessellationFactor 1 ()
+    tessellationFactor (from 0 to 1)
+  ecmaScriptShareRunTime FALSE ()
+    ecmascript share-runTime
+  ecmaScriptGlobalMem 8388608 ()
+    ecmascript global system mem size
+  ecmaScriptLocalMem 8192 ()
+    ecmascript local script mem size
+  ecmaGCPerFrame none (none,auto,force)
+    set GarbageCollection mode per frame
+  javaVMPath  ()
+    The path to the Java virtual machine
+  javaClassPath /Users/jbehr/src/Avalon/java/instantreality.jar ()
+    The Java class path
+  javaOptions  ()
+    Options that are transfered to the Java virtual machine
+  cgVertexProfile auto (auto,arbvp1,vp20,vp30,optimal)
+    Cg vertex shader profile
+  cgFragmentProfile auto (auto,arbfp1,fp20,fp30,optimal)
+    Cg fragment shader profile
+  rigidBodyTrigger Collision ()
+    name of the rigid body physics trigger
+
+</pre></div>
+	<h2>The Scene node in classic encoding</h2>
+	<p>
+	The classic encoding normally does not include an explicit Scene node. All root nodes of a single file are added to the scene as children. Here we extent the spec by allowing to explicitly set context root nodes like ContextSetup, Engine or Scene nodes.
+        </p>
+<div class="code"><h3>Code: Scene and Engine nodes in classic encoding</h3><pre>
+#X3D 3.0 utf8
+
+Engine {
+}
+Scene {
+  children [
+	Transform {
+		...
+	}
+  ]
+}
+        </pre></div>
+	<p>
+	This tutorial just tries to explain the Context root nodes, like Scene, Engine and ContextSetup-nodes, and how to build up an application using only one or none of them. More useful examples can be found in the <a href="/tutorial/single-display-cluster/">cluster</a> and <a href="/tutorial/multiple-windows-and-views/">rendering tutorials</a>. 
+	</p>
+	<p>
+	An execution context will always have an Engine and ContextSetup node. In most cases there is only an explicit (=X3D encoding) or implicit Scene (=classic encoding) and the runtime system will automatically create the object. 
+	</p>
+	
+    </div>
+</div>

@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Passive Stereo</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Passive Stereo</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        engine,
+        stereo,
+        passive,
+        multi view<br/><strong>Author(s): </strong>Marcus Roth,
+        Patrick Riess<br/><strong>Date: </strong>2007-11-27</p>
+  <p><strong>Summary: </strong>
+    This tutorial describes the configuration of the engine to achieve a passive stereoscopic view of scenes. It will distinguish 
+    between overlapped view areas and separated side by side view areas. The first one is performed by splitting color channels and 
+    using red/blue glasses. The latter can be used to achieve a stereo setup with two video beamers and appropriate filters for example. 
+    You should also check the preconditions for this tutorial.
+    </p>
+  <div id="content">
+        <h2>Preconditions for this tutorial</h2>
+        <p>
+        Please read the tutorials "Multiple Windows and Views" as well as "Stereo Basics" in this category to get a  
+        good overview about stereo approaches and basic configuration issues regarding multiple views in Instant Reality. 
+        Notice that this tutorial is just about <b>passive</b> stereo.
+        </p>
+        <h2>Stereo modifier</h2>
+        <p>
+        If we want to do stereo, then we need two view areas. One for the left eye and one for the right eye. For stereo it is neccessary to 
+        modify viewing parameters. For this kind of modification there exists a number of modifiers in Instant Reality. For a simple stereo projection 
+        we have to use the <a href="/documentation/nodetype/ShearedStereoViewModifier">ShearedStereoViewModifier</a>: 
+        </p>
+        <div class="code"><h3>Code: <a href='/documentation/nodetype/ShearedStereoViewModifier'>ShearedStereoViewModifier</a> node</h3><pre>
+...
+Viewarea {
+  modifier [
+    <a href='/documentation/nodetype/ShearedStereoViewModifier'>ShearedStereoViewModifier</a> {
+       leftEye  TRUE
+       rightEye FALSE
+       eyeSeparation 0.08   
+       zeroParallaxDistance 1
+    }
+  ]
+}
+...
+        </pre></div>
+        <p>
+        Depending on the eye which should be represented by this modifier, <i>leftEye</i> and <i>rightEye</i> has to be set to TRUE or FALSE. 
+        <i>zeroParallaxDistance</i> and <i>eyeSeparation</i> values are in metres, so they have good default values, if your scene is also 
+        modeled in metres. Otherwise you could either adapt the values or as a better approach, you should use a <a href="/documentation/nodetype/NavigationInfo">NavigationInfo</a> 
+        node in the <i>Scene</i> namespace and set the <i>sceneScale</i> field to 0.01 if the scene is modeled in centimetres or 0.001 if 
+        the scene is modeled in millimetres and so on. The advantage is you can keep the stereo configuration fix for your setup and each 
+        scene and just need to change one value.
+        </p>
+        <div class="code"><h3>Code: <a href='/documentation/nodetype/NavigationInfo'>NavigationInfo</a> node</h3><pre>
+...
+Scene {
+  children [
+    <a href='/documentation/nodetype/NavigationInfo'>NavigationInfo</a> {
+      sceneScale 0.01
+    }
+    ...
+  ]
+}
+        </pre></div>
+        
+        <h2>Stereo by overlapping view areas</h2>
+        <p> 
+        To receive a simple red/blue stereoscopic view, we have to overlap two view areas, display only one color channel per area (red or blue) and 
+        put a <a href="/documentation/nodetype/ShearedStereoViewModifier">ShearedStereoViewModifier</a> into both areas. After all the code looks like this:
+        <div class="code"><h3>Code: <a href='/documentation/nodetype/Color'>Color</a> channel based stereoscopic view with overlapping view areas</h3><pre>
+...
+DEF render <a href='/documentation/nodetype/RenderJob'>RenderJob</a> { 
+  windowGroups [
+    <a href='/documentation/nodetype/WindowGroup'>WindowGroup</a> {
+      windows [
+        <a href='/documentation/nodetype/LocalWindow'>LocalWindow</a> {
+          views [
+            <a href='/documentation/nodetype/Viewarea'>Viewarea</a> {
+              red TRUE
+              green FALSE
+              blue FALSE
+              lowerLeft  0 0
+              upperRight 1 1
+              modifier [
+                <a href='/documentation/nodetype/ShearedStereoViewModifier'>ShearedStereoViewModifier</a> {
+                  leftEye TRUE
+                  rightEye FALSE
+                }
+              ]
+            }
+            <a href='/documentation/nodetype/Viewarea'>Viewarea</a> {
+              red FALSE
+              green FALSE
+              blue TRUE
+              lowerLeft  0 0
+              upperRight 1 1
+              modifier [
+                <a href='/documentation/nodetype/ShearedStereoViewModifier'>ShearedStereoViewModifier</a> {
+                  leftEye FALSE
+                  rightEye TRUE
+                }	
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+...
+        </pre></div>
+        </p>
+        <div class="imgContainer"><img src="stereorb.png" align="center"/><div class="imgCaption">Image: Stereo view due to separated color channels</div></div>
+        <p>
+        The result will look like this. Everything you need now are some glasses with a red foil for the left eye and a blue foil for the right eye.
+        </p>
+        <h2>Stereo by separate view areas</h2>
+        <p> 
+        Splitting color channels is the fastest variant of stereoscopic viewing. But we get much better results if we use the full color of "left" and "right" 
+        images. That's the reason why we render both images side-by-side, choose our output device, let's say a 
+        graphics card with two outputs and a video beamer on each output. The beamer images are then superposed. To receive only 
+        one image per eye we use polarization or color spectrum filters (see Stereo Basics tutorial) in front of the beamers and in 
+        front of our eyes.
+        </p>
+        <p>
+        To be able to show the image for the left eye on the left side of our window and the image for the right eye on the right side, we 
+        use two view areas again. The first is located from 0 - 0.5 and the second from 0.5 to 1. 
+        </p>
+        <div class="code"><h3>Code: Stereo configuration</h3><pre>
+...
+LocalWindow {
+  size 600 300
+  views [
+    <a href='/documentation/nodetype/Viewarea'>Viewarea</a> {
+      lowerLeft  0   0
+      upperRight 0.5 1
+      modifier [
+        <a href='/documentation/nodetype/ShearedStereoViewModifier'>ShearedStereoViewModifier</a> {
+          leftEye  TRUE
+          rightEye FALSE
+        }
+      ]
+    }
+    <a href='/documentation/nodetype/Viewarea'>Viewarea</a> {
+      lowerLeft  0.5 0
+      upperRight 1   1
+      modifier [
+        <a href='/documentation/nodetype/ShearedStereoViewModifier'>ShearedStereoViewModifier</a> {
+          leftEye  FALSE
+          rightEye TRUE
+        }	
+      ]
+    }
+  ]
+}
+...
+          </pre></div>
+          <div class="imgContainer"><img src="stereoseparated.png" align="center"/><div class="imgCaption">Image: Stereo view side-by-side view areas</div></div>
+          <p>
+          Your graphics card has to be configured so that the left side of the desktop is visible on the left output and the right side of the 
+          desktop is visible on the right graphics output. Additionally the size of the window must cover the whole desktop. 
+          This can be done by the following code.
+          </p>
+          <div class="code"><h3>Code: Fullscreen local window</h3><pre>
+...
+LocalWindow {
+  fullScreen TRUE
+}
+...
+          </pre></div>
+          <p>
+          Now we have a simple stereo setup. The disadvantage is that a single PC is responsible for the simulation and the rendering 
+          of two images per frame. We can get a much better performance, if we are using 3 (or more) hosts where one is responsible 
+          for the simulation, one to calculate the right eye image and one to calculate the left eye image. To find out more about this, read 
+          the tutorials in the <b>Cluster section</b>.
+          </p>
+        
+    Files:
+    <ul class="files"><li><a href="stereoOverlap.wrl">stereoOverlap.wrl (color channel split)</a></li><li><a href="stereoSeparated.wrl">stereoSeparated.wrl</a></li><li><a href="tie.wrl">tie.wrl (test model)</a></li></ul>
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

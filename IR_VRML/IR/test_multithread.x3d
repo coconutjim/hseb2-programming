@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <Viewpoint DEF='Cam0' position='0 0 30'/>
+    <Viewpoint DEF='Cam1' orientation='1 0 0 -0.8' position='0 20 20'/>
+    <TimeSensor DEF='lTS' cycleInterval='10' loop='true'/>
+    <PositionInterpolator DEF='lPS' key='0 0.5 1' keyValue='-1 -1 -1 -1 1 -1 -1 -1 -1'/>
+    <Transform DEF='trans' rotation='0 1 0 -0.3'>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+      <Transform DEF='sourceTrans'>
+        <Shape>
+          <Appearance>
+            <Material ambientIntensity='0.508497' diffuseColor='0.6 0.4 0.3' specularColor='1 1 1'/>
+          </Appearance>
+          <Sphere radius='1.1'/>
+        </Shape>
+      </Transform>
+      <Shape>
+        <Appearance DEF='MAT'>
+          <Material ambientIntensity='0.508497' diffuseColor='0.337255 0.4 0.788235' specularColor='1 1 1'/>
+        </Appearance>
+        <Sphere radius='3'/>
+      </Shape>
+      <Transform rotation='0 0 1 -0.463559' translation='0 -5 0'>
+        <Shape>
+          <Appearance USE='MAT'/>
+          <Cylinder height='0.05' radius='10'/>
+        </Shape>
+      </Transform>
+      <Shape>
+        <Appearance>
+          <BlendMode srcFactor='src_alpha' destFactor='one' colorTransparency='0.5' />
+          <Material ambientIntensity='0.508497' diffuseColor='1 1 1' specularColor='1 1 1'/>
+          <ImageTexture envMode='modulate' url='"texture/gauss.png"'/>
+        </Appearance>
+        <ParticleSet DEF='particleSet' drawOrder='backToFront' lit='false'>
+          <Coordinate DEF='coord' containerField='coord' point='0 0 0'/>
+          <ColorRGBA DEF='color' color='0 0 0 0'/>
+        </ParticleSet>
+      </Shape>
+    </Transform>
+    <ProgrammableParticleSystem DEF='particle' maxParticle='30000' sourceRate='1000' sourceDomainType='sphere' sourceDomainParam='0 10 0 1' colorDomainType='box' colorDomainParam='0 0 0 1 1 1' sizeDomainType='box' sizeDomainParam='0 0 0 1 1 1' velocityDomainType='line' velocityDomainParam='0 1 0 0 3 0' whichShader='0'><![CDATA[	gravity (0,-1,0);
+		bounce  (0,0.35,0, sphere, 0,0,0, 3, 0 );
+		bounce  (0,0.7,0, disc,    0,-5,0, 0.5,1,0, 10 );
+		targetColor (1,0,0,0,0.06);
+		sink    (false, plane, 0,-10,0, 0,1,0 5, 0);
+	]]>
+    </ProgrammableParticleSystem>
+    <VectorInterpolator DEF='sourceI' key='0 0.5 1' keyValue='6 5 0 1 -6 8 0 1 6 5 0 1'/>
+    <PositionInterpolator DEF='posI' key='0 0.5 1' keyValue='6 5 0 -6 8 0 6 5 0'/>
+    <TimeSensor DEF='ts' cycleInterval='20' loop='true'/>
+    <Logger DEF='logger' level='3'/>
+    <OrientationInterpolator DEF='oi' key='0 0.25 0.5 0.75 1' keyValue='0 1 0 0 0 1 0 1.57 0 1 0 3.14 0 1 0 4.71 0 1 0 6.28'/>
+    <ROUTE fromNode='lTS' fromField='fraction_changed' toNode='lPS' toField='set_fraction'/>
+    <ROUTE fromNode='ts' fromField='time' toNode='particle' toField='set_time'/>
+    <ROUTE fromNode='ts' fromField='fraction_changed' toNode='sourceI' toField='set_fraction'/>
+    <ROUTE fromNode='sourceI' fromField='value_changed' toNode='particle' toField='set_sourceDomainParam'/>
+    <ROUTE fromNode='ts' fromField='fraction_changed' toNode='posI' toField='set_fraction'/>
+    <ROUTE fromNode='posI' fromField='value_changed' toNode='sourceTrans' toField='set_translation'/>
+    <ROUTE fromNode='particle' fromField='coord_changed' toNode='coord' toField='set_point'/>
+    <ROUTE fromNode='particle' fromField='color_changed' toNode='color' toField='set_color'/>
+    <ROUTE fromNode='particle' fromField='size_changed' toNode='particleSet' toField='set_size'/>
+    <ROUTE fromNode='ts' fromField='fraction_changed' toNode='oi' toField='set_fraction'/>
+  </Scene>
+</X3D>

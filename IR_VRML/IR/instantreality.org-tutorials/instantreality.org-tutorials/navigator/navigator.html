@@ -1,0 +1,107 @@
+<div id="tutorialContainer">
+  <h2 class="title">Navigator</h2>
+  <p class="description"><strong>Keywords:</strong><br/>IOSensor,
+        Navigator<br/><strong>Author(s): </strong>Johannes Behr, Yvonne Jung<br/><strong>Date: </strong>2007-10-08</p>
+  <p><strong>Summary: </strong>
+	This tutorials shows how to use 2D and 3D navigators together with device inputs to move the user camera.
+    </p>
+  <div id="content">
+		<h2>Introduction</h2>
+		<p>
+		For desktop applications navigation is simply accomplished by using the mouse. Internally a so-called <a href="/documentation/nodetype/Navigator2D">Navigator2D</a> node, which is part of the engine, especially the <a href="/documentation/nodetype/Viewarea">Viewarea</a> node, is used to navigate with a mouse through the 3D scene. Thus it has three input fields, "mousePress", "mouseRelease", and "mouseMove". Actually they were designed for reacting on mouse events, but as other devices may produce similiar events, for the purpose of generality those events may be routed to the 2D Navigator as well. But generally the user doesn't need to care about that.
+		</p>
+		<p>
+		This is different for the 3D Navigators, which were especially developed for joysticks or VR-devices. They also inherit from the abstract Navigator base node, but for convenience they are part of the scene and therefore have to be suitably parameterized, which will be explained in the following sections.
+		</p>
+		
+        <h2>Getting the data - the IOSensor</h2>
+        <p>
+        If you want to navigate or interact with your scenes using a joystick, spacemouse or a similiar external device you first need an <a href="/documentation/nodetype/IOSensor">IOSensor</a> in your scene, for retrieving the deflection values. Below is an example for addressing a joystick. Usage of e.g. a spacemouse would be quite similiar, just with a different type value (See the SpaceMouse tutorial).
+        </p>
+
+<div class="code"><h3>Code: Some entries for the IOSensor node (here for a Joystick)</h3><pre class="classic">
+
+DEF ios IOSensor {
+    type "joyStick"
+    eventOut SFFloat *x*axis
+    eventOut SFFloat *z*rot*
+    eventOut SFBool *button*8
+} 
+</pre></div>
+
+		<h2>Moving around - the Navigator3D</h2>
+        <p>
+        Now that you have the values of your device, there exist basically two possibilites for navigating. On the one hand you can route the translational and rotational values to a Script node, calculate the corresponding transformations and route the results to your Viewpoint. Because this might be quite cumbersome on the other hand you can alternatively use a Navigator3D node. Currently there exist three types: the <a href="/documentation/nodetype/PointingNavigator">PointingNavigator</a>, the <a href="/documentation/nodetype/SpaceNavigator">SpaceNavigator</a>, and the <a href="/documentation/nodetype/SteerNavigator">SteerNavigator</a>.
+		</p>
+		
+		<ul><li>
+            The <a href="/documentation/nodetype/PointingNavigator">PointingNavigator</a> is especially useful for fully immersive navigation in combination with a Pen. Via point and "click" you can fly to the chosen location, which is conceptually similiar to the 'lookat' navigation type. The calculated movement is generated from relative movements of the device. 
+            </li><li>
+            The <a href="/documentation/nodetype/SpaceNavigator">SpaceNavigator</a> allows navigation regarding all six degrees of freedom by directly manipulating the camera position in 3D space, but therefore usually a lot of practice is needed. 
+            </li><li>
+            The <a href="/documentation/nodetype/SteerNavigator">SteerNavigator</a> tries to alleviate this by providing a simpler interface for walk-through and fly modes with devices like joystick and spacemouse. In the following the latter navigation type will be further explained exemplarily.
+            </li></ul>
+        
+		<p>
+		After having outlined what type of navigators exist, it will now be explained, how they are used. One possibility is to instantiate a navigator as a child of a <a href="/documentation/nodetype/Viewpoint">Viewpoint</a>, which is shown in the following code fragment. This has the great advantage that the navigator is automatically connected to the currently active Viewpoint.
+		</p>
+		
+<div class="code"><h3>Code: Viewpoint node with an additional navigator field</h3><pre>
+  
+Viewpoint {
+    position 45.15 0.42 5.11813
+    orientation -0.21 0.97 0.0644 0.59193
+    navigator [
+        DEF nav SteerNavigator {
+            inputRange [0 1]
+            rotationSpeed -0.2 -0.2 -0.2
+            translationSpeed 10 10 10
+        }
+    ]
+}
+
+ROUTE ios.*x*axis TO nav.set_yRotation
+ROUTE ios.*z*rot* TO nav.set_zTranslation
+  
+</pre></div>
+		
+		<p>
+		As can be seen in the next code fragment, despite fields for the type of navigation etc., the <a href="/documentation/nodetype/NavigationInfo">NavigationInfo</a> also contains a MFNode field "navigator" for holding the 3D navigator, which will be called for the currently bound ViewBindable node.
+		</p>
+		
+<div class="code"><h3>Code: NavigationInfo node with additional navigator field</h3><pre>
+  
+NavigationInfo {
+    type "walk"
+    navigator [
+        DEF nav SteerNavigator {
+            inputRange [0 1]
+            rotationSpeed -0.2 -0.2 -0.2
+            translationSpeed 10 10 10
+        }
+    ]
+}
+
+ROUTE ios.*x*axis TO nav.set_yRotation
+ROUTE ios.*z*rot* TO nav.set_zTranslation
+  
+</pre></div>
+		
+		<p>
+		Now there remains one question. How do the navigators update their internal state? Therefore the SteerNavigator for instance has six input fields for [x|y|z]Rotation as well as for [x|y|z]Translation, which define a rotation around the corresponding axis or a translation in the appropriate direction respectively. For updating camera movement, you only need to route the corresponding values from your device sensor node to the navigator node as shown above.
+		</p>
+		<p>
+		Furthermore there exist some interesting fields for fine-tuning your navigator. The "inputRange" field specifies the input value range e.g. [-1;1] or [0;1]. It is possible to specify one value for all inputs or a single range for all 6 input values. The "rotationSpeed" field defines the rotations per second for each axis; the values can also be negative for inverting the direction of rotation. The "translationSpeed" field defines the speed of the translation in meters per second for each axis.
+		</p>
+        <p>
+        In order to avoid drift when not interacting with the input device the <a href="/documentation/nodetype/SteerNavigator">SteerNavigator</a> has two SFVec3f fields for defining the values of zero deflection for each axis (meaning the control sticks, after initially having moved them already, are now at rest): "zeroDeflectionTrans" and "zeroDeflectionRot". Last but not least the SteerNavigator node has an SFBool eventIn slot called "updateRotationCenter". If this slot is triggered a point along the viewing ray, usually the point of intersection with the scene geometry, is set as the new center of rotation (default is the origin), which is used in examine mode as the center point around which the viewpoint is rotated.
+        </p>
+		
+		<p>
+		The attached example file shows a simple walk-through world using an IOSensor for joystick movement and a SteerNavigator for showing the previously explained fields in action.
+		</p>
+		
+    Files:
+    <ul class="files"><li><a href="walk_through.wrl">walk_through.wrl</a></li></ul>    
+	</div>
+</div>

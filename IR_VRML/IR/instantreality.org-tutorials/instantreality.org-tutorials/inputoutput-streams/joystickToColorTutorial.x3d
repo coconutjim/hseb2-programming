@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <Scene DEF='scene'>
+    <IOSensor DEF='joystick' type='joystick' device='1'>
+      <field accessType='outputOnly' name='*x*axis*' type='SFFloat'/>
+    </IOSensor>
+    <ColorInterpolator DEF='ci' key='0 1' keyValue='0 0 0 1 1 1'/>
+    <Shape>
+      <Appearance>
+        <Material DEF='mat' diffuseColor='1 0 0'/>
+      </Appearance>
+      <Box/>
+    </Shape>
+    <ROUTE fromNode='joystick' fromField='*x*axis*' toNode='ci' toField='set_fraction'/>
+    <ROUTE fromNode='ci' fromField='value_changed' toNode='mat' toField='set_diffuseColor'/>
+  </Scene>

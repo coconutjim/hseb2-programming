@@ -1,0 +1,86 @@
+<div id="tutorialContainer">
+  <h2 class="title">Apple Sudden Motion Sensor</h2>
+  <p class="description"><strong>Keywords:</strong><br/>accelerometer,
+        tracking,
+        tilt,
+        interaction<br/><strong>Author(s): </strong>Michael Zoellner<br/><strong>Date: </strong>2007-06-14</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to use the Apple Sudden Motion Sensor inside a 3d scene.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+	<p>
+        In 2005 Apple introduced the Sudden Motion Sensor for its portable computers in order to protect the hardrive. This example only works on Apple Powerbooks, iBooks, MacBooks and MacBooks Pro build after 2005.
+    </p>
+    <p>
+        The sensor is a 3-axis accelerometer. The AppleMotionSensor backend delivers a Vec3f with the three acceleration values.
+    </p>
+    <h2>Shaking</h2>
+    <p>
+        In the first example we create an IOSensor of the type AppleMotionSensor and route its values to a Transform node. The values are getting smoothed by a PositionDamper.
+	</p>
+        <p>
+        The AppleMotionSensor is loaded like any other Instant IO device via an IOSensor. The acceleration values are stored in the field <i>Motion</i>:
+        </p>
+        <ul><li><i>Motion (SFVec3f)</i>: Acceleration values (x, y, z)</li></ul>
+        <div class="code"><h3>Code: IOSensor</h3><pre>
+&lt;IOSensor DEF='AppleMotionSensor' type='AppleMotionSensor'&gt;
+	&lt;field accessType='outputOnly' name='Motion' type='SFVec3f'/&gt;
+&lt;/IOSensor&gt;
+        </pre></div>
+        
+        <p>
+        The acceleration values could be routed to a Transform node. But in order to smooth the values we are putting a PositionDamper inbetween.
+        </p>
+        <div class="code"><h3>Code: Mapping the acceleration values</h3><pre>
+&lt;Transform DEF='tr'&gt;
+	&lt;Shape&gt;
+		&lt;Appearance&gt;
+			&lt;Material diffuseColor='1 1 1' /&gt;
+		&lt;/Appearance&gt;
+		&lt;Box/&gt;
+	&lt;/Shape&gt;
+&lt;/Transform&gt;
+    
+&lt;PositionDamper DEF='pd' tau='0.1' /&gt;
+
+&lt;ROUTE fromNode='AppleMotionSensor' fromField='Motion' toNode='pd' toField='set_destination'/&gt;
+&lt;ROUTE fromNode='pd' fromField='value_changed' toNode='tr' toField='set_translation'/&gt;
+        </pre></div>
+
+        
+    Files:
+    <ul class="files"><li><a href="applesuddenmotion.x3d">test_suddenMotion.x3d (Example)</a></li></ul>
+        
+        <h2>Tilt</h2>
+        <p>
+        In this second example we are mapping the acceleration on the orientation of an object.
+        </p>
+        <p>
+        Calling the SFRotation() constructor with the acceleration vector and a vector SFVec3f(0,1,0) calculates the sensor's orientation. By routing that value on a Transform's <i>rotation</i> the object seems to keep its position while rotating the notebook.
+        </p>
+        <div class="code"><h3>Code: Creating rotation relative to the ground</h3><pre>
+&lt;Script DEF='script'&gt;
+	&lt;field accessType='inputOnly' name='set_motion' type='SFVec3f'/&gt;
+	&lt;field accessType='outputOnly' name='rotation_changed' type='SFRotation'/&gt;
+	&lt;![CDATA[javascript:
+	
+		var rotation_changed;
+	  	var vector = new SFVec3f(0,1,0);
+	  
+	  	function set_motion(motion)
+	  	{
+	  		rotation_changed = new SFRotation(motion, vector);
+	  	}
+
+    ] ]&gt;
+&lt;/Script&gt;
+
+&lt;ROUTE fromNode='AppleMotionSensor' fromField='Motion' toNode='script' toField='set_motion'/&gt;
+&lt;ROUTE fromNode='script' fromField='rotation_changed' toNode='tr' toField='set_rotation'/&gt;
+        </pre></div>
+        
+        
+    Files:
+    <ul class="files"><li><a href="test_suddenMotionTilt.x3d">test_suddenMotionTilt.x3d (Example)</a></li></ul>
+        
+    </div>
+</div>

@@ -1,0 +1,124 @@
+<div id="tutorialContainer">
+  <h2 class="title">Immersive PointingSensor Interaction</h2>
+  <p class="description"><strong>Keywords:</strong><br/>UserBody,
+        PointingDeviceSensor<br/><strong>Author(s): </strong>Johannes Behr, Yvonne Jung<br/><strong>Date: </strong>2007-10-08</p>
+  <p><strong>Summary: </strong>
+	This tutorials shows how to use a <a href="/documentation/nodetype/UserBody">UserBody</a> together with immersive interaction devices in order to trigger pointing sensors.
+    </p>
+  <div id="content">
+		<h2>Desktop based interaction</h2>
+		<p>
+		For desktop applications object manipulation is simply accomplished by using the mouse or similiar devices. The X3D <a href="/documentation/nodetype/PointingDeviceSensor">PointingDeviceSensor</a> nodes therefore allow to interact with objects in the scene. The user can choose which object to manipulate by locating the mouse pointer "over" the object. Here the interaction concepts directly follow the way they are described in the pointing device sensor component of the <a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/">X3D specification</a>.
+		</p>
+		<p>
+		Hint: This concept can easily be generalized for any screen-space based input data. Internally the so-called <a href="/documentation/nodetype/Navigator2D">Navigator2D</a> node, which is part of the engine, is used to handle navigation and interaction with a mouse within a 3D scene. But other devices like e.g. optical tracking may produce similiar events, which can also be used. Because those concepts already were explained in the context of 2D/3D navigation, the interested reader may refer to the corresponding <a href="../navigator/">navigation tutorial</a>.
+		</p>
+		
+		<h2>Fully immersive interaction</h2>
+		
+		<p>
+		Within X3D a pointing-device sensor is activated when the user locates the pointing device "over" geometry that is influenced by that specific pointing-device sensor. For desktop clients with a 2D mouse this is just defined by the mouse pointer. In immersive environments (e.g. a CAVE using a 6DOF interaction device) it is not so straightforward how "over" should be understood.
+		</p>
+		<p>
+		Therefore one additional node to generalize the immersive implementation is provided. The <a href="/documentation/nodetype/UserBody">UserBody</a> derived from the <a href="/documentation/nodetype/Group">Group</a> node defines a sub-graph as so-called user body. The <a href="/documentation/nodetype/UserBody">UserBody</a> has only one extra <a href="#" class="field">SFBool</a> field "hot". The hot-field is analogous to a mouse button for 2D interaction and corresponds to the "button pressed" state.
+		</p>
+		<p>
+		If the <a href="/documentation/nodetype/UserBody">UserBody</a> is instantiated as child of a <a href="/documentation/nodetype/Transform">Transform</a> node it can be transformed by using external interaction devices like a spacemouse or pen (whose values can be accessed by means of the <a href="/documentation/nodetype/IOSensor">IOSensor</a> node), and can be used for direct visual feedback of pointing tasks as well as for colliding with real scene geometry, equivalent to a 3D mouse cursor.
+		</p>
+		<p>
+		The type of interaction is set in the <a href="/documentation/nodetype/NavigationInfo">NavigationInfo</a> node. Currently the following interaction types are possible: 
+        </p>
+		<ul><li>
+			<tt>none</tt> - no interaction
+			</li><li>
+			<tt>ray</tt> - handles ray selection in 3D; the ray origin is the position of the user body, and the ray points into the negative z direction (typically an array, by grouping a <a href="/documentation/nodetype/Cone">Cone</a> and a <a href="/documentation/nodetype/Cylinder">Cylinder</a>, is used for representing the proxy geometry, in this case don't forget to add an additional rotation of '1 0 0 -1.5707963' for correct adjustment to the parent <a href="/documentation/nodetype/Transform">Transform</a>)
+			</li><li>
+			<tt>nearest</tt> - also ray based, but uses the nearest sensor, because sometimes it might be quite difficult to really hit an object by means of a ray intersect
+			</li><li>
+			<tt>projection</tt> - like 'ray' this type also handles ray selection in 3D, but this time the ray points from the camera through the origin of the user body's coordinate system, what is especially useful for desktop applications. Be careful not to mix up the origin (which might not be visible) with the real position of your object. Hint: When using the <a href="/documentation/nodetype/Viewspace">Viewspace</a> a <a href="/documentation/nodetype/Geometry2D">Geometry2D</a> node works best as user body.
+			</li><li>
+			<tt>collision</tt> - here the notion of being "over" is modelled by means of a collision of the user body geometry with the sensor geometry
+			</li></ul>
+        <p>
+		With the help of the following code fragment (the complete version can be found in the attached example) a typical usage scenario will finally exemplarily discussed.
+		</p>
+		
+<div class="code"><h3>Code: Controlling a UserBody with a Spacemouse</h3><pre>
+  
+	DEF script Script {	  
+		eventIn SFTime update
+		eventIn SFFloat set_xRotation
+		eventIn SFFloat set_yRotation
+		eventIn SFFloat set_zRotation
+		eventIn SFFloat set_xTranslation
+		eventIn SFFloat set_yTranslation
+		eventIn SFFloat set_zTranslation
+		eventOut SFRotation rotation_changed
+		eventOut SFVec3f translation_changed
+		url "javascript: ..."
+	}
+
+	DEF timeSensor TimeSensor { loop TRUE }
+	ROUTE timeSensor.time TO script.update
+
+	DEF ios IOSensor {
+		type "spacemouse"
+		eventOut SFFloat X*Rotation
+		eventOut SFFloat Y*Rotation
+		eventOut SFFloat Z*Rotation
+		eventOut SFFloat X*Translation
+		eventOut SFFloat Y*Translation
+		eventOut SFFloat Z*Translation
+		eventOut SFBool Button*
+	}
+
+	DEF navInfo NavigationInfo {
+		interactionType "ray"
+		sceneScale 0.01
+	}
+
+	Viewspace {
+		scaleToScene TRUE
+		children [
+			DEF userBodyTrans Transform {
+				children [
+					DEF userBody UserBody {
+						...
+					}
+				]
+			}
+		]
+	}
+
+	ROUTE ios.X*Rotation TO script.set_xRotation
+	ROUTE ios.Y*Rotation TO script.set_yRotation
+	ROUTE ios.Z*Rotation TO script.set_zRotation
+	ROUTE ios.X*Translation TO script.set_xTranslation
+	ROUTE ios.Y*Translation TO script.set_yTranslation
+	ROUTE ios.Z*Translation TO script.set_zTranslation
+	ROUTE ios.Button* TO userBody.hot 
+	ROUTE script.rotation_changed TO userBodyTrans.set_rotation
+	ROUTE script.translation_changed TO userBodyTrans.set_translation
+  
+</pre></div>
+		
+		<p>
+		Because a <a href="/documentation/nodetype/UserBody">UserBody</a> can only have an effect when being moved around, you first have to update its position and orientation to determine which 3D objects are to be hit. This can be done with the help of an <a href="/documentation/nodetype/IOSensor">IOSensor</a> for receiving the input data of your desired interaction device. In this example a spacemouse was chosen.
+		</p>
+		<p>
+		Because a spacemouse has six <tt>SFFloat</tt> eventOut slots, three for translation along the x, y, and z axis, and three for rotation about these axes, the final translation (of type <tt>SFVec3f</tt>) and rotation (of type <tt>SFRotation</tt>) have to be assembled in a script. After that the results are routed to the parent transform of the <a href="/documentation/nodetype/UserBody">UserBody</a> node, which contains the pointer geometry.
+		</p>
+		<p>
+		In this example the user body is also a child of a <a href="/documentation/nodetype/Viewspace">Viewspace</a> node. This is due to the fact, that usually the pointer geometry is not really considered as being part of the scene but rather a tool for interacting in immersive environments.
+		</p>
+		<p>
+		In this context two fields are quite important: If <tt>scaleToScene</tt> is true, the <a href="/documentation/nodetype/Viewspace">Viewspace</a> is scaled to the same size as defined in <tt>sceneScale</tt> of the <a href="/documentation/nodetype/NavigationInfo">NavigationInfo</a>. This is very useful in case the scene wasn't modelled in meters; hence if the scene was modelled e.g. in centimeters, the <a href="#" class="field">sceneScale</a> field should be set to 0.01.
+		</p>
+        
+		<p class="warning"><b>Warning: </b>Please note, that currently only the first <a href="/documentation/nodetype/UserBody">UserBody</a> can activate pointing device sensors in <tt>ray</tt>, <tt>nearest</tt> and <tt>collision</tt> mode; whereas the projection mode may not work in multi-viewport/highly immersive environments.</p>
+		
+		
+    Files:
+    <ul class="files"><li><a href="mainUserBody.wrl">Ray intersect</a></li><li><a href="ir_userbody.wrl">Projective intersect</a></li><li><a href="ir_userbody_vs.wrl">Projective intersect with HUD</a></li></ul>    
+	</div>
+</div>

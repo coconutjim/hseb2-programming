@@ -1,0 +1,123 @@
+<div id="tutorialContainer">
+  <h2 class="title">Face Tracking</h2>
+  <p class="description"><strong>Keywords:</strong><br/>vision,
+        tracking,
+        face detection,
+        shore face tracker,
+        augmented reality<br/><strong>Author(s): </strong>Junming Peng, Harald Wuest<br/><strong>Date: </strong>2010-06-01</p>
+  <p><strong>Summary: </strong>
+    This tutorial will give you a rough idea on how to use the Instant Reality's face tracking module for implementation of a face detection application.
+    </p>
+  <div id="content">
+        <h2>Introduction</h2>
+	<p>
+     In general, face detection does not appear to be a new technology to most of us. In fact, we have seen several demonstrations using one of the famous OpenCV libraries to do 2D face tracking. Moreover, new face detection libraries are introduced one after another. One of the newly enhanced versions of face detection module that was integrated into Instant Reality system is known as SHORE <i>(Sophisticated High-speed Object Recognition Engine)</i>. It was designed for the purpose of rapid face detection and analysis, which an example given below will illustrate this feature. The current version of SHORE is available as C++ library for different platforms and was copyrighted by Fraunhofer IIS.  
+    </p>
+    <p>
+     In this brief tutorial section, we shall focus on the basic definitions and code structures of this face tracking example using Instant Reality platform. Furthermore, the advantages and disadvantages of different face model type are being covered in this tutorial as well.
+	</p>
+        <h2>Basic Definitions</h2>
+        
+        <p>
+        First of all, let's discuss about the Cartesian coordinate system used in SHORE library. Basically, its coordinate system is located in the upper left corner of the image meaning the positive x-axis points to the right and the positive y-axis points downwards. Therefore, all values returned by this library are referenced from this coordinate system. We will quote an example code below to showcase this concept. Currently, this face detection only works in 2D space but soon, it will be in 3D since it will be more realistic this way. 
+        </p>
+        <p>
+        Besides that, SHORE also enables the detection of different facial expressions, age estimation, genders and so forth. This is not all, it can also track more than one faces while still maintaining its tracking accuracy as it has a special scoring or rating system which records the quality of individual face captured. However, this special feature of SHORE is only available for European adult faces at the moment. 
+        </p>
+        <p>
+         Please note that it is recommended to turn on the eye search for better face detection result. <i>(See Image:TutorialFaceTracking_InitialStage.jpg)</i> 
+        </p>
+        
+        <div class="imgContainer"><img src="TutorialFaceTracking_InitialStage.jpg" align="center"/><div class="imgCaption">Image: The initial sample files of FaceTrackerIIS</div></div>
+        
+        <p>
+        With reference to the above image, the pair of yellow dots indicates successful eyes detection or search eyes while the red color border indicates tracked face(s).  
+        </p>
+        
+        <h2>Code Structures</h2>
+        
+        <p>
+        Under this section, we shall cover two parts:
+        
+        <ul><li>The SHORE module which is defined in the form of ShoreAction in our configuration file namely 'FaceTrackerIIS.pm' and</li><li>How to extract the essential values from ShoreAction in strings' format from our X3D main executable file.</li></ul>
+        </p>
+        
+        <p>
+        The parameters of ShoreAction will be discussed with regards to the code below. Other than that, there are also other parameters which should be taken care of which are the three attributes of face object such as <i>Roll</i>, <i>Pitch</i> and <i>Yaw</i> that define the orientation of face. The face object also has a rating with key ‘Score’ that describes how likely it is to be a face. Thus, the higher the score, the more likely that a face is detected.
+        </p>
+        <div class="code"><h3>Code: ShoreAction</h3><pre>
+        &lt;ShoreAction category='Action' enabled='1' name='Shore'&gt;
+          &lt;Keys size='3'&gt;
+            &lt;key val='ImageGrey' what='Image to process, in'/&gt;
+            &lt;key val='JsonString'/&gt;        
+            &lt;key val='DetectedFaces'/&gt;
+          &lt;/Keys&gt;
+          &lt;ActionConfig AnalyzeAge='1' AnalyzeAngry='0' AnalyzeEyes='0' AnalyzeGender='1' AnalyzeHappy='1' AnalyzeMouth='0' AnalyzeSad='0' AnalyzeSurprised='0' Engine='custom' IdMemoryLength='5' IdMemotyType='Spatial' ImageScale='1' MinFaceScore='9' MinFaceSize='0' ModelType='Face.Front' SearchEyes='1' SearchMouth='0' SearchNose='0' ThreadCount='1' TimeBase='0.02' TrackFaces='1' UpdateTimeBase='1'/&gt;
+        &lt;/ShoreAction&gt;
+        </pre></div>
+        
+        <ul><li>AnalyzeAge: If '1', an age estimation step is added to the Shore engine. Each face object will get two additional ratings with keys 'Age' and 'AgeDeviation'. The value of Age is estimated in years (0 to 90 years) while AgeDeviation indicates the deviation or mean absolute error of the age estimation.</li><li>AnalyzeEyes: If '1', an analysis step of eyes is added to Shore. Each face object will get two ratings with keys 'LeftEyeClosed' and 'RightEyeClosed' which indicate how closed the eyes are and they are in the range [0,100].</li><li>AnalyzeGender: If '1', gender analysis is added to Shore. Each face object will get key 'Gender' that can be Female or Male or empty e.g. “”, if nothing is detected in the video. The ratings are both in the range [0,100]. The higher the ratings, the more it will be classified as male or female.</li><li>AnalyzeAngry: If '1', angry analysis step is added to the Shore. Each face object will get a rating with key 'Angry' that rate between [0,100].</li><li>AnalyzeHappy: If '1', a happy analysis is added to Shore. Each face object will get a rating with key 'Happy' and the range is in [0,100].</li><li>AnalyzeSad: If '1', sad analysis is added to Shore. Each face object will get a rating with key 'Sad' that falls in the range [0,100].</li><li>AnalyzeSurprised: If '1', surprised analysis is added to Shore. Each face object will get a rating with key 'Surprised' and is in the range [0,100].</li><li>AnalyzeMouth: If '1', a mouth analysis is added to Shore. Each face object will get a rating with key 'MouthOpen' that indicates how wide the mouth is opened. It is in the range [0,100] and the rating for a closed mouth is 0.</li><li>Engine: This is the Shore engine and has a default value of custom.</li><li>TimeBase: Video sampling interval is in seconds. If '0', it means that video filtering is off. For instance, a video of 50 frames/second would require a value of 0.02 or 20ms. The valid range of this parameter is [0, 10].</li><li>IdMemoryLength: This parameter will become active if TimeBase &gt; 0. It defines how long <i>(in seconds)</i> a face is remembered internally, so that a connection of a currently detected face to the same face detected some time ago can be made. How this connection is made and which information is returned by the engine is defined by the parameter IdMemotyType. The valid range of IdMemoryLength is [0, 180].</li><li>IdMemotyType: This parameter will become active if TimeBase &gt; 0 and if IdMemory
+Length &gt; 0. In this case, valid arguments are "Spatial", "Recent" or "All".</li><li>ImageScale: It resizes the original input image using this scaling factor for the internal processing and its range is in [0, 3].</li><li>MinFaceSize: It limits the minimal face size that will be returned. It must be greater or equal to 0. If it is in the range [0, 1], it is taken with respect to the original image size. If it is greater than 1, it is the absolute minimal number of pixels a face will have in the original image.</li><li>MinFaceScore: This is the minimal face detection threshold. Each face has a rating with key ’Score’ that indicates how likely it is to be a face. The lower this value is, the more faces are recognized but also false detections will be found. A good choice for the model type ’Face.Front’ and ’Face.Rotated’ is 9 and for ’Face.Profile’ is 16. A reasonable range for all models is in [0, 60].</li><li>ModelType: Defines which model is used to detect faces. The valid values are ’Face.Front’, ’Face.Rotated’ and ’Face.Profile’. The returned face objects also have three attributes with key ’Roll’, ’Pitch’ and ’Yaw’. The ’Roll’ attribute describes roughly the in-plane rotation of the face. The ’Pitch’ attribute indicates the tilt of the face. The pitch of a face can be compared with nodding. The ’Yaw’ attribute describes roughly the out-of-plane rotation, e.g. for profile faces, the yaw is ’-90’ and ’90’ respectively.</li><li>SearchEyes: If '1', an eye fine search module is added to Shore.</li><li>SearchMouth: If '1', a mouth fine search module is added to Shore.</li><li>SearchNose: If '1', a nose fine search module is added to Shore.</li><li>ThreadCount: The number of threads used for processing. If you run your application on a machine with more than one single CPU, it will typically be faster to use all CPUs. The number of threads is limited to 10.</li><li>TrackFaces: This parameter will take effect only if TimeBase &gt; 0. If it is '1', an object
+tracker is activated that tries to track the faces that were lost by the face detection module. In this case the object type is changed to ’Face.Tracked’. Please note that fine search such as SearchEyes etc and analysis modules such as AnalyzeHappy etc do not act on the tracked faces.</li><li>UpdateTimeBase: If UpdateTimeBase is '1', the automatic estimation and adaption of the current TimeBase is turned on otherwise, it is in off state. This parameter will take effect only if TimeBase &gt; 0.</li></ul>
+        
+        <p>
+        This is how we extract the values of JsonString from our configuration file as declared below e.g. 'JsonString_out_value'. Following that, we just pass JsonString as input into our script in which the values will be processed accordingly.
+        </p>
+        <div class="code"><h3>Code: processJsonString</h3><pre>
+        &lt;IOSensor DEF='VisionLib' type='VisionLib' configFile='FaceTrackerIIS.pm' dataAttributeSlots='true' addDataBases='VideoSourceImage;DetectedFaces;JsonString;'&gt;
+    		&lt;field accessType='outputOnly' name='VideoSourceImage' type='SFImage'/&gt;
+            &lt;field accessType='outputOnly' name='DetectedFaces' type='MFVec3f'/&gt;            
+            &lt;field accessType='outputOnly' name='JsonString_out_value' type='SFString'/&gt;
+    	&lt;/IOSensor&gt;
+        
+        &lt;Script DEF="script"&gt;
+            &lt;field name='processJsonString' type='SFString' accessType='inputOnly'/&gt;
+            .
+            .
+            .
+        &lt;/Script&gt;
+        
+        &lt;ROUTE fromNode='VisionLib' fromField='JsonString_out_value' toNode='script' toField='processJsonString'/&gt;
+        </pre></div>
+        
+        <p>
+        Like I have mentioned earlier about the Cartesian coordinate system that Shore has adopted and thus, you can see all our y-axis negated. This happened to one of our visualized data which you can find in our sample code below which can be easily interpreted.
+        </p>
+        <div class="code"><h3>Code: Shore cartesian coordinate system</h3><pre>
+        var y1= f[i].region.top;
+        var y2= f[i].region.bottom;
+        var x1= f[i].region.left;
+        var x2= f[i].region.right;
+        
+        p.point[i*4+0] = new SFVec3f(x1, -y1, 0);
+        p.point[i*4+1] = new SFVec3f(x2, -y1, 0);
+        p.point[i*4+2] = new SFVec3f(x2, -y2, 0);
+        p.point[i*4+3] = new SFVec3f(x1, -y2, 0);
+        </pre></div>
+        
+        <h2>Advantages and Disadvantages of Face Model Type</h2>
+        
+        <p>
+        For the value ’Face.Front’, a model is used to detect an upright frontal faces. All returned face objects will have the value ’0’ for the ’Roll’, ’Pitch’ and ’Yaw’ attributes. The face objects also have two markers with key ’LeftEye’ and ’RightEye’ that describe roughly the position of both eyes.
+</p>
+<p>
+Providing ’Face.Rotated’ as value, a detection model is used that is able to detect -60 to +60 degree in-plane rotated faces. For rotated face objects, the attribute ’Roll’ contains the in-plane rotation (’-60’,’-45’, ’-30’, ’-15’, ’0’, ’15’, ’30’, ’45’, ’60’). The ’Pitch’ and ’Yaw’ attributes will have the value ’0’. The rotated face objects also have two markers with key ’LeftEye’ and ’RightEye’ that describe roughly the position of both eyes.
+</p>
+<p>
+For the value ’Face.Profile’, a model is used that is able to detect upright frontal and out-of-plane rotated faces. The ’Yaw’ attribute contains the out-of-plane rotation (’-90’, ’-45’, ’0’, ’45’, ’90’). In addition, the model also detects profile faces (yaw equal to ’-90’ or ’90’) that are pitched. Possible values for the attribute ’Pitch’ are ’-20’, ’0’ and ’20’. For the ’Yaw’ values of ’-45’, ’0’ and ’45’, the face objects have three markers with key ’LeftEye’, ’RightEye’ and ’NoseTip’ that roughly describe the position of both eyes and nose tip. If the value of the ’Yaw’ attribute is equals to ’90’, the face objects will have three markers with key ’LeftEye’, ’NoseTip’ and ’LeftMouthCorner’. For the value ’-90’ of the ’Yaw’ attribute, the face objects have three markers with key ’RightEye’, ’NoseTip’ and ’RightMouthCorner’.
+</p>
+<p>
+Please keep in mind that the rotated and profile face models do not have the same performance than the upright frontal face model <i>(lower detection rate and more false detections)</i>. And please consider that the analysis and fine search modules only act on face if the ’Roll’ attribute equals to ’-15’, ’0’ or ’15’, the ’Pitch’ attribute equals to ’0’ and the ’Yaw’ attribute equals to ’-45’, ’0’ or ’45’.
+</p>
+        <p>
+        After further development of FaceTrackerIIS sample in its initial/original stage, you can find below a screenshot of a sample application which showcase the final possible outcome. ;)
+        </p>
+        
+        <div class="imgContainer"><img src="TutorialFaceTracking_Final.JPG" align="center"/><div class="imgCaption">Image: FaceTracker IIS Finished Product.</div></div>
+        
+        
+    Files:
+    <ul class="files"><li><a href="FaceTrackerIIS.x3d">FaceTrackerIIS.x3d (Main)</a></li><li><a href="FaceTrackerIIS2.x3d">FaceTrackerIIS2.x3d (alternative Main)</a></li><li><a href="FaceTrackerIIS.pm">FaceTrackerIIS.pm (Config File)</a></li><li><a href="FaceTrackerIIS.rar">FaceTrackerIIS.rar (Sample Application File)</a></li></ul>
+        
+    </div>
+</div>

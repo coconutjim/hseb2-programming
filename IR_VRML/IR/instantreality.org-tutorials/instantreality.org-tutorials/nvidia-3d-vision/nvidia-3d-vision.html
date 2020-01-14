@@ -1,0 +1,90 @@
+<div id="tutorialContainer">
+  <h2 class="title">NVIDIA 3D Vision</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        engine,
+        stereo,
+        active,
+        NVIDIA 3D vision<br/><strong>Author(s): </strong>Johannes Behr<br/><strong>Date: </strong>2009-12-01</p>
+  <p><strong>Summary: </strong>
+    This tutorial describes the configuration and setup of the NVIDIA 3D Vision System to be usable with InstantReality.
+    </p>
+  <div id="content">
+        <h2>Preconditions for this tutorial</h2>
+        <p> 
+        Please read the tutorials "Multiple Windows and Views" as well as "Active Stereo" in this category to get a  
+        good overview about stereo approaches and active stereo setups.
+        </p>
+        
+        <h2>NVIDIA Hardware</h2>
+        <p>
+        Nvidia produces and sells a consumer active stereo system which is mainly targeted for games and entertainment applications. It's called <a href="http://www.nvidia.com/object/3D_Vision_Main.html">"NVidia 3D Vision"</a> and is available world-wide. It works out of the box with DirectX games. OpenGL applications need a standard Quadbuffer-context which is only available with professional quadro-cards.  
+        </p>
+	<p>
+	The package includes the active shutter glasses, the emitter and necessary cables. There are different versions with and without the extra sync cable needed for the quadro-cards. 
+	</p>
+	<div class="imgContainer"><img src="nvidia-3dvision-hw.png" align="center"/><div class="imgCaption">Image: NVidia 3D Vision shutter glasses and emitter</div></div>
+
+        <h2>Hardware Setup</h2>
+        <p>
+        Quadbuffer is one of the basic features used for stereo rendering, which is needed to provide the separate images for the left and right eye. NVidia supports this feature only in the professional quadro-line. 
+        </p>
+	<p>
+	You have to enable the stereo support following the <a href="http://www.nvidia.com/object/quadro_pro_graphics_boards.html"> NVIDIA 3D Vision for Quadro </a> setup page. 
+	</p>
+	<p>
+	There are two different ways to connect the stereo emitter: "Stereo VESA" or USB. If you use one of the professional boards (e.g. Quadro FX 4600) which provide an extra VESA connector you need to connect the emitter using this socket. Some boxes include the needed Stereo VESA to audio cable and some don't. 
+	</p>
+	<p>
+	If you need to build an extra VESA sync cable follow the <a href="http://forums.nvidia.com/lofiversion/index.php?t98067.html"> 3D Vision VESA cable </a> setup guide.
+	</p>
+
+	<h2>Software Setup</h2>
+	<p>
+	InstantReality directly supports QuadBuffer rendering for stereo. You only need two Viewarea nodes layered onto each other and a Window with 4 buffers. 
+	</p>
+	<p>
+	Please read the <a href="http://www.instantreality.org/tutorial/active-stereo/"> "Active Stereo" </a> tutorial for details. 
+	</p>
+     <div class="code"><h3>Code: Stereo configuration with Quad-Buffer</h3><pre>
+RenderJob { 
+  windowGroups [
+    WindowGroup {
+      windows [
+        LocalWindow {
+        buffer 4
+          views [
+            Viewarea {
+              leftBuffer TRUE
+              rightBuffer FALSE
+              modifier [
+                ShearedStereoViewModifier {
+                  leftEye  TRUE
+                  rightEye FALSE
+                }
+              ]
+            }
+            Viewarea {
+              leftBuffer FALSE
+              rightBuffer TRUE
+              modifier [
+                ShearedStereoViewModifier {
+                  leftEye  FALSE
+                  rightEye TRUE
+                }	
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+	</pre></div>
+        
+        
+    Files:
+    <ul class="files"><li><a href="activeStereo.wrl">activeStereo.wrl</a></li></ul>
+    </div>
+</div>

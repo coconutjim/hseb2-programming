@@ -1,0 +1,59 @@
+#X3D V3.0 utf8
+
+Engine {
+  jobs [
+    DEF render RenderJob { 
+       windowGroups [
+        WindowGroup {
+          windows [
+            Window {
+              #This window is just for interaction
+              enabled FALSE
+            }
+            TiledClusterWindow {
+              servers [ "displaypc1" "displaypc2" ]
+              tileWidth 1024
+              tileHeight 768
+              fullScreen TRUE
+              overlapX 20
+              overlapY 0
+              balance TRUE
+              showBalancing TRUE
+              columns 2
+              rows 1
+            }
+          ]
+        }
+       ]
+    }	
+  ]
+}
+Scene {
+  children [
+    Transform {
+      translation -5 -5 0
+      children [
+        Inline { url [ "tie.wrl" ] }
+      ]
+    }
+    Transform {
+      translation 5 -5 0
+      children [
+        Inline { url [ "tie.wrl" ] }
+      ]
+    }
+    Transform {
+      translation 5 5 0
+      children [
+        Inline { url [ "tie.wrl" ] }
+      ]
+    }
+    Transform {
+      translation -5 5 0
+      children [
+        Inline { url [ "tie.wrl" ] }
+      ]
+    }
+  ]
+}
+

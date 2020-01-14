@@ -1,0 +1,150 @@
+<div id="tutorialContainer">
+  <h2 class="title">Accessing hardware in InstantIO via REST from X3DOM</h2>
+  <p class="description"><strong>Keywords:</strong><br/>REST,
+        InstantIO,
+        X3DOM<br/><strong>Author(s): </strong>Tobias Alexander Franke<br/><strong>Date: </strong>2013-08-09</p>
+  <p><strong>Summary: </strong>
+    InstantIO is equipped with a REST API, which enables access to hardware via HTTP or Websockets, exposing all features of InstantIO to web-based 3D applications. This tutorial will show you how to use it.
+  </p>
+  <div id="content">
+  
+    <p class="warning"><b>Warning: </b>The REST interface of InstantIO is currently in a pre-alpha state. We have enabled an early access preview, but it will certainly crash at some point. A stable version should be available with the next major release of InstantReality.</p>
+  
+    <h2>InstantIO and REST</h2>
+    
+    <p>
+        InstantIO is a library and server application used in the InstantReality framework to enable broad access to hardware. To do this, each piece of hardware is instantiated as a node in a graph, and each node has In- and OutSlots which either gather or produce data. For instance, a Joystick only produces data and has OutSlots for the buttons being pressed or the axis the stick is currently being pushed on. Additionally, nodes have fields which contain static variables initialized right at instantiation. These might include a node name, a specific setting for the hardware etc.
+    </p>
+    
+    <p>
+        The REST interface built on top of InstantIO exposes all of these slots and fields to the outside. With just the right REST address, you can access this information or manipulate it with HTTP commands or websockets. A key benefit of this interface is that web applications such as X3DOM apps can access and use hardware in a browser by running the InstantIO server application without any plugins or the need to enable special browser support.
+    </p>
+    
+    <h2>Creating a device</h2>
+    
+    <p>
+        In the next few steps, we will instantiate a piece of hardware, similar to the tutorial on <a href="http://doc.instantreality.org/tutorial/connecting-devices/">Connecting Devices</a>. First find your InstantIO application and run it. In your taskbar you will find a little icon indicating a running InstantIO service. With a right-click on it, select <b>Webinterface</b>, which will bring up a browser window.
+    </p>
+        
+    <div class="imgContainer"><img src="webInterface-start.png" align="center"/><div class="imgCaption">Image: Webinterface of InstantIO right after opening it in a web browser. Click on Root Namespace to continue.</div></div>
+    
+    <p>
+        Click on <b>Root Namespace</b> to get to the top level namespace which contains instantiated hardware nodes.
+    </p>
+    
+    <div class="imgContainer"><img src="webInterface-namespace-node.png" align="center"/><div class="imgCaption">Image: A view of the root namespace. Click on Nodes to continue.</div></div>
+    
+    <p>
+        In this namespace, we can instantiate a node by clicking on <b>Nodes</b> in the current view.
+    </p>
+    
+    <div class="imgContainer"><img src="webInterface-type.png" align="center"/><div class="imgCaption">Image: Select the device you want to instantiate here, the continue with the Create button.</div></div>
+    
+    <p>
+        This view presents currently instantiated hardware. If you have never opened up InstantIO before, you should see only one node: the <b>Web</b> server. In the lower half you can select a device or library from a dropdown menu called <b>Type</b>. Not all devices are listed here though: plugins, which depend on the availability of a certain SDK or driver, are instantiated dynamically with their name. If you want to use these devices, simply enter the plugin name in the text field <b>Type</b>. These are:
+    </p>
+    
+    <ul><li><b>Oculus Rift</b>: OculusVR</li><li><b>OpenNI</b>: NI</li><li><b>Microsoft Kinect</b>: Kinect</li><li><b>LEAP Motion</b>: Leap</li></ul>
+    
+    <p>
+        When you are done, click on <b>Create</b> to continue. If the plugin is able to initialize (on the software side of things) or the device you have selected from the dropdown menu, you will be prompted with a new dialog. Depending on the device, this dialog will contain different fields which you can set or leave at their default values.
+    </p>
+    
+    <div class="imgContainer"><img src="webInterface-createType.png" align="center"/><div class="imgCaption">Image: A sample screen when creating a device. The fields for each device vary. In most cases it is sufficient to enter a name for your node and click on Start.</div></div>
+    
+    <p>
+        In most cases it is sufficient to simply give your node a unique name and click the <b>Start</b> button. This will create a new node and initialize the device. If this process was successful, you should see a new node appear in the list of devices. InstantIO will remember this device and it should be right where you left it after a restart of the server application.
+    </p>
+    
+    <div class="imgContainer"><img src="webInterface-typeOverview.png" align="center"/><div class="imgCaption">Image: After creating a device, it will be displayed in the list on top. Click on it to see additional information about it.</div></div>
+    
+    <p>
+        You should now have a new device ready to use. We will now take a look how to access its properties with the REST interface.
+    </p>
+    
+    <h2>The REST interface</h2>
+    
+    <p>
+        A REST address to an InstantIO node is mainly identified by the node's name, e.g. <b>foo</b>: <b>http://localhost:12345/InstantIO/element/foo</b>. You can try this with the <b>web</b> node which is instantiated by default. Simply open a browser and enter the address. It will bring up a JSON container which provides information on the node. For instance, the <b>web</b> node may look like this:
+    </p>
+    
+    <div class="code"><h3>Code: An example JSON container of a Web node</h3><pre>{
+  "id": "Web",
+  "type": "Web",
+  "length": 1,
+  "cardinality": "single",
+  "attributes": [
+    "Address", "Port", "UserId", "Password", "LogSize"
+  ],
+  "relations": [ "routes" ],
+  "input": [ ],
+  "output": [ ]
+}
+</pre></div>
+    
+    <p>
+        These entries reflect basic properties of a web node. The entry <b>attributes</b> presents a list of all <b>Attributes</b> an <b>Element</b> (in this case the web node) might have. In the context of InstantIO, these Attributes are all fields, InSlots and OutSlots of a Web node. To access one of them, simply add them to the address. For instance, to access the attribute <b>Port</b>, you go to: <b>http://localhost:12345/InstantIO/element/web/Port</b>. You will be presented with another JSON container, this time describing and Attribute.
+    </p>
+    
+    <div class="code"><h3>Code: An example JSON container of an Attribute</h3><pre>{
+  "name": "Port",
+  "type": "string",
+  "length": 1,
+  "cardinality": "single",
+  "input": [ "string" ],
+  "output": [ "string" ]
+}
+</pre></div>
+    
+    <p>
+        Here you can see some important information about the Attribute: it has a type <b>string</b> and a length <b>1</b>, which basically means it's a single string. You can read or write to it by supplying a string or reading it as a string. The lists <b>input</b> and <b>output</b> however may contain additional types, such as int, float or double2 (a 2-vector of doubles). By using the input or output type as additioal mimetype in the HTTP query, you can access the value, in this case the value of <b>Port</b>, in a given format: <b>http://localhost:12345/InstantIO/element/web/Port.string</b>.
+    </p>
+    
+    <h2>Connecting web-apps</h2>
+    
+    <p>
+        There are two ways of accessing a field or Slot of an InstantIO node: via HTTP with a pull-mechanism, or with WebSockets in a push-like manner. The WebSocket variant is the preferred way of reading data in an interactive Javascript application. In the following example, we connect a WebSocket on an OutSlot of an instantiated Oculus Rift node (named <b>ovr</b>) to a X3DOM viewpoint. WebSockets use the same address as the REST API, but with a different protocol identifier <b>ws://</b>.
+    </p>
+    
+    <div class="code"><h3>Code: </h3><pre>function websocket(location)
+{
+    if (window.MozWebSocket)
+        return new MozWebSocket(location);
+    else
+        return new WebSocket(location);
+}
+
+function start_log(location)
+{
+    var viewpoint = document.getElementById('vpp');
+    
+    socket = websocket(location);
+    socket.onmessage = function(event)
+    {
+        //console.log(event.data);
+        var h = x3dom.fields.SFVec4f.parse(event.data);
+        var q = new x3dom.fields.Quaternion(h.x, h.y, h.z, h.w);
+        
+        var aa = q.toAxisAngle();            
+        //console.log(aa[0].x + " " + aa[0].y + " " + aa[0].z + " " + aa[1]);
+        
+        viewpoint.setAttribute("orientation", aa[0].x + " " + aa[0].y + " " + aa[0].z + " " + aa[1]);
+    }
+}
+
+var instantIOport = "12345";    // attention: use port as opened in InstantIO
+start_log("ws://localhost:" + instantIOport + "/InstantIO/element/ovr/Orientation/data.string");
+</pre></div>
+
+    <p>
+        The function <tt>websocket(location)</tt> is a helper to abstract away differences in the Javascript API for websockets of different browser vendors. In the <tt>start_log(location)</tt> function, we first search for a X3DOM viewpoint element called <b>vpp</b> and then open a new websocket on the location <b>ws://localhost:12345/InstantIO/element/ovr/Orientation/data.string</b>. A callback function <b>onmessage</b> will be executed when ever the websocket is provided with new data from the node's OutSlot <b>Orientation</b>, which in this case is the head tracker orientation of the Oculus Rift HMD. Since the data is queried as string, we parse the <b>event.data</b> and create a new Quaternion out of the four numbers in the Orientation, turn them into an axis angle representation and use these values to set a new orientation in the viewpoint X3DOM node.
+    </p>
+	
+	<div class="imgContainer"><img src="oculus.png" align="center"/><div class="imgCaption">Image: A view of a classroom scene in X3DOM driven by an Oculus Rift HMD through InstantIO.</div></div>
+	
+	<p>
+		The only real setup you need to take care of is instantiating a device, making sure that the name of the instantiated node matches the name supplied in your REST address in the Javascript code and having the right port to the InstantIO server it is currently running on. If you have an Oculus, go ahead and download the current InstantReality release, instantiate a node and call it <b>ovr</b> and then download and <a href="http://www.x3dom.org/x3dom/test/functional/classroom.html">try out the X3DOM demo from here</a> after setting up the instantIOPort variable to the correct value.
+	</p>
+        
+  </div>
+</div>

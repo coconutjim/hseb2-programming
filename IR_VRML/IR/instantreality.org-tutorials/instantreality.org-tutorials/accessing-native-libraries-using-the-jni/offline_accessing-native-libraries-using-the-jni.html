@@ -1,0 +1,359 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Accessing native libraries using the JNI</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Accessing native libraries using the JNI</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Java,
+        Script,
+        Java Native Interface,
+        JNI,
+        external library,
+        native library<br/><strong>Author(s): </strong>Sabine Webel<br/><strong>Date: </strong>2009-06-26</p>
+  <p><strong>Summary: </strong>This tutorial explains how to access external (native) libraries within a <a href='/documentation/nodetype/Script'>Script</a> node in Instant Player using the Java Native Interface (JNI). The JNI is a programming framework that allows Java to call methods of platform specific (native) libraries written in other languages (e.g. C, C++). This tutorial is based on the <a href="http://www.instantreality.org/tutorial/breaking-out-of-the-java-sandbox/">Breaking out of the Java Sandbox</a> and the <a href="http://www.instantreality.org/tutorial/implementing-script-nodes-in-java/">Implementing <a href='/documentation/nodetype/Script'>Script</a> nodes in JavaScript</a> tutorial. It assumes that the reader knows how to use a Java class inside a <a href='/documentation/nodetype/Script'>Script</a> node and how to create and handle .java.policy files.</p>
+  <div id="content">
+    <h2>Preparing the Java class</h2>
+        <p>
+            The Java Native Interface (JNI) is a powerful feature of the Java platform that allows Java code running in a Java Virtual Machine (JVM) to call methods of native applications and libraries, such as Windows-DLLs or Linux shared libraries. In the opposite direction the JNI also enables Java code to be called by those applications and libraries which may also be written in other programming languages such as C, C++ or assembly. To access a native method inside Java at first the library must be declared as "native" in the Java class. Then the library must be loaded by calling <i>System.loadLibrary("&lt;name of the library&gt;")</i>. This may look like:
+        <div class="code"><h3>Code: Making the native library accessible</h3><pre>
+public class HelloWorldJNI extends vrml.node.Script
+{
+    native void function1();
+
+    static
+    {
+        System.loadLibrary("HelloWorldJNI");
+    }
+    ...
+}
+        </pre></div>
+    </p>
+    <p class="warning"><b>Warning: </b>
+    The directory where the native library, that is loaded in the Java code, is located must be included in the <i>PATH</i>.
+    </p>
+    <p>
+        After the compilation of the Java program a JNI-style header file must be generated using the <i>javah</i> tool that comes with the Java Development Kit (JDK). This can be done by calling
+        <div class="code"><pre>javah -jni &lt;Java class name&gt;</pre></div>
+        The name of the generated header file is the class name with a ".h" appended. This header file specifies the prototypes for the native methods (i.e. the JNI functions for the native methods declared in the Java class).
+        </p>
+    <h2>Creating the JNI functions</h2>
+         <p>
+            In the JNI native functions are implemented in separate C or C++ files (i.e. *.c or *.cpp). A JNI function may look like the following:
+        </p>
+        <div class="code"><h3>Code: JNI function</h3><pre>
+JNIEXPORT void JNICALL Java_JavaClassName_MethodName (JNIEnv *env, jobject obj)
+{
+    /*Implementation of the Native Method*/
+}
+        </pre></div>
+        <p>
+            The name of the JNI function is composed of three components: a <i>Java</i> prefix, the name of the <i>Java class</i> where the JNI function shall be called and the <i>native method name</i>. More information about the <i>JNICALL</i>, the <i>JNIEnv</i> pointer and the <i>jobject</i> reference can be found in the <a href="http://java.sun.com/j2se/1.5.0/docs/guide/jni/spec/jniTOC.html">Java Native Interface Specification</a>.
+            To follow the example in the section above the <i>HelloWorldJNI.function1</i> method can be impelemented in C++ as follows:
+            <div class="code"><h3>Code: HelloWorldJNI</h3><pre>
+#include &lt;stdio.h&gt;
+#include &lt;jni.h&gt;
+#include "HelloWorldJNI.h"
+
+JNIEXPORT void JNICALL Java-HelloWorldJNI_function1(JNIEnv *env, jobject obj)
+{
+    printf("HelloWorld\n");
+    return;
+}
+            </pre></div>
+            As can be seen in the example the C++ code includes three header files:
+            </p>
+            <ul><li><i>stdio.h</i>: Just because <i>printf</i> is used, not JNI specific.</li><li><i>jni.h</i>: Provides information for calling JNI functions. Must be included when writing native methods.</li><li><i>HelloWorldJNI.h</i>: Header file that is generated using <i>javah</i>. Includes the prototype for the <i>Java_HelloWorldJNI_function1</i> method.</li></ul>
+        <p>
+            The <i>jni.h</i> and <i>&lt;MyJavaClass&gt;.h</i> must always be included in the C/C++ files where the JNI functions are written. To get the native library that can loaded in the Java code, all corresponding sources must be compiled.
+        </p>
+        <h2>Passing arguments and returning values</h2>
+        <p>
+            To pass arguments from the Java program to the native methods and vice versa, native types can be mapped to/from Java types. Primitive types such as <i>int</i>, <i>float</i> and <i>bool</i> can simply be copied. Compound types like e.g. <i>objects</i>, <i>arrays</i> and <i>string</i> must be explicitly converted by using <i>JNIEnv</i> methods. The following table shows the mapping between <i>Java Language Types</i> and the <i>Native Types</i>:
+        </p>
+        <table>
+  <tr>
+    <th>Java Language Type</th>
+    <th>Native Type</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>boolean</td>
+    <td>jboolean</td>
+    <td>unsigned 8 bits</td>
+  </tr>
+  <tr>
+    <td>byte</td>
+    <td>jbyte</td>
+    <td>signed 8 bits</td>
+  </tr>
+  <tr>
+    <td>char</td>
+    <td>jchar</td>
+    <td>unsigned 16 bits</td>
+  </tr>
+  <tr>
+    <td>short</td>
+    <td>jshort</td>
+    <td>signed 16 bits</td>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>jint</td>
+    <td>signed 32 bits </td>
+  </tr>
+  <tr>
+    <td>long</td>
+    <td>jlong</td>
+    <td>signed 64 bits </td>
+  </tr>
+  <tr>
+    <td>float</td>
+    <td>jfloat</td>
+    <td>32 bits </td>
+  </tr>
+  <tr>
+    <td>double</td>
+    <td>jdouble</td>
+    <td>64 bits</td>
+  </tr>
+  </table>
+  <p>
+    Here you can see a simple example how to convert arguments and return values in the JNI implementation and how to access the native functions in Java:
+  </p>
+  <div class="code"><h3>Code: MyDLL.cpp (C++ and JNI)</h3><pre>#include &lt;string.h&gt;
+#include &lt;jni.h&gt;
+#include "ExampleJNI.h"
+
+char _str[256];
+float _color[3][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
+int _counter=0;
+
+//multiply the argument by 2
+int function1(int arg)
+{
+    return(2*arg);
+}
+
+//prepend three * to a given sourceString and return the result
+char* function2(const char *sourceString)
+{
+    _str[0]='*';
+    _str[1]='*';
+    _str[2]='*';
+    strcpy(&amp;_str[3],sourceString);
+    return(_str);
+}
+
+//change color values
+float *switchColor()
+{
+    static float internal_parameters[3];
+    _counter=_counter%3; 
+
+    internal_parameters[0]=_color[_counter][0];
+    internal_parameters[1]=_color[_counter][1];
+    internal_parameters[2]=_color[_counter][2];
+
+    _counter++;
+
+    return((float*)internal_parameters);
+}
+
+//****************************
+//JNI
+//****************************
+JNIEXPORT jint JNICALL Java_ExampleJNI_function1(JNIEnv *env, jobject obj, jint arg)
+{
+    jint j_retCode = function1(arg);
+    return(j_retCode);
+}
+
+JNIEXPORT jstring JNICALL Java_ExampleJNI_function2(JNIEnv *env, jobject obj, jstring sourceString)
+{
+    const char *s = env-&gt;GetStringUTFChars(sourceString, 0); 
+    const char *retCode = function2(s);
+    jstring j_retCode;
+    j_retCode = env-&gt;NewStringUTF(retCode);
+    env-&gt;ReleaseStringUTFChars(sourceString, retCode);
+    return(j_retCode);
+}
+
+JNIEXPORT jfloatArray JNICALL Java_ExampleJNI_switchColor(JNIEnv *env, jobject obj)
+{
+    float *retCode = switchColor();
+    jfloatArray j_retCode = env-&gt;NewFloatArray(3);
+    env-&gt;SetFloatArrayRegion(j_retCode, 0, 3, retCode);
+    return(j_retCode);
+}
+</pre></div>
+  <div class="code"><h3>Code: ExampleJNI.java</h3><pre>
+import vrml.*;
+import vrml.field.*;
+import vrml.node.*;
+import vrml.Event;
+import java.lang.String;
+
+public class ExampleJNI extends vrml.node.Script
+{
+    private vrml.field.SFColor color_changed;
+
+    native int function1(int arg);
+    native String function2(String sourceString);
+    native float[] switchColor();
+    
+    static
+    {
+        System.loadLibrary("MyDLL");
+    }
+
+    public void initialize()
+    {
+        //get out slot
+        color_changed = (vrml.field.SFColor)getEventOut("color_changed");
+    
+        //do some stuff
+        int myInt = 128;
+        System.out.println("Return value function1: "+function1(myInt)+"\n");
+        
+        String myString = "My String";
+        System.out.println("Return value function2: "+function2(myString)+"\n");
+    }
+    public void processEvent(vrml.Event e)
+    {
+        if (e.getName().equals("change_color"))
+        {
+            vrml.field.ConstSFBool active = (vrml.field.ConstSFBool)e.getValue();
+            if (active.getValue())
+            {
+                float[] col = switchColor();
+                System.out.println("SwitchColor: "+col[0]+", "+col[1]+", "+col[2]+"\n");
+                color_changed.setValue(col);
+            }
+        }
+    }
+    public void shutdown() {}
+}
+  </pre></div>
+  In the following X3D code the <i>ExampleJNI.class</i> is embedded in the <i>Script</i> node. The scene shows a blue sphere. By clicking on the sphere the color of the sphere changes. The new color of the sphere is determined by the native function <i>switchColor()</i> that is part of the <i>MyDLL</i> library.
+  <div class="code"><h3>Code: ExampleJNI.x3d</h3><pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd"&gt;
+&lt;X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'&gt;
+  &lt;Scene DEF='scene'&gt;
+    &lt;Viewpoint position='0 0 7'/&gt;
+    &lt;Group&gt;
+      &lt;TouchSensor DEF='ts'/&gt;
+      &lt;Shape&gt;
+        &lt;Appearance&gt;
+          &lt;Material DEF='mat' diffuseColor='0 0 1'/&gt;
+        &lt;/Appearance&gt;
+        &lt;Sphere radius='0.5'/&gt;
+      &lt;/Shape&gt;
+    &lt;/Group&gt;
+    &lt;Script DEF='script' url='"ExampleJNI.class"' directOutput='true' mustEvaluate='true'&gt;
+      &lt;field accessType='inputOnly' name='change_color' type='SFBool'/&gt;
+      &lt;field accessType='outputOnly' name='color_changed' type='SFColor'/&gt;
+    &lt;/Script&gt;
+    &lt;ROUTE fromNode='script' fromField='color_changed' toNode='mat' toField='set_diffuseColor'/&gt;
+    &lt;ROUTE fromNode='ts' fromField='isActive' toNode='script' toField='change_color'/&gt;
+  &lt;/Scene&gt;
+&lt;/X3D&gt;
+</pre></div>
+<div class="code"><h3>Code: ExampleJNI.wrl</h3><pre>
+#VRML V2.0 utf8
+Group {
+    children [
+        DEF	ts <a href='/documentation/nodetype/TouchSensor'>TouchSensor</a> {}
+        <a href='/documentation/nodetype/Shape'>Shape</a> {
+            appearance <a href='/documentation/nodetype/Appearance'>Appearance</a> {
+                material DEF mat <a href='/documentation/nodetype/Material'>Material</a> {
+                    diffuseColor 0 0 1
+                }
+            }
+            geometry <a href='/documentation/nodetype/Sphere'>Sphere</a> {
+                radius .5
+            }
+        }
+    ]
+}
+DEF script <a href='/documentation/nodetype/Script'>Script</a> {
+    directOutput TRUE
+    mustEvaluate TRUE
+    eventIn SFBool change_color
+    eventOut SFColor color_changed
+    url "ExampleJNI.class"
+}
+ROUTE ts.isActive TO script.change_color
+ROUTE script.color_changed TO mat.diffuseColor
+</pre></div>
+  <h2>Make it run in InstantPlayer</h2>
+    <p>
+        To make the example run in InstantPlayer, at first the Java code must be compiled and the header file <i>ExampleJNI.h</i> must be generated. Then you have to compile the C++ sources and copy the resulting library to the directory where the <i>ExampleJNI.class</i> is located. This directory must also be added to your <i>PATH</i>. As explained in the <a href="http://www.instantreality.org/tutorial/breaking-out-of-the-java-sandbox/">Breaking out of the Java Sandbox</a> tutorial, a <i>.java.policy</i> file must be generated or edited to add the following security settings:
+        </p>
+        <div class="imgContainer"><img src="policy.png" align="center"/><div class="imgCaption">Image: Adding a permission to .java.policy</div></div>
+        <p>
+        Create an X3D file that uses your Java class in a <a href='/documentation/nodetype/Script'>Script</a> node (see the <a href="http://www.instantreality.org/tutorial/implementing-script-nodes-in-java/">Implementing <a href='/documentation/nodetype/Script'>Script</a> nodes in JavaScript</a> tutorial for more details) and run the X3D file in InstantPlayer.
+    </p>
+    
+    Files:
+    <ul class="files"><li><a href="MyDLL.cpp">MyDLL.cpp</a></li><li><a href="ExampleJNI.java">ExampleJNI.java</a></li><li><a href="ExampleJNI.x3d">ExampleJNI.x3d</a></li><li><a href="ExampleJNI.wrl">ExampleJNI.wrl</a></li></ul>
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

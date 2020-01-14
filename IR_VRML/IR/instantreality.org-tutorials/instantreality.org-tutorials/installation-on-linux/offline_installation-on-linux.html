@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Installation on Linux</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Installation on Linux</h2>
+  <p class="description"><strong>Keywords:</strong><br/>install,
+        uninstall,
+        linux<br/><strong>Author(s): </strong>Patrick Daehne, Johannes Behr<br/><strong>Date: </strong>2007-06-18</p>
+  <p><strong>Summary: </strong>This document describes how to install Instant Player on Linux.
+    </p>
+  <div id="content">
+
+        <h2>Installation on Linux</h2>
+        <p>
+          This document describes all steps necessary to install InstantPlayer
+on Linux, starting with the download of the correct version, the actual
+installation, and how to start InstantPlayer for the first time. It also
+explains how to deinstall InstantPlayer completely in case you do not want to
+use it anymore.
+        </p>
+        
+    <p class="warning"><b>Warning: </b>
+	Our linux packaging scripts and the GNOME/GTK-based InstantPlayer are in a
+very early developing stage. The software installation process and the User-Interface 
+will be changed in the future. 
+	</p>
+
+        <h2>Quick Summary for the Impatient</h2>
+        
+        <ul><li>Download the Instant Player disk image from the 
+<a href="http://www.instantreality.org/downloads/">Instant Reality web site</a>
+            </li><li>Install the package with super-user/ root rights</li><li>Start Instant Reality Player with
+/opt/instantReality/bin/gip</li><li>To uninstall Instant Player, use your system package manager
+            </li></ul>
+        
+
+        <h2>System Requirements</h2>
+        <p>
+	  We support ubuntu 7.4, debian 4.0, fedora 6.0, and SuSE 10.2 right now 
+      (all versions as ia32 systems). There are no 64 Bit packages right now.
+  </p><p>
+          Of course you'll also need a powerfull graphics board and correctly 
+installed/configured graphics drivers (please make sure you have permissions for 
+read/write access of your graphics device which is quite essential for shader programs). 
+We strongly recommend NVIDIA boards. ATI boards should also work fine, 
+but there are still some caveats with their drivers. Intel shared memory boards work, 
+but their performance is not optimal for large 3D scenes or shaders.
+        </p>
+
+        <h2>Download</h2>
+        <p>
+          You first have to download the Instant Player package from the 
+          Instant Reality website. Go to the following address: <a href="http://www.instantreality.org/downloads/">
+                http://www.instantreality.org/downloads/</a>
+        </p>
+        <p>
+          Make sure to get the right version of Instant Player, depending on your
+Linux distribution. 
+        </p>
+
+        <h2>Installing the package</h2>
+	<p>
+	We support the two most common package formats (rpm, deb) for different
+distributions right now. On different distributions you have different GUI based
+package management systems (see screenshot), but in addition you can also just 
+use the command-line version directly.
+	</p>
+    <div class="imgContainer"><img src="install_yast.png" align="center"/><div class="imgCaption">Image: Installing Instant Player with YaST under SuSE</div></div>
+    <h2>Ubuntu/ Debian</h2>
+          <ul><li><tt>sudo gdebi instantRealityPlayer-*.deb</tt></li></ul>
+	<h2>Redhat/ SuSE</h2>
+          <ul><li><tt>sudo rpm -i Instant_Player-*.rpm</tt></li></ul>
+           <p>
+All the packages on all systems will be installed to /opt/instantReality. 
+This will probably change in the future.
+        </p>
+       
+        <p>
+	The package depends on a large number of usual (e.g. gtk) and unusual (e.g.
+openal) packages which will be installed additionally on request. Depending on you
+system settings and packages manager this will require an internet connection or
+another form of installation media (e.g. via nfs). Please note, that on some systems 
+occasionally there might occur some problems in automatically finding the missing
+packages. In this case you can search for them on your installation medium or 
+in the web and then manually install them.
+        </p>
+        <h2>Gentoo Linux</h2>
+        <p>
+        Gentoo Linux uses source packages instead of RPM packages and compiles them on
+        the fly when installed. The Instant Player is not available as a source package
+        but you can use an existing RPM-package and the <tt>rpm2tar</tt> commandline tool to
+        convert the RPM into a <tt>.tar</tt> archive and install it.
+        </p>
+        <ol><li>First convert the rpm to a tar archive. The following command will create 
+                a <tt>.tar</tt> file in the calling directory:
+                <div class="code"><pre>rpm2tar Instant_Player-SuSE-2.0.0_beta4.i586.rpm</pre></div>
+                
+            </li><li>Now change to the root directory:
+               <div class="code"><pre>cd /</pre></div>
+            </li><li>Untar the created .tgz archive.
+              <div class="code"><pre>tar path/to/Instant_Player-SuSE-2.0.0_beta1.i586.tar</pre></div>
+              This will untar the Instant Player to <tt>/opt/instantReality</tt>.
+            </li></ol>
+        
+        <h2>Starting the InstantPlayer</h2>
+        <p>
+    After having installed the package there should appear an icon in your 
+    Applications/Graphics submenu, and the 3d-scene file types should be 
+    registered with Instant Player. 
+    If there occurs any problem (and logout - login doesn't help), or if you are using 
+    the old beta1 release, you have to start the player with the following command 
+    directly from the commandline (you do not have to set any environment variable):
+    </p><p>
+	<tt>/opt/instantReality/bin/gip</tt>
+	</p>
+
+        <h2>Cleaning up</h2>
+        <p>
+          When you successfully installed Instant Player on your hard disk, you
+can just delete the rpm or deb file. It's not needed anymore.
+        </p>
+        
+        <h2>Uninstalling Instant Player</h2>
+        <p>
+	  Do not delete the icons or installation directory directly. Use your
+package manager (e.g. Synaptic on Ubuntu or YaST on SuSE) to remove the package.
+        </p>
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

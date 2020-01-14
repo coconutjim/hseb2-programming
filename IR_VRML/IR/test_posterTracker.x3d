@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D>
+	<Engine DEF='engine'>
+		<TimerJob DEF='timer'/>
+		<SynchronizeJob DEF='synchronize'/>
+		<RenderJob DEF='render'>
+			<WindowGroup>
+				<Window position='10 50' size='640,480' fullScreen='false' />
+			</WindowGroup>
+		</RenderJob>
+	</Engine>
+    
+	<Scene DEF='scene'>
+    	<IOSensor DEF='VisionLib' type='VisionLib' configFile='posterTracker/FrankfurtTracker.pm' allowVisionWidgets='false'>
+    		<field accessType='outputOnly' name='InstantVideo' type='SFImage'/>
+    		<field accessType='outputOnly' name='InstantCamera_ModelView' type='SFMatrix4f'/>
+    		<field accessType='outputOnly' name='InstantCamera_Projection' type='SFMatrix4f'/>
+    		<field accessType='outputOnly' name='InstantCamera_Position' type='SFVec3f'/>
+    		<field accessType='outputOnly' name='InstantCamera_Orientation' type='SFRotation'/>
+    		<field accessType='outputOnly' name='InstantCamera_Valid' type='SFBool'/>
+    	</IOSensor>
+
+        <Viewfrustum DEF='vf' />
+    <ForegroundBindable>
+      <PolygonOverlay positions='0 -65 512 -65 512 -1 0 -1' normalizedX='false' normalizedY='false'>
+        <Appearance>
+          <ImageTexture url='"Data/Splash_IGD.png"'>
+            <TextureProperties boundaryModeS='CLAMP' boundaryModeT='CLAMP' magnificationFilter='nearest' minificationFilter='nearest'/>
+          </ImageTexture>
+        </Appearance>
+      </PolygonOverlay>
+    </ForegroundBindable>
+        
+        <MatrixTransform DEF='mt' invert='true'>
+            <PointLight DEF='ptl' location="0 0 0"/>
+        </MatrixTransform>
+        <Transform rotation='1 0 0 0' scale='1 1 1' translation='0 0 0'><Inline url='posterTracker/Data/Frankfurt_neu.wrl'  />
+        </Transform>
+         
+
+    	<PolygonBackground positions='0 0, 1 0, 1 1, 0 1' 
+				texCoords='0 1 0, 1 1 0, 1 0 0, 0 0 0'>
+    		<Appearance>
+      			<PixelTexture2D DEF='tex' autoScale='false' 
+				envMode='replace' minFilter='nearest' magFilter='nearest' />
+    		</Appearance>
+    	</PolygonBackground>
+        
+        <Foreground DEF='fg'>
+			<ScreenTextOverlay DEF='sto' text='' />
+		</Foreground>
+        
+        
+        <Script DEF="script">
+			<field name='set_resettrack' type='SFString' accessType='outputOnly'/>
+			<field name='mouse_press' type='SFInt32' accessType='inputOnly'/>
+			<field name='key_press' type='SFString' accessType='inputOnly'/>
+			<field name='time' type='SFTime' accessType='inputOnly'/>
+
+			<![CDATA[
+				ecmascript:
+				
+				var set_resettrack = 0;
+				var vf = Browser.currentScene.getNamedNode('vf');
+                var mt = Browser.currentScene.getNamedNode('mt');
+				var sto = Browser.currentScene.getNamedNode('sto');
+				
+				
+				function time(val)
+				{
+					sto.text[0] = 'Viewfrustum';
+					sto.text[1] = ' ';
+					sto.text[2] = 'modelview:';
+					sto.text[3] = vf.modelview;
+					sto.text[4] = 'projection:';
+					sto.text[5] = vf.projection;
+                    sto.text[6] = 'mat :';
+					sto.text[7] = mt.matrix;
+				}
+				
+			]]>
+		</Script>
+		
+    	<ROUTE fromNode='VisionLib' fromField='InstantVideo' toNode='tex' toField='image'/>
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_ModelView' toNode='vf' toField='modelview'/>
+    	<ROUTE fromNode='VisionLib' fromField='InstantCamera_Projection' toNode='vf' toField='projection'/>
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_ModelView' toNode='mt' toField='matrix'/>
+        
+        
+        <TimeSensor DEF='ts' loop='true' cycleInterval='0.1' />
+        <ROUTE fromNode='ts' fromField='cycleTime' toNode='script' toField='time'/>
+        
+        <Logger DEF='log' level='1' enabled='TRUE' logFeature=''/>
+        <!--ROUTE fromNode='VisionLib' fromField='InstantCamera_Valid' toNode='log' toField='write'/-->
+
+    </Scene>
+</X3D>

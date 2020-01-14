@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - CommonSurfaceShader</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">CommonSurfaceShader</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        rendering<br/><strong>Author(s): </strong>Karsten Schwenk<br/><strong>Date: </strong>2012-03-03</p>
+  <p><strong>Summary: </strong>How to use the <a href="/documentation/nodetype/CommonSurfaceShader">CommonSurfaceShader</a> and <a href="/documentation/nodetype/SurfaceShaderTexture">SurfaceShaderTexture</a> nodes.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        <p>
+        <a href="/documentation/nodetype/CommonSurfaceShader">CommonSurfaceShader</a> is a alternative way to specify materials. It can be regarded as a replacement for the <a href="/documentation/nodetype/Material">Material</a> node with some modern features like normal mapping.
+        </p>
+        <p>
+        Formally, it is a <a href="/documentation/nodetype/Shader">Shader</a> node (and it goes into the shaders-slot of an appearance), but it does not contain explicit shader code and exposes only a declarative interface, similar to that of the <a href="/documentation/nodetype/Material">Material</a> node.
+        </p>
+        <p>
+        The node has quite a lot of fields, which can be overwhelming at first sight, but in your day-to-day work you'll only need a few of them. The fields can be grouped into three components: the core component, the bump mapping component, and the perfect specular component. The core component is basically the BRDF of the surface (Lambertian diffuse part plus Blinn-Phong glossy part) and some additional controls for emission, ambient, and alpha. The bump-mapping component is used to do -- guess what -- bump mapping, i.e. it perturbs shading normals in order to produce apparent bumps in the surface that are not modeled in the geometry. The perfect specular component captures surfaces that are perfect specular reflectors or refractors like glass or water.
+        </p>
+        <p>
+        You'll notice that most of the fields of the <a href='/documentation/nodetype/CommonSurfaceShader'>CommonSurfaceShader</a> node come in pairs of a fooFactor and a fooTexture. fooFactor establishes a base value that is constant across the whole surface. fooTexture can be used to modulate this base value per texel. The value read from fooTexture is multiplied by fooFactor. If no fooTexture is present (i.e. it is NULL), fooFactor is used directly. For example there is a diffuseFactor and a diffuseTexture. diffuseFactor is just your normal diffuse color. This is constant across the surface. If you want some spatial variation and want to use a texture for the diffuse color you would just set diffuseFactor to (1,1,1) and diffuseTexture to the texture you want to use. At first sight, it may seem a bit odd to multiply the values instead of using either the one or the other. The reasoning behind the multiplication is that one can easily change foo by just changing fooFactor. For example if you want your object’s diffuse color to fade to black, you can simply let diffuseFactor go to (0,0,0) and your object goes black regardless of whether it uses a texture or not.
+        </p>
+        <p>
+        Once you understand the fooFactor/fooTexture pairing, most of the fields will make immediate sense to you, if you have a little experience in computer graphics. Therefore, I’ll just discuss some not-so-obvious cases in this tutorial. If questions remain, there are the <a href="http://www.instantreality.org/examples/">official examples</a>, the <a href="/documentation/nodetype/CommonSurfaceShader">CommonSurfaceShader</a> node documentation, <a href="http://dx.doi.org/10.1145/1836049.1836051">the paper</a>, and the <a href="http://forum.instantreality.org/">official forums</a> to consult. The examples in this tutorial are available in this zip archive. You should play around with them as you read the tutorial.
+        </p>
+
+        <h2>Example 1</h2>
+        <p>
+        We’ll start with a rather trivial example.
+<div class="imgContainer"><img src="css_tutorial_core.png" align="center"/><div class="imgCaption">Image: screenshot of css_tutorial_core.x3d</div></div>
+<div class="code"><h3>Code: Simple example (css_tutorial_core.x3d)</h3><pre>
+&lt;Shape&gt;
+  &lt;Sphere DEF='Geo' resolution='2'/&gt;
+  &lt;Appearance &gt;
+    &lt;TextureTransform scale='2 1' translation='.125 0'/&gt; 
+    &lt;CommonSurfaceShader
+      ambientFactor=".588 .588 .588"
+      diffuseFactor=".588 .588 .588"
+      specularFactor=".75 .75 .75"
+      shininessFactor=".05"
+
+      normalScale='-2 2 2'
+      normalBias='1 -1 -1'
+
+      textureTransformEnabled='1'
+    &gt;
+      &lt;ImageTexture containerField="ambientTexture" url="data/texturez.com/texturez_rust_930.png"/&gt;
+      &lt;ImageTexture containerField="diffuseTexture" url="data/texturez.com/texturez_rust_930.png"/&gt;
+      &lt;ImageTexture containerField="specularTexture" url="data/texturez.com/texturez_rust_930_spec.png"/&gt;
+      &lt;ImageTexture containerField="normalTexture" url="data/texturez.com/texturez_rust_930_nrm.png"/&gt;
+    &lt;/CommonSurfaceShader&gt;
+  &lt;/Appearance&gt;
+&lt;/Shape&gt;
+
+</pre></div>
+
+        This renders a sphere with a <a href="/documentation/nodetype/CommonSurfaceShader">CommonSurfaceShader</a> that defines a rusty metallic material (well, it’s programmer’s art). The thing to notice is that the fooFactors establish base values and the fooTextures modulate them, as described above. This particular material has the default color textures (diffuse and ambient), but also a separate specular (or gloss) map and a normal map.
+        </p>
+        <p>
+        The fields normalScale and normalBias are very useful when working with arbitrary normal maps, as they specify how the normal encoded in the texture should be unpacked. The Basic formula is Ns = normalScale*Nt + normalBias, where Nt is the value read from normalTexture and Ns is the (tangent-space) shading normal. In this particular example, the normal is flipped about the x-axis (i.e. the u texture coordinates).
+        </p>
+        <p>
+        Another interesting aspect of this example is that it uses a global texture coordinate transform. The <a href="/documentation/nodetype/TextureTransform">TextureTransform</a> is defined as a sibling of the <a href="/documentation/nodetype/CommonSurfaceShader">CommonSurfaceShader</a>. If you want to apply such a single global transform to _all_ of a <a href="/documentation/nodetype/CommonSurfaceShader">CommonSurfaceShader</a>’s textures, you just have to set the textureTransformEnabled field to true.
+        </p>
+        <p>
+        But let’s return to the bump-mapping component for a moment. You may wonder how tangents are specified. Currently, there are basically two ways to do this in InstantReality. The first is the simplest: just don’t specify them at all (as done in the example). In this case the shader will try to derive them from the texture coordinates. However, this is not the best solution in term of quality and speed. Usually it’s better to supply them explicitly via 3d texture coordinates. Just augment your geometry with <a href="/documentation/nodetype/TextureCoordinate3D">TextureCoordinate3D</a> nodes and refer to these channels in your <a href="/documentation/nodetype/CommonSurfaceShader">CommonSurfaceShader</a> by setting tangentTextureCoordinatesId and binormalTextureCoordinatesId. You can also set binormalTextureCoordinatesId to -1 (which is the default), then the implementation will reconstruct the second tangent with a cross product. An example can be found in tangents.x3d.
+        </p>
+
+        <h2>Example 2</h2>
+        <p>
+        <a href="/documentation/nodetype/CommonSurfaceShader">CommonSurfaceShader</a> also allows finer control over the texture sampling process via the <a href="/documentation/nodetype/SurfaceShaderTexture">SurfaceShaderTexture</a> nodes. Basically, they can stand wherever a “normal” <a href="/documentation/nodetype/Texture">Texture</a> node can stand, but they have a number of additional properties. For example, you can specify a swizzle mask to specify the exact channel(s) that will be used. Consider the following example:
+<div class="imgContainer"><img src="css_tutorial_alpha.png" align="center"/><div class="imgCaption">Image: screenshot of css_tutorial_alpha.x3d</div></div>
+<div class="code"><h3>Code: <a href='/documentation/nodetype/SurfaceShaderTexture'>SurfaceShaderTexture</a> example (css_tutorial_alpha.x3d)</h3><pre>
+&lt;Appearance&gt;
+  &lt;CommonSurfaceShader
+    diffuseFactor="1 1 1"
+    specularFactor="1 1 1"
+    shininessFactor=".8"
+  &gt;
+    &lt;ImageTexture DEF="diff" containerField="diffuseTexture" url="data/alpha.tga"/&gt;
+    &lt;ImageTexture USE="diff" containerField="specularTexture"/&gt;
+    &lt;SurfaceShaderTexture containerField="alphaTexture" channelMask="a" &gt;
+      &lt;TextureTransform scale='1 1'/&gt; 
+      &lt;ImageTexture USE="diff"/&gt;
+    &lt;/SurfaceShaderTexture&gt;
+    &lt;ImageTexture containerField="normalTexture" url="data/normal_test.tga"/&gt;
+  &lt;/CommonSurfaceShader&gt;
+&lt;/Appearance&gt;
+
+</pre></div>
+        The alpha value is sampled from the ‘a’ (=alpha) channel of the texture, which is also the default. However, suppose you wanted to sample the alpha value from the red channel (e.g. because your modeler spits out grayscale textures for alpha). Then you could just change the channelMask to ‘r’. Speaking of alpha textures: Another useful property is invertAlphaTexture, which can be used to, well, invert the alpha texture. This is useful if your alpha texture encodes transparency instead of opacity. But back to the <a href="/documentation/nodetype/SurfaceShaderTexture">SurfaceShaderTexture</a>. We already know how to apply a global texture coordinate transform to all textures. But what if you just want to transform a single texture? Well, you may have guessed it, <a href="/documentation/nodetype/SurfaceShaderTexture">SurfaceShaderTexture</a> can do this for you: Just specify a <a href="/documentation/nodetype/TextureTransform">TextureTransform</a> inside the <a href="/documentation/nodetype/SurfaceShaderTexture">SurfaceShaderTexture</a> and it will apply to only this one texture.
+        </p>
+
+        <h2>Example 3</h2>
+        <p>
+        The final aspect I’d like to discuss in this tutorial is the perfect specular component. Here is a simple glass sphere.
+<div class="imgContainer"><img src="css_tutorial_specular.png" align="center"/><div class="imgCaption">Image: screenshot of css_tutorial_specular.x3d</div></div>
+<div class="code"><h3>Code: Reflective teapot (css_tutorial_specular.x3d)</h3><pre>
+&lt;Appearance&gt;
+  &lt;CommonSurfaceShader
+    ambientFactor='0 0 0'
+    diffuseFactor='0 0 0'
+
+    reflectionFactor='1 1 1'
+    transmissionFactor='0 0 0'
+    environmentFactor='1 1 1'
+      
+    relativeIndexOfRefraction='1 1 1'
+    fresnelBlend='0'
+  &gt;
+    &lt;GeneratedCubeMapTexture DEF='GCMT' containerField='environmentTexture' update='always' size='512' useWorldSpaceOrientation='true'&gt;
+      &lt;TextureProperties containerField='textureProperties' boundaryModeS='CLAMP' boundaryModeT='CLAMP' boundaryModeR='CLAMP' magnificationFilter='linear' minificationFilter='linear'/&gt;
+    &lt;/GeneratedCubeMapTexture&gt;
+  &lt;/CommonSurfaceShader&gt;
+&lt;/Appearance&gt;
+
+</pre></div>
+        Again, there are three fooFactor/fooTexture pairs. reflectionFactor is the color for the perfect specular reflection and transmissionFactor the same for transmission. For a rasterizer it is usually most practical to simulate perfect specular reflection/refraction of the environment with cube maps. environmentFactor and, more importantly, environmentTexture define this environment. You can either specify an environmentTexture explicitly, or, if you leave it set to NULL, the implementation will automatically render a cube map centered at the object you shader is attached to (excluding the object itself). Note that this is still somewhat experimental (e.g. there are problems with USE and DEF), so you should probably always specify a <a href="/documentation/nodetype/GeneratedCubeMapTexture">GeneratedCubeMapTexture</a> manually. Note that you have to set useWorldSpaceOrientation to true, or the cube map may not work correctly in some cases.
+        </p>
+        <p>
+        You can blend between two behaviors for the perfect specular component: In the first extreme, transmission and reflection are independent of the angle of incidence. This is not physically correct, but nonetheless sometimes useful. The other extreme is reflection/transmission according to the Fresnel equations. This is physically correct, and you need to specify a refractive index via the field relativeIndexOfRefraction. The parameter that blends between the two extremes is called fresnelBlend.
+        </p>
+  
+        
+    Files:
+    <ul class="files"><li><a href="css_tutorial_examples.zip">css_tutorial_examples.zip</a></li></ul>
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<div id="tutorialContainer">
+  <h2 class="title">Text</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        world,
+        rendering<br/><strong>Author(s): </strong>Sabine Webel, Yvonne Jung<br/><strong>Date: </strong>2007-03-02</p>
+  <p><strong>Summary: </strong>This tutorial shows how to use Text in a 3D scene.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        <p>
+        It's often useful to add text to the scene, e.g. for the labeling of objects or marking of nameplates. Instant Player supports different ways to put text in a scene. There are two types of Text nodes which are processed as geometry nodes: <a href="/documentation/nodetype/SolidText">SolidText</a> and <a href="/documentation/nodetype/PixelText">PixelText</a>. 
+		</p>
+		<p>
+		Another possibility is the use of a <a href="/documentation/nodetype/TextTexture">TextTexture</a> node that is a texture filled by the given text-string. The <a href="/documentation/nodetype/FontStyle">FontStyle</a> node is another important node you need to know about in order to adapt the text to the given use case. This tutorial shows you how to utilize the different types of Text nodes.
+        </p>
+		
+        <h2>Text basics</h2>
+        <p>
+        The easiest way to add text in your scene is to use a Text geometry. This type of text is processed as geometry. Therefore it is placed in the <tt>geometry</tt> field of a <a href="/documentation/nodetype/Shape">Shape</a> node. If you put a Text node (without specifying the type of text to use) in the Shape, SolidText is used as default. The text strings are contained in the <tt>string</tt> field. Each string is displayed as a seperate line of text. The appearance of the text is defined in the <a href="/documentation/nodetype/Appearance">Appearance</a> of the Shape.
+        </p>
+		
+<div class="code"><h3>Code: A default text geometry</h3><pre>
+
+    Shape {
+        appearance Appearance {
+            diffuseColor 1 0 0
+        }
+        geometry Text {
+            string [ "Default Text." "New line of default Text." ]
+        }
+    }
+
+</pre></div>
+
+        <p>
+        In order to modify some font attributes of the text you must put a <a href="/documentation/nodetype/FontStyle">FontStyle</a> into the <tt>fontStyle</tt> field of your text node. The FontStyle node defines the font size, font family (e.g. SANS), style (e.g. ITALIC), the direction of the text string (horizontal or vertical), how the text should be justified, and any language-specific rendering techniques that must be used for non-English text.
+        </p>
+        <div class="imgContainer"><img src="text-family-style_small.png" align="center"/><div class="imgCaption">Image: Left: the three abstract font families; right: the four text styles.</div></div>
+		
+        <p>
+        The following example shows how to use a <a href="/documentation/nodetype/FontStyle">FontStyle</a>. A more detailed discussion of its usage can be found in the text component section of the <a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/">X3D specification</a>.
+        </p>
+<div class="code"><h3>Code: A text geometry with a font style</h3><pre>
+
+    Shape {
+        appearance Appearance {
+            diffuseColor 1 0 0
+        }
+        geometry Text {
+            string "Italic Typewriter Font"
+            fontStyle FontStyle {
+                family "TYPEWRITER"
+                style "ITALIC"
+                size 2.5
+            }
+        }
+    }
+
+</pre></div>
+		
+		<h2>SolidText and PixelText</h2>
+		<p>
+        As described above, the <a href="/documentation/nodetype/SolidText">SolidText</a> geometry is the default text, that is used when no explicit type is given. This text consists of a 3D geometry. The depth of the text (i.e. its dimension in the z direction) is indicated by the <tt>depth</tt> field.
+        </p>
+        <p>
+        The <a href="/documentation/nodetype/PixelText">PixelText</a> is a special kind of geometry containing a texture, that provides all letters of the alphabet, and a rectangular geometry for each letter of the text where the corresponding part from the texture is mapped onto. This type of text is usually found in computer games, because it is very efficient, but it has a lower visual quality than the SolidText. An example file can be found below.
+        </p>		
+		<h2>TextTexture</h2>
+		<p>
+		Slightly different but often more general applicable is the <a href="/documentation/nodetype/TextTexture">TextTexture</a> node. Unlike the other types this type of test is not a geometry but a material; more precisely it is a <a href="/documentation/nodetype/Texture">Texture</a>, which is filled by the text <tt>string</tt> using the given <tt>fontStyle</tt>.
+		</p>
+<div class="code"><h3>Code: Text in a texture</h3><pre>
+
+	Shape {
+		appearance Appearance {
+			texture TextTexture {
+				string "TextTexture example"
+				fontStyle FontStyle { 
+					family "Arial"
+					style "PLAIN"
+				}
+			}
+		}
+		geometry IndexedFaceSet { ... }
+	}
+
+</pre></div>
+	<p>
+	The TextTexture has one interesting MFVec2f output field, the <tt>textureBounds</tt>. Because you can't know the image size in advance due to the fact, that the texture is assempled during runtime based on the chosen text, font style etc., the text will probably look skewed when mapping on an arbitrary geometry. Therefore the textureBounds field contains an SFVec2f with the offset of the upper left corner of the image from the coordinate origin in pixels, and another one with the width and height of the text image in pixels. With this information an appropriate texture (or similiar) transformation can then be calculated.
+	</p>
+
+	
+    Files:
+    <ul class="files"><li><a href="pixelText.wrl">pixelText.wrl</a></li><li><a href="textTexture.wrl">textTexture.wrl</a></li></ul>
+    </div>
+</div>

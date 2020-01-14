@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D profile='Immersive'>
+	<Scene>
+            <SteeringSystem DEF='steerSystem'>
+        
+    <SteeringVehicle DEF='vehicle1' maxSpeed='2' maxForce='4' mass='1.4'>
+        <SeekBehaviour DEF='seekBehaviour' factor='1.0' containerField='behaviours'  />    
+        <WanderBehaviour DEF='wanderBehaviour' factor='0.2' containerField='behaviours' />    
+    </SteeringVehicle>
+    
+    <SteeringVehicle DEF='vehicle2' maxSpeed='2' maxForce='4' mass='1.1' >
+        <PursuitBehaviour DEF='pursuitBehaviour' containerField='behaviours' >
+            <SteeringVehicle USE='vehicle1' containerField='quarry' />
+        </PursuitBehaviour>
+    </SteeringVehicle>
+</SteeringSystem>
+<TimeSensor DEF='timeSensor' loop='true' />
+<ROUTE fromNode='timeSensor' fromField='time' toNode='steerSystem' toField='time' />
+
+<Shape><Sphere radius='0.05' /></Shape>
+
+<ComponentTransform DEF='trans1'>
+    <Shape>
+        <Box containerField='geometry' size='0.1 0.1 0.1' />
+        <Appearance><Material diffuseColor='1 0 0' /></Appearance>
+    </Shape>
+</ComponentTransform>
+
+<ComponentTransform DEF='trans2'>
+    <Shape>
+        <Box containerField='geometry' size='0.1 0.1 0.1' />
+        <Appearance><Material diffuseColor='0 0 1' /></Appearance>
+    </Shape>
+</ComponentTransform>
+
+<ROUTE fromNode='vehicle1' fromField='translation_changed' toNode='trans1' toField='translation' />
+<ROUTE fromNode='vehicle2' fromField='translation_changed' toNode='trans2' toField='translation' />
+<ROUTE fromNode='vehicle1' fromField='rotation_changed' toNode='trans1' toField='rotation' />
+<ROUTE fromNode='vehicle2' fromField='rotation_changed' toNode='trans2' toField='rotation' />
+	</Scene>
+</X3D>

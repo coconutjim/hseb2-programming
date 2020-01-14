@@ -1,0 +1,187 @@
+<div id="tutorialContainer">
+  <h2 class="title">Creating custom nodes with Prototypes</h2>
+  <p class="description"><strong>Keywords:</strong><br/>PROTO,
+        Prototypes,
+        Nodes,
+        Extension<br/><strong>Author(s): </strong>Jens Keil<br/><strong>Date: </strong>2009-11-11</p>
+  <p><strong>Summary: </strong>
+
+This tutorials shows how to structure X3D files, how to create custom node types
+with special functionality and how to make those nodes reusable for other
+projects.
+
+</p>
+  <div id="content">
+
+<h2>Introduction</h2>
+<p>
+In the following it is assumed that the reader is already familiar with the basic X3D structure and node types and knows, how
+to create X3D content.
+</p>
+
+<p>
+A common and known issue when creating X3D content is the fact, that the X3D file might become very large, since
+one has to describe not only the 3D world's content, but also the behavior and logic. In  result, 
+the file appears somehow clattered and unstructured.
+
+On the other hand, sometimes it is necessary to give a node or parts of the scene some special
+behavior, that might be (re)used a couple of times. For example, the <a href="#" class="field">transparency</a> field of an <a href="/documentation/nodetype/ImageTexture">ImageTexture</a> node,
+that shall be increased or decreased, whenever it is touched.
+
+In all of this cases, it is possible to create an own new node prototype, which enholds the declaration, thus separating it from
+your main file. Prototypes can help you structuring your files or make code snippes reusable again very easily. It is
+also possible to somehow extend existing nodes with own, special behavior. For example, imagine a special <a href="/documentation/nodetype/Appearance">Appearance</a> node 
+that lets any given Texture appear to pulse or to glow.
+
+Prototyped nodes behave like an OOP class definitions, where you once declare a Proto node, that can be instanciated within
+(anohter) X3D file then. 
+</p>
+
+<h2>Structure</h2>
+<p>
+Prototypes or PROTOs have a special structure, that is mandatory. Like any X3D file, prototypes are wrapped inside an <b>X3D</b> and <a href="/documentation/nodetype/Scene">Scene</a> node.
+A Prototype begins with a <b>ProtoDeclare</b>, wich is is more or less the inital declaration of its name.
+After that, node fields have to be described inside the <b>ProtoInterface</b>. Those fields can be accessed form outside later on.
+The final content is then implemented inside the <b>ProtoBody</b> node. Via the <b>IS</b>/<b>connect</b> statement, nodes and fields 
+from the proto interface are connected and linked to those in the proto body.
+</p>
+<div class="code"><h3>Code: Basic Proto structure</h3><pre>
+
+&lt;!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd"&gt;
+&lt;X3D version='3.0'&gt;
+    &lt;Scene&gt;
+        &lt;ProtoDeclaration name="MyNewNode"&gt;
+            &lt;ProtoInterface&gt;
+                &lt;field name="myNewField" accessType="inputOutput" value="" /&gt;
+            &lt;/ProtoInterface&gt;
+            &lt;ProtoBody&gt;
+                &lt;!-- Some content implementation here --&gt;
+            &lt;/ProtoBody&gt;
+        &lt;/ProtoDeclaration&gt;
+    &lt;/Scene&gt;
+&lt;/X3D&gt;
+
+</pre></div>
+<p>
+Note, that only the declared fields inside the <b>ProtoInterface</b> can be accessed from outside. Those fields can be considered as 
+public attributes of a class file.
+</p>
+<p class="warning"><b>Warning: </b>In order to have any visible geometry after instantiating a proto node, you first have to declare the visible parts after beginning with the
+<b>ProtoBody</b>.</p>
+<p>This is due to the fact, that your proto node more or less is derrived from the node that is declared first. Imagine,
+there is a <a href="/documentation/nodetype/Sphere">Sphere</a> node (within a <a href="/documentation/nodetype/Transform">Transform</a> and <a href="/documentation/nodetype/Shape">Shape</a> node) and a <a href="/documentation/nodetype/Script">Script</a> node
+described within the <b>ProtoBody</b>. Since a <a href="/documentation/nodetype/Script">Script</a> node has no visible gemoetry at all, you have to describe 
+the <a href="/documentation/nodetype/Sphere">Sphere</a> first. Otherwise you won't see any visible geometry after instantiating.</p>
+
+<h2>Declaration and instantiation</h2>
+<p>It is legal to describe more than one Prototype per file. As mentioned above, each new Prototype is defined in the <b>ProtoDeclare</b> statement,
+which consists of the <i>ProtoDeclare</i> element, a <i>name</i> attribute, an optional <b>ProtoInterface</b> containing 
+the interface field declarations, and a <b>ProtoBody</b> containing the Prototype body definition.
+If a Prototype shall be used within the file where it is declared, it can be instantiated by 
+the <a href="/documentation/nodetype/ProtoInstance">ProtoInstance</a> node, where the <i>name</i> field corresponds to the name of the Protoype defined in the proto declaration (e.g. <i>&lt;ProtoInstance name="MyNewNode"&gt;</i>). 
+</p>
+<p>
+If the proto is declared inside an external file, you first have to refer to it by using the
+<b>ExternProtoDeclare</b> statement. This statement contains a <i>name</i> attribute which references the Prototype, and a
+<i>url</i> of one or more addresses pointing to the file that contains the Prototype definition. At each filename (or address) in a <i>url</i> value 
+should be appended a <i>#</i> symbol, followed by the name of the Prototype. Furthermore, the <b>ExternProtoDeclare</b> 
+comprises zero or more field definitions (depending on the number of fields defined in the Prototype itself), which provide the interface for the prototype. 
+</p>
+<div class="code"><h3>Code: ExternProtoDeclare and proto instantiation</h3><pre>
+
+&lt;!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd"&gt;
+&lt;X3D version='3.0'&gt;
+    &lt;Scene&gt;
+        &lt;!-- link to externally declared proto --&gt;
+        &lt;ExternProtoDeclare name="MyNewNode" url="MyNewNode_PROTO.x3D#MyNewNode" /&gt;
+                &lt;field name="myNewField" accessType="inputOutput" /&gt;
+        &lt;/ExternProtoDeclare&gt;
+        
+        &lt;!-- instantiation of the proto --&gt;
+        &lt;ProtoInstance name="MyNewNode"&gt;
+            &lt;fieldValue name="myNewField" value="" /&gt;
+        &lt;/ProtoInstance&gt;
+    &lt;/Scene&gt;
+&lt;/X3D&gt;
+
+</pre></div>
+ 
+<h2>IS and connect statements</h2> 
+<p>
+The real magic is done by connecting the proto fields with corresponding fields inside the ProtoBody.
+Imagine, the translation, rotation and scale of a<a href="/documentation/nodetype/Transform">Transform</a> node shall be be accessible from outside:
+First describe the three fields inside the <b>ProtoInterface</b> and then connect it with the 
+<a href="/documentation/nodetype/Transform">Transform</a> node declaration insinde the <b>ProtoBody</b>.
+</p>
+<div class="code"><h3>Code: Connecting fields</h3><pre>
+
+&lt;!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd"&gt;
+&lt;X3D version='3.0'&gt;
+    &lt;Scene&gt;
+        &lt;ProtoDeclaration name="MyNewNode"&gt;
+            &lt;ProtoInterface&gt;
+                &lt;field name="translation" accessType="SFVec3f" value="0 0 0" /&gt;
+                &lt;field name="rotation" accessType="SFRotation" value="0 0 0 1" /&gt;
+                &lt;field name="scale" accessType="SFVec3f" value="0 0 0" /&gt;
+            &lt;/ProtoInterface&gt;
+            &lt;ProtoBody&gt;
+                &lt;Transform&gt;
+                    &lt;IS&gt;
+                        &lt;connect protoField="translation" nodeField="translation" /&gt;
+                        &lt;connect protoField="rotation" nodeField="rotation" /&gt;
+                        &lt;connect protoField="scale" nodeField="scale" /&gt;
+                    &lt;/IS&gt;
+                    &lt;!-- some geometry here --&gt;
+                &lt;/Transform&gt;
+            &lt;/ProtoBody&gt;
+        &lt;/ProtoDeclaration&gt;
+    &lt;/Scene&gt;
+&lt;/X3D&gt;
+
+</pre></div>
+<p>
+Because of its connection translation, rotation and scale can be directly manipulated and be
+accessed from outside. The ProtoInterface field's name doesn't have to match the
+standard one's of the <a href="/documentation/nodetype/Transform">Transform</a> node. In fact, it can have any distiguishable, accurate XML valid 
+name you like. Here, the names are identical, because <i>nodeField</i> and <i>protoField</i> names may be the same or, more
+general, they may be also overloaded as well; i.e., these two names may be identical since each is part of a different namespace.
+</p>
+
+
+<h2>Conclusion</h2>
+<p>
+This tutorial showed, how to create custom nodes with special functionality and 
+how to make those nodes reusable for other projects. The interface and the structure for those
+Prototypes has been explained. Finally, check out the example files of this tutorial.
+</p>
+
+<div class="imgContainer"><img src="snapshot.png" align="center"/><div class="imgCaption">Image: Proto example</div></div>
+
+<p><b>Please note:</b> This tutorial only covered the XML syntax of X3D. For VRML syntax please refer to <a href="http://accad.osu.edu/~pgerstma/class/vnv/resources/info/AnnotatedVrmlRef/ch2-28.htm">The Annotated VRML 97 Reference, chapter 2.8</a> and <a href="http://accad.osu.edu/~pgerstma/class/vnv/resources/info/AnnotatedVrmlRef/ch2-29.htm">The Annotated VRML 97 Reference, chapter 2.9</a>.
+However, the next little code snippet shows how to use a PROTO (in this case a custom material node) in VRML syntax.
+</p>
+
+<div class="code"><h3>Code: Simple Proto in VRML syntax</h3><pre>
+PROTO Gold [
+	exposedField SFColor color 0.9 0.8 0.2
+]
+{
+	Material { 
+		diffuseColor IS color
+	}
+}
+
+Shape {
+	appearance Appearance {
+		material Gold {}
+	}
+	geometry Sphere {}
+}
+
+</pre></div>
+
+
+    Files:
+    <ul class="files"><li><a href="main.x3d">main.x3d</a></li><li><a href="Texturemorph_PROTO.x3d">Texturemorph_PROTO.x3d</a></li><li><a href="protoTexture.png">protoTexture.png</a></li></ul> 
+</div>
+</div>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <NavigationInfo speed='2' type='"EXAMINE" "ANY"'/>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+    <Transform>
+      <Viewpoint DEF='Kam1' description='Elso' position='0 0 6'/>
+    </Transform>
+    <DirectionalLight direction='-1 -1 -1'/>
+    <TimeSensor DEF='Idozito1' cycleInterval='3' loop='true'/>
+    <Transform rotation='1 1 0 0.3'>
+      <TouchSensor DEF='TS'/>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='1 1 0'/>
+          <PixelTexture DEF='Kep' minFilter='nearest' magFilter='nearest' image='3 3 1 0 0 255 0 255 0 255 0 0'>
+              <TextureProperties containerField='textureProperties' boundaryModeS='CLAMP' boundaryModeT='CLAMP' boundaryModeR='CLAMP' magnificationFilter='nearest' minificationFilter='nearest'/>
+          </PixelTexture>
+        </Appearance>
+        <IndexedFaceSet solid='false' coordIndex='0 1 2 3 0 -1'>
+          <Coordinate point='-2 -2 0 2 -2 0 2 2 0 -2 2 0'/>
+        </IndexedFaceSet>
+      </Shape>
+    </Transform>
+    <Script DEF='Felulet' url='"java/life.class"'>
+      <field accessType='inputOnly' name='set_fraction' type='SFFloat'/>
+      <field accessType='outputOnly' name='image_changed' type='SFImage'/>
+      <field accessType='inputOnly' name='reset' type='SFBool'/>
+      <field accessType='initializeOnly' name='minta1' type='MFInt32' value=''/>
+      <field accessType='initializeOnly' name='minta2' type='MFInt32' value=''/>
+    </Script>
+    <ROUTE fromNode='Idozito1' fromField='fraction_changed' toNode='Felulet' toField='set_fraction'/>
+    <ROUTE fromNode='Felulet' fromField='image_changed' toNode='Kep' toField='set_image'/>
+    <ROUTE fromNode='TS' fromField='isActive' toNode='Felulet' toField='reset'/>
+  </Scene>
+</X3D>

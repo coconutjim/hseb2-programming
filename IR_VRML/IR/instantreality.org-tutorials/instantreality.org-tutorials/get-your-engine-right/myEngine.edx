@@ -1,0 +1,21 @@
+<Engine>
+    <TimerJob DEF="timer" />
+    <InteractionJob DEF="interaction">
+        <DeviceHandler type="HID" name="hid" parameterDic='"network", ""' />
+    </InteractionJob>
+    <ExternalInterfaceJob DEF="aei" />
+    <WebServiceJob DEF="web" port="30000" logLevel="1" />
+    <CombinerJob DEF="combiner" />
+    <CollisionJob DEF="collision" />
+    <SynchronizeJob DEF="synchronize" />
+    <RenderJob DEF="render"/>
+
+    <ROUTE fromNode='engine' fromField='startFrame' toNode='timer' toField='start' />
+    <ROUTE fromNode='timer' fromField='finished' toNode='interaction' toField='start' />
+    <ROUTE fromNode='interaction' fromField='finished' toNode='aei' toField='start' />
+    <ROUTE fromNode='aei' fromField='finished' toNode='web' toField='start' />
+    <ROUTE fromNode='web' fromField='finished' toNode='combiner' toField='start' />
+    <ROUTE fromNode='combiner' fromField='finished' toNode='collision' toField='start' />
+    <ROUTE fromNode='collision' fromField='finished' toNode='synchronize' toField='start' />
+    <ROUTE fromNode='synchronize' fromField='finished' toNode='render' toField='start' />
+</Engine>

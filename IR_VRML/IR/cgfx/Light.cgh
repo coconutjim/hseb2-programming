@@ -1,0 +1,20 @@
+#ifndef LIGHT_CGH_INCLUDED
+#define LIGHT_CGH_INCLUDED
+
+#include "DifferentialSurface.cgh"
+
+// A generic light interface.
+interface Light
+{
+    // Returns the radiance arriving at 'surface' from
+    // this light (from direction 'omega_i').
+    // It is assumed that that the radiance function of
+    // the light contains a Dirac-delta (so omega_i is unambiguous).
+    Spectrum GetRadiance(
+        out float3 omega_i,
+        in DifferentialSurface surface
+        );
+};
+
+
+#endif

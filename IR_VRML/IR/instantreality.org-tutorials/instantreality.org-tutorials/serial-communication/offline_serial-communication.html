@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Serial Communication</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Serial Communication</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Instant IO,
+        interaction,
+        serial,
+        devices,
+        rs232,
+        arduino<br/><strong>Author(s): </strong>Michael Zoellner<br/><strong>Date: </strong>2007-02-01</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to communicate with a serial device.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+	<p>
+        This tutorial shows how to communicate with a serial device within a 3D scene. Possible devices are microcontroller boards like <a href="http://www.arduino.cc">Arduino</a> or <a href="http://www.wiring.org.co">Wiring</a>, but also for example Wacom tablets, GPS devices and rotary encoders.
+	</p>
+
+        <h2>Setting up the serial port</h2>
+        <p>
+        The serial port is set up with an <a href='/documentation/nodetype/IOSensor'>IOSensor</a> node at the beginning of the scene. The following parameters are available:
+        </p>
+        <ul><li><i>Device</i>: A number starting at 0 specifying the serial interface to use. 0 for COM1 or the first tty serial device. <i>(default: 0)</i></li><li><i>BaudRate</i>: Baud rate of the serial port. 9600, 19200, ... <i>(default: 9600)</i></li><li><i>DataBits</i>: Number of data bits used for the communication on the serial port. Possible values are 7 or 8. <i>(default: 8)</i></li><li><i>Parity</i>: Type of parity used for the communication on the serial port. Possible values are even, odd or none. <i>(default: none)</i></li><li><i>StopBits</i>: Number of stop bits used for the communication on the serial port. Possible values are 1 or 2. <i>(default: 1)</i></li><li><i>Handshake</i>: Type of handshake (flow control). Possible values are none, hardware or software. <i>(default: none)</i></li><li><i>DTR</i>: The status of the DTR line.</li><li><i>RTS</i>: The status of the RTS line.</li><li><i>Init String</i>: A initialisation string that is send to the serial device to start operation.</li><li><i>Deinit String</i>: A deinitialisation string that is send to the serial device to stop operation.</li><li><i>Delimiter</i>: Ascii value of the character that splits the serial message <i>(default: no delimiter)</i></li><li><i>MaxBytes</i>: The maximum number of bytes a message consists of. A value of -1 means that there is no maximum number of bytes. <i>(default: -1)</i></li></ul>
+        <div class="code"><h3>Code: <a href='/documentation/nodetype/Serial'>Serial</a> <a href='/documentation/nodetype/IOSensor'>IOSensor</a> in X3D encoding</h3><pre>
+&lt;IOSensor DEF='serial' type='serial' Device='0' Delimiter='10' BaudRate='9600'&gt;
+	&lt;field accessType='outputOnly' name='Data out' type='SFString'/&gt;
+	&lt;field accessType='inputOnly' name='Data in' type='SFString'/&gt;
+&lt;/IOSensor&gt;
+        </pre></div>
+        
+        <p>
+        Here we are seeting up a serial device with 9600 baud rate at COM1 or tty.usbserial-00001. The delimiter is set to a line break (ASCII value: 10). All other parameters have the default values.
+        </p>
+        <p>
+        There are two fields for the incoming and outgoing data:
+        </p>
+        <ul><li><i>Data out</i>: Data from the serial device to the scene</li><li><i>Data in</i>: Data from the scene to the serial device</li></ul>        
+        
+        <h2>Sending Data to the <a href='/documentation/nodetype/Serial'>Serial</a> Port</h2>
+        <p>
+        By routing the KeySensors' <i>keyPress</i> field to the serial devices' <i>Data in</i> field we are sending each keystroke (SFString) to the serial port.
+        We also specify a name for the device handler via the <i>name</i> field.
+        </p>
+        <div class="code"><h3>Code: Sending data to the serial device</h3><pre>
+&lt;KeySensor DEF='keysensor' /&gt;
+&lt;ROUTE fromNode='keysensor' fromField='keyPress' toNode='serial' toField='Data in'/&gt;
+    	</pre></div>
+    	
+    	<h2>Receiving Data from the <a href='/documentation/nodetype/Serial'>Serial</a> Port</h2>
+        <p>
+        In order to get the data from the serial port and to show it in the scene we are routing the values from the serial devices' <i>Data out</i> field to a <a href='/documentation/nodetype/Text'>Text</a> nodes' <i>string</i> field.
+        </p>
+        <div class="code"><h3>Code: Sending data to the serial device</h3><pre>
+&lt;Transform&gt;
+	&lt;Shape&gt;
+    	&lt;Text DEF='text' string='' solid='true'&gt;
+    &lt;/Shape&gt;
+&lt;/Transform&gt;
+    
+&lt;ROUTE fromNode='serial' fromField='Data out' toNode='text' toField='string'/&gt;
+    	</pre></div>
+    	
+       
+		<h2>Example Scene</h2>
+		<p> This is a simple example for the communication between an Arduino microcontroller and instant<i>viewer</i>. We are sending keystrokes from the scene to the controller. The software on the Arduino board switches an LED on when "1" is sent and switches it off when "2" is sent. It sends the Strings "On" and "Off" back to the scene where it is routed on a <a href='/documentation/nodetype/Text'>Text</a> node's string.
+		</p>
+
+        <div class="code"><h3>Code: Basic X3D scene</h3><pre>
+&lt;X3D&gt;
+  &lt;Scene DEF='scene'&gt;
+  
+    &lt;IOSensor DEF='serial' type='serial' Device='0' Delimiter='10' BaudRate='9600'&gt;
+    	&lt;field accessType='outputOnly' name='Data out' type='SFString'/&gt;
+    	&lt;field accessType='inputOnly' name='Data in' type='SFString'/&gt;
+    &lt;/IOSensor&gt;
+    
+    &lt;Viewpoint position='0.625 0.3 1.9' /&gt;
+    
+    &lt;Transform&gt;
+    	&lt;Shape&gt;
+    		&lt;Appearance&gt;
+    			&lt;Material diffuseColor='1 1 1' /&gt;
+    		&lt;/Appearance&gt;
+    		&lt;Text DEF='text' string='/../' solid='true'&gt;
+    			&lt;FontStyle justify='BEGIN' family='SANS' /&gt;
+    		&lt;/Text&gt;
+    	&lt;/Shape&gt;
+    &lt;/Transform&gt;
+    
+    &lt;ROUTE fromNode='serial' fromField='Data out' toNode='text' toField='string'/&gt;
+    
+    
+    &lt;KeySensor DEF='keysensor' /&gt;
+    &lt;ROUTE fromNode='keysensor' fromField='keyPress' toNode='serial' toField='Data in'/&gt;
+
+  &lt;/Scene&gt;
+&lt;/X3D&gt;
+</pre></div>
+	<div class="imgContainer"><img src="serialInstantViewer.jpg" align="center"/><div class="imgCaption">Image: Scene</div></div>
+
+		<div class="code"><h3>Code: Arduino Code</h3><pre>
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(13, OUTPUT);
+}
+
+void loop()
+{
+  if (Serial.available() &gt; 0)
+  {
+    int incoming = Serial.read();
+    
+    if ((char)incoming == '1')
+    {
+      digitalWrite(13, HIGH);
+      Serial.println("On");
+    }
+    else if ((char)incoming == '2')
+    {
+      digitalWrite(13, LOW);
+      Serial.println("Off");
+    }
+  }
+}
+</pre></div>
+		<div class="imgContainer"><img src="serialArduino.jpg" align="center"/><div class="imgCaption">Image: Arduino LED</div></div>
+
+        
+    Files:
+    <ul class="files"><li><a href="serialTutorial.x3d">serialTutorial.x3d</a></li><li><a href="serialExample.pde">serialExample.pde</a></li></ul>
+        
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

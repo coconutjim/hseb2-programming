@@ -1,0 +1,124 @@
+
+// let's just do rgb rendering...
+#define Spectrum float3
+
+#include "DifferentialSurface.cgh"
+#include "PointLight.cgh"
+#include "DirectionalLight.cgh"
+#include "LambertBRDF.cgh"
+#include "ModifiedBlinnPhongBRDF.cgh"
+
+//////////////////////////////////////////////////////////////////////////////////
+// Some transformations
+float4x4 WorldToObjectTranspose : WorldInverseTranspose < string UIWidget="None"; >;
+float4x4 ObjectToClip : WorldViewProjection < string UIWidget="None"; >;
+float4x4 ObjectToWorld : World < string UIWidget="None"; >;
+float4x4 ViewToWorld : ViewInverse < string UIWidget="None"; >;
+float4x4 WorldToClip : ViewProjection < string UIWidget="None"; >;
+
+
+
+// Two global parameters are needed: a BRDF and a light source.
+Light light;
+BRDF brdf;
+
+// Sigh...
+texture TestTexture 
+< 
+    string ResourceName = "earth.png";
+    string ResourceType = "2D";
+>;
+
+sampler2D TestSampler = sampler_state
+{
+    texture = <TestTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+//    MinFilter = Point;
+//    MagFilter = Point;
+};
+
+
+struct VSIn
+{
+    float4 Position     : POSITION;
+    float3 Normal       : NORMAL;
+    float2 TexCoord     : TEXCOORD0;
+};
+
+struct VSOut
+{
+    float4 ClipPosition  : POSITION;
+    float3 WorldPosition : TEXCOORD0;
+    float3 WorldNormal   : TEXCOORD1;
+    float2 TexCoord      : TEXCOORD2;
+};
+ 
+VSOut VS_Default( VSIn vin )
+{
+	
+    VSOut vout = (VSOut)0;
+
+    vout.ClipPosition = mul( ObjectToClip, float4(vin.Position.xyz,1) );
+    vout.WorldPosition = mul( ObjectToWorld, float4(vin.Position.xyz,1) ).xyz;
+    vout.WorldNormal = mul( WorldToObjectTranspose, float4(vin.Normal.xyz,0) ).xyz;
+    vout.TexCoord = vin.TexCoord; 
+    
+    return vout;
+}
+
+// Computes the radiance that is reflected in direction omega_o
+// from a differential surface when it is illuminated by a light source.
+Spectrum LocalReflectance(
+    in DifferentialSurface surface,
+    in BRDF brdf,
+    in Light light,
+    in float3 omega_o
+    )
+{
+    if( dot( surface.n, omega_o ) < 0.f )
+        return 0.f;
+        
+    float3 omega_i = 0.f;
+    Spectrum L_i = light.GetRadiance( omega_i, surface );
+
+    Spectrum f_r = brdf.Evaluate( surface, omega_i, omega_o );
+
+    float NdotL = max( 0.0, dot( surface.n, omega_i ) );
+    return f_r * L_i * NdotL;
+}
+
+float4 PS_SimpleLighting( VSOut pin ) : COLOR
+{
+    // prepare data
+    DifferentialSurface ds;
+    ds.x = pin.WorldPosition;
+    ds.n = pin.WorldNormal;
+    float3 omega_o = normalize(transpose(ViewToWorld)[3].xyz - pin.WorldPosition);
+    
+    // calculate reflection
+    float3 lighting = LocalReflectance( ds, brdf, light, omega_o );
+    float3 texture = tex2D( TestSampler, pin.TexCoord.xy ).rgb;
+    float3 result = lighting*texture;
+    
+    return float4(result/*+.1*/,1);
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// Techniques
+
+technique Default
+{
+    pass p0
+    {
+        VertexShader = compile arbvp1 VS_Default();
+        PixelShader = compile arbfp1 PS_SimpleLighting();
+
+        ZEnable = true;
+        ZWriteEnable = true;
+		AlphaBlendEnable = false;
+		ZFunc = LESSEQUAL;
+    }
+}
+
+

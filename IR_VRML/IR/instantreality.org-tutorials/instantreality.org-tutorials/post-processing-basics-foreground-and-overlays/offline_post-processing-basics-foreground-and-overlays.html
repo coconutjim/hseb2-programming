@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Post processing basics: Foreground and overlays</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Post processing basics: <a href='/documentation/nodetype/Foreground'>Foreground</a> and overlays</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Post processing,
+        effects,
+        fx<br/><strong>Author(s): </strong>Peter Eschler<br/><strong>Date: </strong>2009-03-22</p>
+  <p><strong>Summary: </strong>In this tutorial you will learn the basic concepts for applying post processing effects to an X3D scene using InstantPlayer. It starts by explaining essential nodes like the <a href="/documentation/nodetype/Foreground">Foreground</a> and the different <a href="/documentation/nodetype/Overlay">Overlay</a> nodes. It then continues to show how to grab the frame buffer and finally presents a basic layout for post-processing effects.
+    </p>
+  <div id="content">
+        <p>In order to demonstrate the post-processing effects we need a simple test scene. The following code presents a scene containing three standard shapes: a <a href="/documentation/nodetype/Box">Box</a>, a <a href="/documentation/nodetype/Sphere">Sphere</a> and a <a href="/documentation/nodetype/Torus">Torus</a>.</p>
+        <div class="code"><h3>Code: testScene1.x3d, The basic test scene.</h3><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd"&gt;
+&lt;X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' 
+     profile='Full' version='3.0'
+     xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'&gt;
+    
+    &lt;Scene DEF='scene'&gt;    
+        &lt;Viewpoint DEF='vp1' position='0 0 12'/&gt;    
+        
+        &lt;Transform translation='-3 0 0'&gt; 
+            &lt;Shape&gt;
+                &lt;Appearance&gt;&lt;Material diffuseColor="1 0 0" /&gt;&lt;/Appearance&gt;            
+                &lt;Box /&gt;                    
+            &lt;/Shape&gt;    
+        &lt;/Transform&gt;        
+        &lt;Transform translation='0 0 0'&gt;                    
+            &lt;Shape&gt;
+                &lt;Appearance&gt;&lt;Material diffuseColor="0 1 0" /&gt;&lt;/Appearance&gt;            
+                &lt;Sphere /&gt;                    
+            &lt;/Shape&gt;    
+        &lt;/Transform&gt;    
+        &lt;Transform translation='3 0 0'&gt;                    
+            &lt;Shape&gt;
+                &lt;Appearance&gt;&lt;Material diffuseColor="0 0 1" /&gt;&lt;/Appearance&gt;            
+                &lt;Teapot /&gt;                    
+            &lt;/Shape&gt;    
+        &lt;/Transform&gt;    
+    &lt;/Scene&gt;
+&lt;/X3D&gt;</pre></div>
+
+        <div class="imgContainer"><img src="testScene1.png" align="center"/><div class="imgCaption">Image: The test scene.</div></div>
+
+        <h2>Introducing the <a href='/documentation/nodetype/Foreground'>Foreground</a> node</h2>
+        <p>For post processing this scene in InstantPlayer we will use a <a href="/documentation/nodetype/Foreground">Foreground</a> node.</p>
+        
+        <p class="warning"><b>Warning: </b>The <a href="/documentation/nodetype/Foreground">Foreground</a> and most other nodes used in this tutorial are not X3D standard nodes but rather InstantReality extensions. Therefore this example will not work in any X3D runtime/player other than InstantReality.</p>
+        
+        <p>The documentation of the <a href="/documentation/nodetype/Foreground">Foreground</a> node says: <i>"Foreground bindable which holds a list of <a href='/documentation/nodetype/Overlay'>Overlay</a> nodes. Overlays are simular to layers but not interactive. They are mostly used for visual effects."</i></p>
+        
+        <p>As stated in the documentation the <a href="/documentation/nodetype/Foreground">Foreground</a> node does not do anything useful until some <a href='/documentation/nodetype/Overlay'>Overlay</a> nodes are added. To build up our example step by step we first add an empty <a href="/documentation/nodetype/Foreground">Foreground</a> to our test scene:</p>
+        
+        <div class="code"><h3>Code: testScene1b.x3d, Added an empty <a href='/documentation/nodetype/Foreground'>Foreground</a> node.</h3><pre>&lt;Scene DEF='scene'&gt;           
+    &lt;!-- ... other nodes not shown for brevity --&gt;
+    &lt;Transform translation='3 0 0'&gt;                    
+        &lt;Shape&gt;
+            &lt;Appearance&gt;&lt;Material diffuseColor="0 0 1" /&gt;&lt;/Appearance&gt;            
+            &lt;Teapot /&gt;                    
+        &lt;/Shape&gt;    
+    &lt;/Transform&gt;    
+    
+    &lt;Foreground /&gt;
+&lt;/Scene&gt;</pre></div>
+
+    <p>When you start the <tt>testScene1b.x3d</tt> example scene, there will be no difference to the <tt>testScene1a.x3d</tt>. This is simply because the <a href="/documentation/nodetype/Foreground">Foreground</a> is empty and thus has no effect on the rendered result. In the next step we will add a <a href="/documentation/nodetype/PolygonOverlay">PolygonOverlay</a> with a <a href="/documentation/nodetype/SolidTexture">SolidTexture</a> to get some results. So add the following code to the <a href="/documentation/nodetype/Foreground">Foreground</a> node:</p>
+    <div class="code"><h3>Code: testScene1c.x3d, Added a solid red PolygonOverlay.</h3><pre>&lt;!-- ... other nodes not shown for brevity --&gt;
+&lt;Foreground&gt;
+    &lt;PolygonOverlay&gt;
+        &lt;Appearance&gt;&lt;SolidTexture color="1 0 0 0.5" /&gt;&lt;/Appearance&gt;
+    &lt;/PolygonOverlay&gt;
+&lt;/Foreground&gt;</pre></div>        
+
+    <p>When starting example <tt>testScene1c.x3d</tt> your scene should render with a red overlay which is half transparent. Because the <a href="/documentation/nodetype/PolygonOverlay">PolygonOverlay</a> automatically adjusts to the size of the output window you can resize it and your scene will be still covered with red. This can be a problem when using an <a href="/documentation/nodetype/ImageTexture">ImageTexture</a> on the overlay because the texture will be stretched to the dimensions of the window effectively changing the aspect ratio of the texture which will be distorted then. We will learn how to change that behaviour later on in this tutorial, but for now we will use the <a href="/documentation/nodetype/PolygonOverlay">PolygonOverlay</a> automatically adjusting to the size of the output window.</p>
+    
+    <div class="imgContainer"><img src="testScene1c.png" align="center"/><div class="imgCaption">Image: The scene rendered with a red, half-transparent overlay.</div></div>
+
+    <h2>Adding "useful" textures to the PolygonOverlay</h2>
+    <p>A transparent red overlay does not provide much use, so in the next step we will replace the solid texture of the <a href="/documentation/nodetype/PolygonOverlay">PolygonOverlay</a> by a custom <a href="/documentation/nodetype/ImageTexture">ImageTexture</a>.</p>
+
+    <div class="code"><h3>Code: testScene1d.x3d, Added an <a href='/documentation/nodetype/ImageTexture'>ImageTexture</a> to the PolygonOverlay.</h3><pre>&lt;!-- ... other nodes not shown for brevity --&gt;
+&lt;Foreground&gt;
+    &lt;PolygonOverlay&gt;
+        &lt;Appearance&gt;&lt;ImageTexture url="opengl-logo.png" /&gt;&lt;/Appearance&gt;
+    &lt;/PolygonOverlay&gt;
+&lt;/Foreground&gt;</pre></div>     
+    
+    <p>The texture contains the OpenGL logo and because it is mapped to the polygon of the overlay it fills the whole window. This means that it might be displayed distorted depending on the size of the output window because it's aspect ratio does not match the aspect ratio of the texture.</p>
+
+    <div class="imgContainer"><img src="testScene1d.png" align="center"/><div class="imgCaption">Image: The <a href='/documentation/nodetype/PolygonOverlay'>PolygonOverlay</a> showing the stretching effect.</div></div>
+    
+    <p class="warning"><b>Warning: </b>Currently it's not possible to use a <a href='/documentation/nodetype/Material'>Material</a> node within the <a href='/documentation/nodetype/Appearance'>Appearance</a> of the <a href='/documentation/nodetype/PolygonOverlay'>PolygonOverlay.</a> As soon as a <a href='/documentation/nodetype/Material'>Material</a> node is added the <a href='/documentation/nodetype/ImageTexture'>ImageTexture</a> will not be shown! In the code above the transparency is encoded into the texture which currently is the only way to make transparency in overlays work.</p>
+        
+    <h2>Fixing the aspect ratio using the "fixedImageSize" field</h2>
+    <p>To solve the problem of overlays being stretched to a wrong aspect ratio you can:</p>
+    <ul><li>Make sure that the aspect ratio of the output window is the same as your overlay texture.</li><li>Use the <a href="#" class="field">fixedImageSize</a> field of the <a href="/documentation/nodetype/PolygonOverlay">PolygonOverlay</a> node to specify a fixed texture size.</li></ul>
+    
+    <p>To deactive the default behaviour of the <a href="/documentation/nodetype/PolygonOverlay">PolygonOverlay</a> being stretched to fit the whole output window we will use the "<tt>fixedImageSize</tt>" field of the <a href="/documentation/nodetype/PolygonOverlay">PolygonOverlay</a>. Despite the name of the field it does not take an <b>image size</b> but rather an <b>aspect ratio</b>. Furthermore the datatype of the field which is <tt>SFVec2f</tt> is misleading because you can specify float values with a fractional part (e.g. 2.9) but they are treated as integers. If you do specfiy float values with a fractional part they will be floored down to the next integer, i.e. a value of <tt>"2.9 1.0"</tt> will result in an aspect ratio of <tt>"2 1"</tt> (and not <tt>"3 1"</tt> because floor/truncation is used rather than round here).</p>
+    
+    <p class="warning"><b>Warning: </b>The fact that the ratio specified in the <tt>fixedImageSize</tt> field is treated as integer, any texture used on an overlay needs to have an aspect ratio of full integers (e.g. 4:3, 16:9, 5:7 but not 2.3:5). The OpenGL logo texture in the following example has an aspect ratio of 2:1.</p>
+    <div class="code"><h3>Code: testScene1e.x3d, Added 'fixedImageSize' to the PolygonOverlay.</h3><pre>&lt;Foreground&gt;
+    &lt;PolygonOverlay fixedImageSize="2 1"&gt;
+        &lt;Appearance&gt;&lt;ImageTexture url="opengl-logo.gif" /&gt;&lt;/Appearance&gt;
+    &lt;/PolygonOverlay&gt;
+&lt;/Foreground&gt;</pre></div>
+    
+    <p>This will keep the <a href="/documentation/nodetype/ImageTexture">ImageTexture</a> of the <a href="/documentation/nodetype/PolygonOverlay">PolygonOverlay</a> at a fixed ratio. The polygon will still be scaled according to the width or height of the output window but it will keep the specified ratio. Try to resize the output window much wider than tall and you will notice that there is some black space to the left and the right of the image.</p>
+    
+    <div class="imgContainer"><img src="testScene1e.png" align="center"/><div class="imgCaption">Image: The <a href='/documentation/nodetype/PolygonOverlay'>PolygonOverlay</a> at a fixed ratio (using 'fixedImageSize')</div></div>
+    
+    <h2>The TextureGrabOverlay</h2>
+    <p>Besides the <a href="/documentation/nodetype/PolygonOverlay">PolygonOverlay</a> there exist two additional overlay nodes:</p>
+    <ul><li><a href="/documentation/nodetype/TextureGrabOverlay">TextureGrabOverlay</a></li><li><a href="/documentation/nodetype/ScreenTextOverlay">ScreenTextOverlay</a></li></ul>
+    <p>In this tutorial we will focus on the <a href="/documentation/nodetype/TextureGrabOverlay">TextureGrabOverlay</a>, which can be used to grab the current content of the frame buffer into a texture. This functionality is the basis for multi-pass post-processing effects.</p>
+    <p>By simply adding the <a href="/documentation/nodetype/TextureGrabOverlay">TextureGrabOverlay</a> after the <a href='/documentation/nodetype/PolygonOverlay'>PolygonOverlay</a> in our test scene, the current frame buffer content is grabbed into the specified texture. Note that we use a <a href="/documentation/nodetype/SolidTexture">SolidTexture</a> here (as it is recommened by the documentation of the <tt>texture</tt> field, because no initial image is needed).</p>
+    <p class="warning"><b>Warning: </b>The SolidTexture's <tt>size</tt> field doesn't do anything when used within a <a href='/documentation/nodetype/TextureGrabOverlay'>TextureGrabOverlay.</a> That's simply because the current frame buffer is grabbed and the target texture is sized according to the size of the frame buffer.</p>
+    <div class="code"><pre>&lt;TextureGrabOverlay&gt;
+    &lt;SolidTexture DEF="grabTex1" containerField="texture" /&gt;
+&lt;/TextureGrabOverlay&gt;
+
+&lt;PolygonOverlay &gt;
+    &lt;Appearance&gt;
+        &lt;SolidTexture USE="grabTex1" /&gt;
+        &lt;TextureTransform scale="2 2 2" containerField="textureTransform" /&gt;
+    &lt;/Appearance&gt;
+&lt;/PolygonOverlay&gt;</pre></div>
+    <p>To be able to see that the grabbed texture is displayed rather than what was in the frame buffer anyway, a <a href="/documentation/nodetype/TextureTransform">TextureTransform</a> node has been added which scales the grabbed texture, effectively showing the grabbed texture 4 times (2x2).</p>
+    <div class="imgContainer"><img src="testScene1f.png" align="center"/><div class="imgCaption">Image: testScene1g.x3d, The <a href='/documentation/nodetype/PolygonOverlay'>PolygonOverlay</a> without the original frame buffer content.</div></div>
+    <p>To understand what's displayed in this image and how it correlates to the source code of the scene, let's have a look at this documented code snippet:</p>
+    <div class="code"><pre>&lt;Foreground&gt;
+    &lt;!-- At this point the test scene is normally rendered and available in the frame buffer. --&gt;
+    
+    &lt;!-- This overlay draws the transparent OpenGL logo over the test scene. --&gt;
+    &lt;PolygonOverlay fixedImageSize="2 1"&gt;
+        &lt;Appearance&gt;&lt;ImageTexture url="opengl-logo.png" /&gt;&lt;/Appearance&gt;
+    &lt;/PolygonOverlay&gt;
+    
+    &lt;!-- This overlay grabs the frame buffer which contains the test scene overlayed 
+         with the transparent logo into the texture "grabTex1".
+         Note that the grab overlay does not clear the frame buffer, 
+         i.e. the rendered scene with the overlayed logo is still in 
+         the frame buffer. --&gt;
+    &lt;TextureGrabOverlay&gt;
+        &lt;SolidTexture DEF="grabTex1" containerField="texture" /&gt;
+    &lt;/TextureGrabOverlay&gt;    
+    
+    &lt;!-- Now the grabbed texture is overlayed with a scaling (showing it 2x2 times)
+         over the current content of the frame buffer (which shines through).
+    &lt;PolygonOverlay &gt;
+        &lt;Appearance&gt;
+            &lt;SolidTexture USE="grabTex1" /&gt;
+            &lt;TextureTransform scale="2 2 2" containerField="textureTransform" /&gt;
+        &lt;/Appearance&gt;
+    &lt;/PolygonOverlay&gt;
+        
+&lt;/Foreground&gt;</pre></div>
+
+    <h2>Hiding the original frame buffer content</h2>
+    <p>Picking up from the last example it would be nice to be able to remove the original content of the frame buffer which shines through. As it is noted in the code snippet above, the <a href="/documentation/nodetype/TextureGrabOverlay">TextureGrabOverlay</a> does not clear the frame buffer, but we can easily achieve this by inserting an additional overlay which does the job for us. The code in <tt>testScene1f.x3d</tt> shows how to do this:</p>
+    
+    <div class="code"><h3>Code: testScene1f.x3d, Hiding the original frame buffer content.</h3><pre>&lt;TextureGrabOverlay&gt;
+    &lt;SolidTexture DEF="grabTex1" containerField="texture" /&gt;
+&lt;/TextureGrabOverlay&gt;    
+
+&lt;!-- This overlay effectively clears the framebuffer with a black color. --&gt;
+&lt;PolygonOverlay&gt;
+    &lt;Appearance&gt;&lt;SolidTexture color="0 0 0 1" /&gt;&lt;/Appearance&gt;
+&lt;/PolygonOverlay&gt;
+
+&lt;PolygonOverlay &gt;
+    &lt;Appearance&gt;
+        &lt;SolidTexture USE="grabTex1" /&gt;
+        &lt;TextureTransform scale="2 2 2" containerField="textureTransform" /&gt;
+    &lt;/Appearance&gt;
+&lt;/PolygonOverlay&gt;</pre></div>
+    <p>So that's it for this tutorial. You now have learned the basic concepts for post-processing your scenes and the power of <a href="/documentation/nodetype/Foreground">Foreground</a> and <a href="/documentation/nodetype/Overlay">Overlay</a> nodes.</p>
+    
+    
+    Files:
+    <ul class="files"><li><a href="instantreality-post_processing_basics-files.zip">instantreality-post_processing_basics-files.zip</a></li></ul>
+</div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

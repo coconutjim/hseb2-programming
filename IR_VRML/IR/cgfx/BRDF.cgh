@@ -1,0 +1,20 @@
+#ifndef BRDF_CGH_INCLUDED
+#define BRDF_CGH_INCLUDED
+
+#include "DifferentialSurface.cgh"
+
+// A generic BRDF interface.
+interface BRDF
+{
+    // Evaluate the BRDF at 'surface' for incident direction
+    // 'omega_i' and outgoing direction 'omega_o'.
+    Spectrum Evaluate(
+        in DifferentialSurface surface,
+        in float3 omega_i,
+        in float3 omega_o
+    );
+    
+};
+
+
+#endif

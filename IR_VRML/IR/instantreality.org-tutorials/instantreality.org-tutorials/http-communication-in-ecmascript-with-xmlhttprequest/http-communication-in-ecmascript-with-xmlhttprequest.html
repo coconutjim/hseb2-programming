@@ -1,0 +1,185 @@
+<div id="tutorialContainer">
+  <h2 class="title">Http Communication in ECMAScript with XMLHttpRequest</h2>
+  <p class="description"><strong>Keywords:</strong><br/>script,
+        ECMAScript,
+        http,
+        xml,
+        XMLHttpRequest,
+        xhr,
+        REST<br/><strong>Author(s): </strong>Manuel Olbrich<br/><strong>Date: </strong>2010-06-24</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to communicate with Http servers in script nodes using ECMAScript.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        Getting information into X3D/VRML-Scene usually requires converting the data into the language's syntax. Also, runtime changes, such as painting on a <tt>PaintTexture</tt> are lost when the application is closed. A common way to get around this problem involves java based script nodes, which can be allowed to bypass security and write data to disk. The downsides of this method are relatively complex code in an additional programming language and modifications to the java settings. A XMLHttpRequest ECMAScript object allows accessing dynamic data outside of the application, while having a relatively simple setup.
+        
+	<p class="warning"><b>Warning: </b>To prevent foreign scenes from sending personal data to third parties, a XMLHttpRequest object will only communicate with whitelisted servers. If you try to use a non-whitelisted server, a ECMAScript exception will inform you about this problem. You can whitelist a host by adding <tt>--ecmaScriptXHRTrustedHosts HOSTNAME</tt> to your commandline or by changing this parameter via the SceneGraph web interface (Setup section). HOSTNAME can be a single host name, a comma separated list of host names, or the keyword "any" which would disable this security check.</p>        
+	
+	<h2>Connecting to an Http Server</h2>
+	The Http protocol is used in many applications. In this tutorial, we will connect to a simple webserver, to a WebDAV server, and to <a href="HTTP://couchdb.apache.org">apaches CouchDB</a>.
+	<ul><li>WebDAV is very similar to a usual webserver, but it also allows writing and deleting documents. All common desktop operating systems can handle WebDAV like a remote file system. Webservers, such as apache and lighttp, support this service, but it is disabled by default, since it can be used to write in a server's file system.</li><li>CouchDB is a simple and open DBMS that communicates over HTTP. The database entries (called documents in couchdb) are stored in JSON (JavaScript Object Notation) and can therefore be easily used in JavaScript applications.</li></ul>
+	
+	<div class="code"><h3>Code: The following Script node creates an XMLHttpRequest object.</h3><pre>Script{
+  url["JavaScript:
+    var xhr;
+    function initialize()
+    {
+      xhr=new XMLHttpRequest();
+    }
+  "]
+}
+  </pre></div>
+	At this point, the server name, <tt>localhost</tt> in this case, is checked against the whitelist. If it is not in the list a JavaScript exception gets thrown. You can catch this exception, if you like, with JavaScript's <tt>try{}catch(err){}</tt> construct. If not, the execution gets interrupted at this spot and an exception will be printed to console.
+
+	All following code sniplets assume that a XMLHttpRequest object called  <tt>xhr</tt> exists.
+	
+	<h2>GETting Data from a Webserver</h2>
+	<div class="code"><h3>Code: The following code fetches a file from an Http server.</h3><pre>xhr.open('GET','http://localhost/test.txt');
+xhr.send();
+print(xhr.responseText);</pre></div>
+	This example sends a GET request to localhost and prints the results to the console. With the file's content available in the responseText attribute you can interpret it your way with JavaScript.
+	
+	<h2>PUTting Files on a WebDAV Server</h2>
+	Putting files is nearly as simple as getting them. You should check your WebDAV setup with a native client to make sure that your permissions are set correctly and that you can write files. 
+	<div class="code"><h3>Code: The following code creates a file on a WebDAV server.</h3><pre>xhr.open('PUT','http://localhost/newfile.txt');
+xhr.send('The file content goes here.')</pre></div>
+
+	<h2>PUTting SFImages as JPEG- or PNG-Files on a WebDAV Server</h2>
+	If you like to save an image that was generated in your application (like an image from a PaintTexture or a frame from a Sensor), you would most likely want to save it in a readable image format rather than using SFImage encoding. XMLHttpRequest allows an second parameter to <tt>send()</tt> which sets a convertion before the data will be send. Possible values for this parameter are <tt>SFImage2jpg</tt> and <tt>SFImage2png</tt>.
+	<div class="code"><h3>Code: The following code creates a several image files on a WebDAV server. img is an SFImage.</h3><pre>xhr.open('PUT','http://localhost/testimage.sfimage');
+xhr.send(img); //new file will be the string representation of an SFImage
+
+xhr.open('PUT','http://localhost/testimage.jpg');
+xhr.send(img,'SFImage2jpg'); // convertion to JPEG
+
+xhr.open('PUT','http://localhost/testimage.png');
+xhr.send(img,'SFImage2png'); // convertion to PNG</pre></div>
+	
+	<h2>DELETE Files from a WebDAV Server</h2>
+	Deleting files works like getting. The following Example shows the deletion of a file.
+	<div class="code"><h3>Code: The following code deletes a file on a WebDAV server.</h3><pre>xhr.open('DELETE','http://localhost/test.txt');
+xhr.send();</pre></div>
+
+
+    <h2>Asynchronous requests</h2>
+    XMLHttpRequest allows asynchronous requests, which is important since the rendering will be blocked by an synchronous request. The open() method has an third parameter, which determines if the request is async or not. The default Value for this parameter is <tt>false</tt>. You can set an callback function for XMLHttpRequest with the <tt>onreadystatechange</tt> attribute. This callback function gets called on every state change. Usually the state we are most interested in is <tt>DONE</tt>, indicated by the number 4.  
+    <div class="code"><h3>Code: Asynchronous version of the GET example.</h3><pre>xhr.open('GET','http://localhost/test.txt',true);
+xhr.onreadystatechange = function(){
+  if(xhr.readyState==4) //4==DONE
+    print(xhr.responseText);
+}
+xhr.send();
+</pre></div>
+    
+
+    <h2>Information about your last Request</h2>
+	An XMLHttpRequest object stores the last reply's header and statusline. The attribute <tt>status</tt> returns the response status code. It will be 200 if everything went right. The corresponding status phrase is available in the <tt>statusText</tt> attribute.
+	
+	<div class="code"><h3>Code: The following code fetches a file from an Http server and reads the response status information and headers.</h3><pre>xhr.open('GET','http://localhost/test.txt');
+xhr.send();
+print('status code: ' + xhr.status + '\n');
+print('status phrase: ' + xhr.statusText + '\n');
+print('response headers are:\n:' + xhr.getAllResponseHeaders());</pre></div><div class="code"><pre>status code: 200
+
+status phrase: OK
+
+response headers are:
+Accept-Ranges: bytes
+Content-Length: 14
+Content-Type: text/plain
+Date: Tue, 05 Oct 2010 09:46:14 GMT
+ETag: "111fc-e-491db7dd4e565"
+Last-Modified: Tue, 05 Oct 2010 09:43:21 GMT
+Server: Apache/2.2.14 (Ubuntu)
+Vary: Accept-Encoding
+</pre></div>
+
+    <h2>Working with CouchDB</h2>
+    <a href="http://couchdb.apache.org">apache's CouchDB</a> is quite simple and easy to set up and use. However, you should understand the basic concepts before you play with these examples. The <a href="http://wiki.apache.org/couchdb/FrontPage"> CouchDB Wiki</a> is a good starting point. Once you do, <a href="http://wiki.apache.org/couchdb/API_Cheatsheet">here</a> is a neat API-Cheatsheet.
+    You should have understood the following:
+    <ul><li>Every document (database entry) is accessed via its <tt>id</tt>, which is usually a random generated UUID</li><li>You have to provide an <tt>id</tt> when generating a document. You can get a new UUID from couchdb</li><li>if you want to change or delete an object, you have to provide the current <tt>revision</tt> (this prevents conflicts when multiple users are working on the same document)</li><li>Documents can have attachments, just like an email. Adding an attachment is a change, so you need to provide the current <tt>revision</tt>. Attachments can be directly accessed, which means that you can point a web browser to an attached Image and simply get it. This is quite useful since you can simply provide this url to an ImageTexture</li><li>A view is a special kind of document, called a design document (with "_design/namehere" as id)</li><li>All documents (including views) are in one container. use views to separate them</li><li>CouchDB comes with a web frontend, called Futon, to access the DB. (<a href="http://localhost:5984/_utils/">http://localhost:5984/_utils/</a>)</li></ul>
+
+<h2>Parsing JSON</h2>
+The neat thing about the combination of CouchDB and JavaScript is that the documents (and nearly everything that CouchDB) returns are encoded in JSON (JavaScript Object Notation). That means, you can simply evaluate what CouchDB returns to you have a JavaScript object. The following example shows how to connect to the couchdbms and get its welcome message as a JavaScript object.
+
+<div class="code"><h3>Code: Connect to CouchDB, read and eval the welcome msg.</h3><pre>Script{
+  url["javascript:
+    var xhr;
+    function initialize()
+    {
+      xhr=new XMLHttpRequest();
+      xhr.open('GET','http://localhost:5984/');
+      xhr.send();
+      print(xhr.responseText);
+      var myobj = eval('('+xhr.responseText+')');
+      print(myobj.couchdb);
+      print(myobj.version);
+    }
+  "]
+}
+  </pre></div>
+      This creates the following output:
+      <div class="code"><pre>{"couchdb":"Welcome","version":"0.10.0"}
+
+Welcome
+0.10.0</pre></div>
+	The following examples assume that the <tt>xhr</tt> object already exists.
+	
+	<h2>List All Documents in Your DB</h2>
+	The db in this example is called <tt>demodb</tt>. You can create yours either with the apicalls or using <a href="http://localhost:5984/_utils/">Futon</a>. If you want to list all DBs in your DBMS, get <a href="http://localhost:5984/_all_dbs">/_all_dbs</a> from you db.
+        <div class="code"><h3>Code: Listing all documents in your db.</h3><pre>xhr.open('GET','http://localhost:5984/demodb/_all_docs');
+xhr.send();
+print(xhr.responseText);</pre></div>
+        This creates the following output:
+      <div class="code"><pre>{"total_rows":0,"offset":0,"rows":[]}</pre></div>
+      <tt>total_rows</tt> shows the number of documents in your db. If you have documents in your db, the array row will contain JSON objects containing each document's <tt>id</tt> and a <tt>value</tt> field containing the <tt>rev</tt>ision. 
+      <div class="code"><pre>{"id":"e42c296c5201a7506768b60c3074affe","value":{"rev":"1-dfc98c905e3b4899ae2114a63fbdd2c4"}}</pre></div>
+      The revision contains a number in front of an UUID that indicates how often a document was changed. If you like to have the other data without fetching each document you should have a look at CouchDBs views.
+      
+      <h2>Writing a New Document</h2>
+      Writing a document is like PUTting files to WebDAV, mentioned previously. The document's content in JSON encoding is transferred as the body. The target URI is <tt>/databasename/id</tt>. As mentioned before, you should use UUIDs as IDs. If you have no convenient way of generating these yourself, simply call 
+      <div class="code"><h3>Code: Get UUIDs from CouchDB.</h3><pre>xhr.open('GET','http://localhost:5984/_uuids');</pre></div>
+      You can call <tt>/_uuids?count=someNumber</tt> if you need more than one. That explains also why the result has the new UUID in a one element array.
+      <div class="code"><pre>{"uuids":["7f06ce4956f68193f66b1f172ef5badf"]}</pre></div>
+      With this id we have all we need to write a new document:
+      <div class="code"><h3>Code: Writing a document to CouchDB</h3><pre>var newDocument = '{\"documentname\":\"myNewDocument\",\"rating\":\"totally awesome\",\"someNumbers\":12345}';
+xhr.open('PUT','http://localhost:5984/demodb/7f06ce4956f68193f66b1f172ef5badf')
+xhr.send(newDocument);</pre></div>
+      The <tt>xhr.responseText</tt> contains next to <tt>ok</tt> and <tt>id</tt> the <tt>rev</tt>ision string of this document, which is quite useful if you plan to attach files.
+      <div class="code"><pre>{"ok":true,"id":"7f06ce4956f68193f66b1f172ef5badf","rev":"1-9bfc66754ea484c25293510de7b6ed9f"}</pre></div>
+      
+      <h2>Reading Documents</h2>  
+      Reading documents is quite simple. We assume you already have the document's id (either from a view or from a <tt>_all_docs</tt> request).
+      <div class="code"><h3>Code: Getting a document from CouchDB</h3><pre>xhr.open('GET','http://localhost:5984/demodb/7f06ce4956f68193f66b1f172ef5badf');
+xhr.send();</pre></div>
+      The responseText contains our previously written document with 2 additional fields: <tt>_id</tt> and <tt>_rev</tt>. These fields contain the document's id (so you don't have to store this information yourself) and its current revision. You will need this revision to change or delete this document.
+      <div class="code"><pre>{"_id":"7f06ce4956f68193f66b1f172ef5badf","_rev":"1-9bfc66754ea484c25293510de7b6ed9f","documentname":"myNewDocument","rating":"totally awesome","someNumbers":12345}</pre></div>
+      
+      <h2>Updating a Document</h2>
+      Updating documents is similar to writing. The only difference is that you have to supply the document's current revision to make sure nobody else changed the document since you've last seen it. 
+      <div class="code"><h3>Code: Updating a document in CouchDB</h3><pre>var updatedDocument = '{\"_rev\":\"1-9bfc66754ea484c25293510de7b6ed9f\",\"documentname\":\"myUpdatedDocument\",\"rating\":\"still awesome\",\"someNumbers\":42}';
+xhr.open('PUT','http://localhost:5984/demodb/7f06ce4956f68193f66b1f172ef5badf');
+xhr.send(updatedDocument);</pre></div>
+      The old version is now replaced with our new document. Note that couchdb doesn't delete an old version immediately. They are still accessible until you decide to "compact" the database. See the CouchDB website for details.
+      <div class="code"><pre>{"ok":true,"id":"7f06ce4956f68193f66b1f172ef5badf","rev":"2-23892d3ee7cf3b99899dadd3c3ffabe2"}</pre></div>
+      If you supply a wrong revision identifier (which could mean that somebody has changed this document already) CouchDB refuses to update this document.
+      <div class="code"><pre>{"error":"conflict","reason":"Document update conflict."}</pre></div>
+      
+      <h2>Adding an Attachment</h2>
+      Adding an attachment to a document is like writing a file to webdav. The documents URI acts as path for the new file. The main difference is that you need to supply the current document revision because you are updating the document.
+      <div class="code"><h3>Code: Adding an attachment to a document.</h3><pre>xhr.open('PUT','http://localhost:5984/demodb/7f06ce4956f68193f66b1f172ef5badf/newpic.jpg?rev=2-23892d3ee7cf3b99899dadd3c3ffabe2');
+xhr.send(someSFImageField,'SFImage2jpg');</pre></div>
+      <div class="code"><pre>{"ok":true,"id":"7f06ce4956f68193f66b1f172ef5badf","rev":"3-d00474de6495109df7cdfe4e194ccd9f"}</pre></div>
+
+      <h2>Deleting a New Document</h2>
+      If you plan to delete a document, you need its <tt>id</tt> and its current <tt>rev</tt>ision string. A revision string is necessary to assure that nobody has changed the document since you have last seen it. Let's delete our updated document:
+      <div class="code"><h3>Code: Deleting a document in CouchDB</h3><pre>xhr.open('DELETE','http://localhost:5984/demodb/7f06ce4956f68193f66b1f172ef5badf?rev=3-d00474de6495109df7cdfe4e194ccd9f');
+xhr.send();</pre></div>
+      Note that couchDB will return a new revision for your document. The old revisions will be available in the db until you decide to "compact" your db.
+      <div class="code"><pre>{"ok":true,"id":"7f06ce4956f68193f66b1f172ef5badf","rev":"4-e02f8207d71b9ac2c93f11a25be9a770"}</pre></div>
+      All further attempts to access the current version of this document will return a <tt>not_found</tt> error with the reason <tt>deleted</tt>.
+      <div class="code"><pre>{"error":"not_found","reason":"deleted"}</pre></div>
+      If you try to delete a document without supplying the right revision identifier, CouchDB refuses to delete it.
+      <div class="code"><pre>{"error":"conflict","reason":"Document update conflict."}</pre></div>
+
+    </div>
+</div>

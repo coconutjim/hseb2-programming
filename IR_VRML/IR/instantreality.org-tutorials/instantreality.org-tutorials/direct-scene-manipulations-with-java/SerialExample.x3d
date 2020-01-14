@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D>
+  <Scene DEF='scene'>
+  
+    <DeviceSensor DEF='serial' type='serial' Device='0' Delimiter='10' BaudRate='9600'>
+      <!--<field accessType='outputOnly' name='Serial/Data in' type='SFString'/>
+      <field accessType='inputOnly' name='Serial/Data out' type='SFString'/>-->
+    </DeviceSensor>
+    
+    <DeviceSensor DEF='web' type='web' port='9090' />
+    
+    <Transform>
+    	<Shape>
+    		<Appearance>
+    			<Material diffuseColor='0 1 0' />
+    		</Appearance>
+    		<Text DEF='text' string='..' solid='true' />
+    	</Shape>
+    </Transform>
+    
+    <ROUTE fromNode='serial' fromField='Serial/Data out' toNode='text' toField='string'/>
+    
+  </Scene>
+</X3D>

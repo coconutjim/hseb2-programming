@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <NavigationInfo headlight='false'/>
+    <Viewpoint position='0 0 5'/>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+    <Shape>
+      <Appearance>
+        <Material diffuseColor='0.2 0.2 0.2' emissiveColor='0.2 0.2 0.2' shininess='0' specularColor='0.2 0.2 0.2'/>
+        <ComposedShader DEF='ComposedShader'>
+          <field accessType='inputOutput' name='DiffuseColor' type='SFVec3f' value='0.3 0.3 0.3'/>
+          <field accessType='inputOutput' name='PhongColor' type='SFVec3f' value='0.5 0.5 0.5'/>
+          <field accessType='inputOutput' name='Edge' type='SFFloat' value='0.5'/>
+          <field accessType='inputOutput' name='Phong' type='SFFloat' value='0.8'/>
+          <ShaderPart DEF='vert' type='VERTEX'><![CDATA[
+					varying vec3 Normal;
+
+					void main(void)
+					{
+					  Normal = normalize(gl_NormalMatrix * gl_Normal);
+					  gl_Position = ftransform();
+					}
+					]]>
+          </ShaderPart>
+          <ShaderPart DEF='frag' type='FRAGMENT'><![CDATA[ 
+					uniform vec3 DiffuseColor;
+					uniform vec3 PhongColor;
+					uniform float Edge;
+					uniform float Phong;
+					varying vec3 Normal;
+
+					void main (void)
+					{
+					  vec3 color = DiffuseColor;
+					  float f = Normal.z;
+					  if (abs(f) < Edge)
+					    color = vec3(0);
+					  if (/*abs(f) > Threshold && */ f > Phong)
+					    color = PhongColor;
+					  gl_FragColor = vec4(color, 1);
+					}
+					]]>
+          </ShaderPart>
+        </ComposedShader>
+      </Appearance>
+      <Teapot/>
+    </Shape>
+  </Scene>
+</X3D>

@@ -1,0 +1,130 @@
+<div id="tutorialContainer">
+  <h2 class="title">Advanced Marker Tracking</h2>
+  <p class="description"><strong>Keywords:</strong><br/>vision,
+        tracking,
+        marker,
+        augmented reality<br/><strong>Author(s): </strong>Timo Engelke<br/><strong>Date: </strong>2008-12-16</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to use instantReality's vision module for marker tracking of multiple markers in on object.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+	<p>
+This tutorial will show how to define multiple markers for one object as well as the usage and configuration of the marker tracker module.
+For this we will create a marker cube that can be used in arbitrary situations, especially when having a movable object that should be tracked.
+A marker cube is basically a cube, where each side of it consists out of an individual marker. All the markers have to be defined to be part of one object to be tracked (TrackedObject) inside our world. 
+Analogous the structure inside the VisionLib-data set is organized.</p>
+    <p>
+        This example consists of three parts:
+    </p>
+    <ul><li>Creating a marker cube</li><li>Definition of a marker tracker inside a file</li><li>Setting up and testing of a marker tracker using multiple markers for one object in instantVision</li></ul>
+
+    <p>You will need the following parts:</p>
+
+    <ul><li>Printer connected to your PC</li><li>Scissor and some glue</li><li>A camera, supported by instantVision (i.e. a webcam, uEye, pointGrey ...)</li><li>20-30min. of time</li></ul>        	
+
+        <h2>Building up a marker cube</h2>
+        <p>
+        
+        First we will have to build up our cube. There for we need a cube sheme, which can be downloaded at the bottom of the page (MarkerCubes.pdf).
+        You can choose between two different sizes. You will have to print this out at least one of the scheme and use a 
+        scissor in order to cut out the cube around the lines. Once cut out, you'll have to bend the small markers at the 
+        dashed lines and use some glue in order to have a cubic dice. The resulting cubes may be look like this:
+        </p>
+
+	<div class="imgContainer"><img src="SchemeAndMarkerCubes.jpg" align="center"/><div class="imgCaption">Image: The scheme and a photo of some built up marker cubes</div></div>
+
+        <h2>Defining the marker cube for instantVision</h2>
+    <p>Now as you have built up a cube, we will have to define the cubes' markers in respect to each other and the center point. The VisionLib (the backend of instantVision) 
+       allows multiple markers to be defined for one tracked object. So defining the markers on the cube will allow us to track the cube in any state of rotation.
+       This can be useful for tracking a movable object like a tool for instance.
+       </p>
+       <p>
+        We assume that you have already tried out the simple marker tutorial and maybe the marker tutorial for two objects. 
+        Within this tutorial we will not focus so much on the X3D integration as this already has beed described inside the other marker tracker tutorials.
+        We will rather more show you some hints on using instantVision for testing your marker definitions and enhancing tracking quality.
+       </p>
+        Based on the previous tutorial the code for the instantVision (.pm) file inside the <tt>World</tt> section has to look like this:
+        <div class="code"><h3>Code: Part of marker definition inside the pm file</h3><pre>
+        &lt;World ....
+        ....
+        &lt;TrackedObject key="TrackedObject1"&gt;
+        &lt;ExtrinsicData calibrated="0"&gt;
+          &lt;R rotation="1 0 0 &amp;#xA;"/&gt;
+          &lt;t translation="0 0 0 &amp;#xA;"/&gt;
+          &lt;Cov covariance="0  0  0  0  0  0  &amp;#xA;0  0  0  0  0  0  &amp;#xA;0  0  0  0  0  0  &amp;#xA;0  0  0  0  0  0  &amp;#xA;0  0  0  0  0  0  &amp;#xA;0  0  0  0  0  0  &amp;#xA;"/&gt;
+        &lt;/ExtrinsicData&gt;
+       &lt;Marker BitSamples="2" MarkerSamples="6" NBPoints="4" key="Marker" is="1"&gt;
+          &lt;Code Line1="0000" Line2="0010" Line3="0000" Line4="0001"/&gt;
+          &lt;Points3D nb="4"&gt;
+            &lt;HomgPoint3Covd Cov3x3="0  0  0  &amp;#xA;0  0  0  &amp;#xA;0  0  0  &amp;#xA;" w="1" x="-0.75" y="0.75" z="-0.75"/&gt;
+            &lt;HomgPoint3Covd Cov3x3="0  0  0  &amp;#xA;0  0  0  &amp;#xA;0  0  0  &amp;#xA;" w="1" x="-0.75" y="0.75" z="0.75"/&gt;
+            &lt;HomgPoint3Covd Cov3x3="0  0  0  &amp;#xA;0  0  0  &amp;#xA;0  0  0  &amp;#xA;" w="1" x="-0.75" y="-0.75" z="0.75"/&gt;
+            &lt;HomgPoint3Covd Cov3x3="0  0  0  &amp;#xA;0  0  0  &amp;#xA;0  0  0  &amp;#xA;" w="1" x="-0.75" y="-0.75" z="-0.75"/&gt;
+          &lt;/Points3D&gt;
+        &lt;/Marker&gt;
+        &lt;Marker BitSamples="2" MarkerSamples="6" NBPoints="4" key="Marker2" is="2"&gt;
+          &lt;Code Line1="0000" Line2="1001" Line3="0001" Line4="0000"/&gt;
+          &lt;Points3D nb="4"&gt;
+            &lt;HomgPoint3Covd Cov3x3="0  0  0  &amp;#xA;0  0  0  &amp;#xA;0  0  0  &amp;#xA;" w="1" x="-0.75" y="0.75" z="0.75"/&gt;
+            &lt;HomgPoint3Covd Cov3x3="0  0  0  &amp;#xA;0  0  0  &amp;#xA;0  0  0  &amp;#xA;" w="1" x="0.75" y="0.75" z="0.75"/&gt;
+            &lt;HomgPoint3Covd Cov3x3="0  0  0  &amp;#xA;0  0  0  &amp;#xA;0  0  0  &amp;#xA;" w="1" x="0.75" y="-0.75" z="0.75"/&gt;
+            &lt;HomgPoint3Covd Cov3x3="0  0  0  &amp;#xA;0  0  0  &amp;#xA;0  0  0  &amp;#xA;" w="1" x="-0.75" y="-0.75" z="0.75"/&gt;
+          &lt;/Points3D&gt;
+        &lt;/Marker&gt;
+        ...
+      &lt;/TrackedObject&gt;
+     </pre></div>
+        This is just the description of two markers of the small cube. You can notice that they are placed inside the same <tt>TrackedObject</tt>. 
+        The two definitions represent the first two markers on the cube. The center point of the defined object resides in the middle of the object.
+        Just the x,y and z coordinates are of interest and describing the corner coordinates of the marker in the real world. The values 
+        here are representing the length of the black edge divided by 2. Thus for a big cube we would write a 1.925 as the length of the edge is 3.85cm.
+        Anyway you can use other dimensions, as long as they remain consistent. The complete file can be downloaded at the bottom of the page.
+        
+        <h2>Testing of the marker tracker inside instantVision</h2>
+        <p>
+        When starting instantVision the standard user interface will pop up. You can now load the file using the open file dialog. On the right hand side you
+        will notice the ActionManager which consists of a tree view, presenting the steps that will be performed on every frame.
+        The first thing to do is checking the VideoSource and display the acquired image.
+        Open a window by pressing <img class="icon" src="iconAddNewWindow.jpg"/>. Now pull over the <tt>VideoSourceImage</tt> element from the data set into the viewer using the mouse.
+        </p>
+        <div class="imgContainer"><img src="dragVideoImage.jpg" align="center"/><div class="imgCaption">Image: Dragging the VideoSourceImage object into the viewer</div></div>
+        <p>
+        By pressing the play button (<img class="icon" src="playButton.png"/>) you will be able to see a running picture.
+        If you experience a black screen, check the camera's physical connection and maybe press double on the <tt>VideoSourceAction</tt> inside the ActionManager.
+        A modal dialog will pop up giving you options for selecting cameras. When you have selected an apropriate driver (which usually is ds (DirectShow) for web cams), 
+        you can press the init button (<img class="icon" src="initPipe.png"/>) in order to reinitialize the camera driver.
+        </p>
+        <p>
+        InstantVision is capable of displaying additional information on top of the camera image. So give it a try and search for 
+        the "MarkerTrackerInternalCountour" container. Drag and drop it into the viewer. This can then look like this:
+        </p>
+        <div class="imgContainer"><img src="showContours.jpg" align="center"/><div class="imgCaption">Image: Contours recognized by the marker tracker action</div></div>
+        <p>
+        You can see the internal contours recognized by the <tt>ContourDetectAction</tt> inside the MarkerTracker. This is used by a internal corner detection, that supplies
+        the MarkerDetector with 4 square points. There are two modes for contour detection. In case you have invariant light conditions you can use the 
+        configured one. If you are using a cheap web cam, that usually does not have a global shutter, due to motion blur you might experience a bad result when moving the camera.
+        In this case you can also configure the <tt>MarkerTrackerAction</tt> to use a different contour tracker. Therefore double click on the <tt>MarkerTrackerAction</tt> inside the ActionManager.
+        An action property dialog will pop up, where you can configure the action. You can change the <tt>ContourExtractor</tt> attribute to 1 in order to use a different extraction algorithm.
+        You may change also the <tt>MTASilThresh</tt> attribute, which is a threshold for the binarization of the silouhette extractor that will be used for now.
+        After pressing the init button (<img class="icon" src="initPipe.png"/>) all the actions inside the action pipe will be reinitialized. You can play arround with the mentioned attributes
+        and directly notice the change in the resulting contour.
+        </p>
+        <div class="imgContainer"><img src="actionPropertiesContourSelector.png" align="center"/><div class="imgCaption">Image: Selection of the contour extractor methode</div></div>
+        <p>
+        In order to augment and test the pose calculation of the marker tracker action, we will now drag the <tt>TrackedObject1Camera</tt> data object into the
+        viewer. This sets the intrinsic (camera properties) and extrinsic (pose) data. The viewer will thus be a 3D and a 2D-Viewer at the same time.
+        We want a choordinate frame to be rendered from the perspective of the calculated camera. Thus we have to add a 3D model by using the add data button (<img class="icon" src="addData.png"/>) and 
+        selecting the <tt>ChoordFrame.wrl</tt> file, which can be downloaded below.
+        From now on the choordinate system will be rendered at the center of the cube.
+        </p>
+        <div class="imgContainer"><img src="augmentedWithChoordframe.jpg" align="center"/><div class="imgCaption">Image: Augmented cube inside instantVision</div></div>
+        <p>
+        The used <tt>TrackedObject1Camera</tt> can also be used as described in the other marker tracker tutorials in conjunction with instantReality inside X3D.
+        </p>
+
+
+        
+    Files:
+    <ul class="files"><li><a href="MarkerCubes.pdf">MarkerCubes.pdf (Scheme for building up marker cubes)</a></li><li><a href="MarkerCube.pm">MarkerCube.pm (instantVision marker tracker)</a></li><li><a href="CoordFrame.wrl">Coordinate Frame in VRML format</a></li></ul>
+        
+    </div>
+</div>

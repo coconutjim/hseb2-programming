@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene>
+
+    <Shape>
+      <Appearance>
+        <Material DEF='mat' diffuseColor='1 0 0'/>
+      </Appearance>
+      <Sphere/>
+    </Shape>
+
+    <TouchSensor DEF='ts'/>
+
+    <Script DEF='script' url='"MyCode.class"' directOutput='true' mustEvaluate='true'>
+      <field accessType='inputOnly' name='isActive' type='SFBool'/>
+      <field accessType='outputOnly' name='color_changed' type='SFColor'/>
+      <field accessType='initializeOnly' name='flag' type='SFBool' value='false'/>
+    </Script>
+
+    <ROUTE fromNode='ts' fromField='isActive' toNode='script' toField='isActive'/>
+    <ROUTE fromNode='script' fromField='color_changed' toNode='mat' toField='set_diffuseColor'/>
+
+  </Scene>
+</X3D>

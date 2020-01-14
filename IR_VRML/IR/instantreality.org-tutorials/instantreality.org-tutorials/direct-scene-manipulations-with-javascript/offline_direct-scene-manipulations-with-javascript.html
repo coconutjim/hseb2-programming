@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Direct scene manipulations with Javascript</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Direct scene manipulations with Javascript</h2>
+  <p class="description"><strong>Keywords:</strong><br/>script,
+        javascript,
+        dynamic<br/><strong>Author(s): </strong>Michael Zoellner<br/><strong>Date: </strong>2009-01-01</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to create, manipulate, add and remove nodes via Javascript
+    </p>
+  <div id="content">
+	<h2>Introduction</h2>
+	<p>The previous tutorial (Implementing <a href='/documentation/nodetype/Script'>Script</a> nodes in Javascript) shows the basic mechanisms to integrate your Script-node with inputOnly/OutputOnly-fields and ROUTEs. This fits well in the overall X3D-design where nodes usually do not manipulate the scene-graph structure. However, for some applications it is necessary to change the scene-graph directly. But be warned. If you access and manipulate the graph with your code all automatic event-processing mechanisms are gone. What is even more important is the following fact: The X3D  Browser has to switch all runtime optimizations off for the current executionContext (e.g scene, inline or <a href='/documentation/nodetype/ProtoInstance'>ProtoInstance)</a> since the system can not know which part of the scene will be manipulated by your script. Therefore you have to mark Script-nodes which are allowed to manipulate the scene by setting the directOutput-field to true.</p>
+	  <p class="warning"><b>Warning: </b>You have to set Script.directOutput to true if you directly manipulate the scene inside of your script-code</p>
+        <p>
+        This simple example will create a small subtree via Javascript. The resulting tree will include a <a href='/documentation/nodetype/Box'>Box</a> and a single <a href='/documentation/nodetype/Transform'>Transform</a> as child of a given <a href='/documentation/nodetype/Group'>Group.</a> </p>
+        <div class="code"><h3>Code: The resulting nodes</h3><pre>
+&lt;Transform&gt;
+	&lt;Shape&gt;
+		&lt;Appearance&gt;
+			&lt;Material /&gt;
+		&lt;/Appearance&gt;
+		&lt;Box /&gt;
+	&lt;/Shape&gt;
+&lt;/Transform&gt;
+        </pre></div>
+        <h2>Basic <a href='/documentation/nodetype/Scene'>Scene</a> setup</h2>
+	<p>We only need two nodes in the scene to get started. A <a href='/documentation/nodetype/Group'>Group</a> node where we will put the dynamic objects in and a <a href='/documentation/nodetype/Script'>Script</a> node that generates them. 
+        </p>
+        <div class="code"><h3>Code: Basic <a href='/documentation/nodetype/Scene'>Scene</a> setup</h3><pre>
+&lt;Group DEF='dynamic_group' /&gt;
+&lt;Script DEF='script' directOutput='true' /&gt;
+	</pre></div>
+	<h2>Accessing exiting nodes</h2>
+	<p>To start with our scene-changes we have to access at least a single node. There are two different ways to access exiting nodes within your script code. You can search for your node within the current executionContext using the Browser.currentScene.getNamedNode() method. This may take some milliseconds depending on how many named nodes you have in your executionContext.</p>
+        <div class="code"><h3>Code: Searching for a existing node by name</h3><pre>
+var dynamic_group = Browser.currentScene.getNamedNode('dynamic_group');
+	</pre></div>
+        <p>
+	The second method is to reference the node in a initializeOnly field. 
+        </p>
+        <div class="code"><h3>Code: Referencing a existing node inside of the <a href='/documentation/nodetype/Script'>Script</a> interface</h3><pre>
+&lt;Group DEF='dynamic_group' /&gt;
+&lt;Script DEF='script' directOutput='true' &gt;
+	&lt;field accessType='initializeOnly' name='dynamic_group' type='SFNode'&gt;
+		&lt;Group USE='dynamic_group'/&gt;
+	&lt;/field&gt;
+&lt;/Script&gt;
+        </pre></div>        
+	<p>Use whatever method is more adequate for your application.</p> 
+        <h2>Creating nodes</h2>
+        <p>
+        Next we will create these nodes from inside out and add them as children to their parent node. There are again two methods. First you can use the ISO-standard X3D field-accessor to create and assign those fields. The other method uses some InstantReality-specific addChild() calls.
+        </p>
+        <div class="code"><h3>Code: Creating and adding nodes using standard methods</h3><pre>
+var box = Browser.currentScene.createNode("Box");
+
+var material = Browser.currentScene.createNode("Material");
+material.diffuseColor = new SFColor(1, 0.5, 0);
+	
+var appearance = Browser.currentScene.createNode("Appearance");
+appearance.material = material;
+
+var shape = Browser.currentScene.createNode("Shape");
+shape.geometry = box;
+shape.appearance = appearance;
+
+var transform = Browser.currentScene.createNode("Transform");
+transform.children = new MFNode(shape);
+
+// finally add the transform node to the scene
+dynamic_group.children[0] = transform;
+        </pre></div>
+        <p>The second method utilizes the intelligent type-system by not adding the new nodes to a specific field but to the parent-node. The system therefore tries to find the correct field and adds the child. In addition it calls the SFNode constructor directly. But remember: This works only in the InstantReality runtime.
+	</p>
+        <div class="code"><h3>Code: Creating and adding nodes using InstantReality extensions</h3><pre>
+var box = new SFNode("Box");
+
+var material = new SFNode("Material");
+material.diffuseColor = new SFColor(1, 0.5, 0);
+					
+var appearance = new SFNode("Appearance");
+appearance.addChild(material);				
+
+var shape = new SFNode("Shape");
+shape.addChild (box, appearance);
+
+// create a transform node and put the shape into it
+var transform = new SFNode("Transform");
+transform.addChild (shape);
+
+// finally add the transform node to the scene
+dynamic_group.addChild(transform);
+        </pre></div>
+
+        <p>
+        The last line in both versions adds the new created transform-node to the given dynamic_group. Otherwise these nodes are not added to the scene and thus not visible. 
+        </p>
+		        
+		<div class="imgContainer"><img src="dynamic_box.png" align="center"/><div class="imgCaption">Image: Dynamic Box</div></div>
+		
+		<h2>Manipulating nodes</h2>
+		<p>
+        Once the dynamic nodes are in the <a href='/documentation/nodetype/Scene'>Scene</a> we can read and manipulate the field values directly.
+        </p>
+        <div class="code"><h3>Code: Accessing node values</h3><pre>
+// printing the number of children
+Browser.println( transform.children.length );
+
+// printing the first child's translation
+Browser.println( transform.translation );
+
+// changing the transformation
+transform.translation = new SFVec3f(1,0,0);
+</pre></div>
+	<h2>Removing nodes</h2>
+	<p>
+	One thing is important to know: You only can remove the node from a specific field or parent but you can not delete a node. It will be automatically deleted with the last reference. For the actual removal there are again different methods. For all nodes which have a children-field the safest method is to use the removeChildren field. This is independent of the actual position inside of the children container.</p>
+        <div class="code"><h3>Code: Removing nodes via removeChildren-field</h3><pre>
+// remove transform
+dynamic_group.removeChildren = new MFNode( transform );
+        </pre></div>
+        <p>Another save but again non-standard method is the removeChild() function. This works for all nodes and SFNode/MFNode-links but is a InstantReality specific extension.</p>
+        <div class="code"><h3>Code: Removing nodes via removeChild() function</h3><pre>
+// remove transform
+dynamic_group.removeChild ( transform );
+
+</pre></div>
+	<p>SFNode fields you can set directly to null to remove the link</p>
+        <div class="code"><h3>Code: Removing nodes in SFNode-fiels via null</h3><pre>
+// remove appearance
+shape.appearance = null;
+
+</pre></div>
+	<h2>Adding and deleting Routes</h2>
+	<p>In addition to the nodes you can also dynamically add and delete routes</p>
+        <div class="code"><h3>Code: Adding and deleting routes to given nodes</h3><pre>
+Browser.addRoute( my_timeSensor, 'fraction_changed', my_interpolator, 'set_fraction');
+Browser.deleteRoute( my_TimeSensor, 'fraction_changed', my_interpolator, 'set_fraction');	
+	</pre></div>
+	<p>You can even add and delete routes directly to the <a href='/documentation/nodetype/Script'>Script</a> using the 'this' object</p>
+        <div class="code"><h3>Code: Adding and deleting routes to the script node</h3><pre>
+Browser.addRoute( my_timeSensor, 'time', this, 'printTime');
+        </pre></div>
+	<p>This tutorial should give you a first idea how to manipulate your scene dynamically. For more inspiration look at the X3D specification and the online Javascript documentation.</p>
+        <h2>Example Files</h2>		
+	<p>The first three example files are generating one <a href='/documentation/nodetype/Box'>Box</a> and several Boxes at random positions. The next two are showing how to create dynamic nodes from Protos and advanced manipulation methods. The last one creates and connects a route directly to the script node. </p>
+        
+    Files:
+    <ul class="files"><li><a href="dynamic_box_01.x3d">dynamic_box_01.x3d - A simple dynamic Box</a></li><li><a href="dynamic_box_01_addChild.x3d">dynamic_box_01_addChild.x3d - A simple dynamic <a href='/documentation/nodetype/Box'>Box</a> using addChild()</a></li><li><a href="dynamic_box_02.x3d">dynamic_box_02.x3d - Several dynamic Boxes at random positions</a></li><li><a href="dynamic_box_03.x3d">dynamic_box_03.x3d - Dynamic eased Boxes via dynamic Proto</a></li><li><a href="dynamic_box_04.x3d">dynamic_box_04.x3d - Orbital arrangement of dynamic created Boxes</a></li><li><a href="dynamic_route_01.x3d">dynamic_route_01.x3d - Dynamic creation of a route to the script node</a></li></ul>
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

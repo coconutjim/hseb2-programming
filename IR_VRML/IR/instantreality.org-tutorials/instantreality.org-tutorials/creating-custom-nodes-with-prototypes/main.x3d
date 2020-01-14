@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<X3D>
+	<Scene DEF='scene'>
+		
+		<Viewpoint DEF='vp' position='-250 -500 200' orientation='0.84 -0.30 -0.43 1.16' zNear='0.01' zFar='6000' />
+		<Background groundColor='0.2 0.2 0.2' skyColor='0.95 0.95 0.95' />
+
+		<ExternProtoDeclare name='TextureMorph' url='TextureMorph_PROTO.x3d#TextureMorph' >
+            <field name='translation' type='SFVec3f' accessType='inputOutput' />
+            <field name='render' type='SFBool' accessType='inputOutput' />
+            <field name='rotation'		type='SFRotation' 	accessType='inputOutput' />
+            <field name='scale'			type='SFVec3f' 		accessType='inputOutput' />
+            <field name='imageurl'		type='MFString' 	accessType='initializeOnly' />
+            <field name='distance'		type='SFFloat' 		accessType='initializeOnly' />
+            <field name='instances'		type='SFFloat' 		accessType='initializeOnly' />
+            <field name='size'			type='SFVec2f' 		accessType='initializeOnly' />
+            <field name='title'			type='SFString' 	accessType='inputOutput' />
+            <field name='description'	type='SFString' 	accessType='inputOutput' />
+        </ExternProtoDeclare>
+<!-- PROTO IS INSTANTIATED HERE -->
+		<Transform DEF='trans_sw_planes_all' >
+			<Transform DEF='trans_sw_planes_overlay' translation='0 0 0' rotation='1 0 0 3.14' >
+				<!--TouchSensor DEF='ts_sw_planes_overlay' /-->
+				<Group DEF='group_sw_planes_overlay'>
+					<ProtoInstance name='TextureMorph' DEF='swp_01' >
+						<fieldValue name='imageurl' value='protoTexture.png' />
+						<fieldValue name='translation' value='10 200 0' />
+						<fieldValue name='size' value='262 125' />
+						<fieldValue name='distance' value='10' />
+					</ProtoInstance>
+					<ProtoInstance name='TextureMorph' DEF='swp_02' >
+                            <fieldValue name='imageurl' value='protoTexture.png' />
+                            <fieldValue name='translation' value='10 12 0' />
+                            <fieldValue name='size' value='262 125' />
+                            <fieldValue name='distance' value='25' />
+                        </ProtoInstance>
+				</Group>
+			</Transform>
+		</Transform>
+
+	</Scene>
+</X3D>

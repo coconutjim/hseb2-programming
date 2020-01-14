@@ -1,0 +1,344 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Generic Poster Tracking</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Generic Poster Tracking</h2>
+  <p class="description"><strong>Keywords:</strong><br/>vision,
+        tracking,
+        poster,
+        randomized trees,
+        augmented reality<br/><strong>Author(s): </strong>Folker Wientapper,
+        Harald Wuest<br/><strong>Date: </strong>2007-06-13</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to use instant reality's vision module 
+    for tracking textured planar regions with the "Generic Poster Tracker".
+    </p>
+  <div id="content">
+        <h2>Introduction</h2>
+	    <p>
+            The "Generic Poster Tracker" is a tool which allows the user to create a
+            markerless tracking application for augmented reality very easily. The 
+            underlying tracking method assumes that the object to be tracked is a 
+            well textured and planar surface. The tracking methods used are a randomized trees
+            based keypoint classifier for pose initialization and a KLT tracker.
+        </p>
+	<p class="warning"><b>Warning: </b>The Postertracker will only run for 3000 Frames without restrictions in the unlicensed system. After 3 to 5 minutes the framerate will be limited to 3 frames per second</p>
+        <p>
+           In order to create an AR application based on this tracking technology, the 
+           user has to carry out the following three steps, which will be explained in 
+           more detail subsequently:
+       </p>
+        <ol><li> acquire a reference image of the object,</li><li> perform an offline training phase and</li><li> embed the tracker into the AR application.</li></ol>
+        <p>
+            Finally, some advanced features and tricks are explained, which skilled users might
+            find useful.
+        </p>
+
+        <h2>Creating a reference image</h2>
+        <p>
+            As a first step, a reference image of the object must be taken. It is
+            recommended to produce the reference image with the same camera that
+            is used later for tracking. One possibility is to use the image capturing
+            software, which is (in most cases) provided by the camera manufacturer.
+            Alternatively, this can also be achieved with instant reality's
+            vision module 'testpm4.exe'. For this purpose, the user basically needs to
+            load a 'VideoSourceAction' for image acquisition, an 'ImageWriterAction' for
+            storing the image on hard disk and, finally, a window ('MegaWidgetActionPipe') to  
+            inspect the live video stream in order to choose an appropriate image. We will now 
+            explain the procedure of the latter option.  
+        </p>
+
+        <p>
+           After having started the vision module, one can load the following '.pm' file
+           which already contains the abovementioned components:
+           
+           <div class="code"><h3>Code: An image acquision '.pm' file</h3><pre>
+                   
+               &lt;?xml version="1.0" encoding="UTF-8" standalone="no" ?&gt;
+               &lt;VisionLib2 Version="2.0"&gt;
+                   &lt;ActionPipe category="Action" name="main"&gt;
+                       &lt;VideoSourceAction__ImageT__RGB_Frame category="Action" enabled="1" name="VideoSourceAction"&gt;
+                           &lt;Keys size="2"&gt;
+                               &lt;key val="VideoSourceImage" what="image live, Image*, out"/&gt;
+                               &lt;key val="" what="intrinsic parameters to be modified, out"/&gt;
+                           &lt;/Keys&gt;
+                           &lt;ActionConfig source_url="ds://mode=1280x960xBI_RGB;unit=0;"/&gt;
+                       &lt;/VideoSourceAction__ImageT__RGB_Frame&gt;
+                       &lt;ImageWriterAction__ImageT__RGB_Frame category="Action" enabled="0" name="Action"&gt;
+                           &lt;Keys size="2"&gt;
+                               &lt;key val="VideoSourceImage" what="image to write, image, in"/&gt;
+                               &lt;key val="" what="Frame number (for sequences) as DataTemplate&amp;lt;Int32&gt;, out"/&gt;
+                           &lt;/Keys&gt;
+                           &lt;ActionConfig Filename_postfix_ala_images_type="jpg" Filename_prefix_of_the_images="C:\TestPosterTracker\refImage" Image_Sequence_boolean="0" Number_of_digits_to_write="4"/&gt;
+                       &lt;/ImageWriterAction__ImageT__RGB_Frame&gt;
+                       &lt;MegaWidgetActionPipe height="245" name="WidgetActionPipe" show="1" viewerid="0" width="328" x="0" y="0"&gt;
+                           &lt;Keys size="8"&gt;
+                               &lt;key val="mwap" what="internal use, do not set or change!"/&gt;
+                               &lt;key val="VideoSourceImage" what="background, Image*, in"/&gt;
+                               &lt;key val="" what="2D geometry, GeometryContainer, in"/&gt;
+                               &lt;key val="" what="3D geometry, GeometryContainer, in"/&gt;
+                               &lt;key val="" what="Camera extrinsic parameters, ExtrinsicData, in"/&gt;
+                               &lt;key val="" what="Camera intrinsic parameters, IntrinsicDataPerspective, in"/&gt;
+                               &lt;key val="" what="OSG 3D Models, OSGNodeData, in"/&gt;
+                               &lt;key val="" what="caption string, StringData&amp;lt;string&gt;, in"/&gt;
+                           &lt;/Keys&gt;
+                       &lt;/MegaWidgetActionPipe&gt;
+                   &lt;/ActionPipe&gt;
+                   &lt;DataSet key=""&gt;
+                   &lt;/DataSet&gt;
+                   &lt;Activity name="NOP"/&gt;
+               &lt;/VisionLib2&gt;
+           </pre></div>
+        </p>
+        <p>
+            Before taking the image, create a folder where the image should be stored
+            (e.g.: "C:\TestPosterTracker\").
+        </p>
+            Now, the following steps need to be done:
+        
+        <ol><li> Double-click on VideoSourceAction to set camera parameters, esp. the resolution (640x480 is ok)</li><li> Press 'init'</li><li> Press 'run' and watch the video while adjusting the camera position</li><li> Press 'stop' when an acceptable camera position has been found</li><li> Disable the VideoSourceAction to avoid acquiring new images</li><li> Double click on ImageWriterAction to set the desired path and filename of the image (e.g.: Filename_prefix_of_the_images="C:\TestPosterTracker\refImage") </li><li> Enable the ImageWriterAction</li><li> Press 'run once' to save the image at the desired destination</li></ol>
+        
+        <p>
+            Regardless of which software is used to create the image, the user should pay
+            attention to create the reference image 'properly', i.e.:
+        </p>
+        <ul><li> The reference image should be taken with the viewing field perpendicular to the surface of the object. This is the case, when no projective distortions are observable, i.e. parallel lines on the object should remain parallel in the captured image</li><li> Furthermore it is advantageous not to capture any background of the object (or regions that do not belong to the planar part of the object)</li></ul>
+        
+    
+        <div class="imgContainer"><img src="ReferenceImageExample.jpg" align="center"/><div class="imgCaption">Image: (a) Example setup for capturing a reference image, (b) 'good' reference image, (c) 'bad' reference image (viewing direction not perpendicular + background clutter) </div></div>
+
+
+        <h2>Training phase</h2>
+        
+        The whole generation process can be performed with an Activity plugin in the InstantVision application.
+        The Activity is calles <b>GenericPosterTracker</b>, and can be started by clicking on the according Activity button.
+        <div class="imgContainer"><img src="GenericPosterTracker.png" align="center"/><div class="imgCaption">Image: Starting the GenericPosterTracker</div></div>
+        
+        The user can decide between a simple and an advanced mode.
+        <h2>Simple Mode</h2>
+        <p>
+            For the simple mode first click on <b>add Poster</b>. A new window opens and 
+			you have to click on the <b>image not loaded</b> button. Then you can pick a
+			picture. Now you can decide whether you want to change the data path or not. 
+			By default the data path is in the same directory as the picture you picked as
+			poster. Afterwards click <b>close</b> and the poster is loaded. Then 
+			click the <b>process all</b> button and wait until the process is finished.
+			Finally press <b>create tracker</b> to create the .x3d and the .pm file. They
+			can be found in the directory of the picture.
+        </p>
+        <p>
+            The tracker learns by observing randomized poses of the image, 
+            so activate update <b>viewer</b> if you want to look, if everything 
+            goes fine - but then it takes more time. A progress area shows the 
+            actual step. First of all, keypoints are searched, this takes about 
+            2 minutes. In the next step, the activity produces patches from these 
+            points (~15 minutes), at last the randomized trees are produced (~10 minutes).
+        </p>
+        <p>
+            It is also possible to change the number of trees. In fact, this is 
+            already an advanced option, but this variable changes the manufacturing 
+            time at most. The recognition rate is very high for 20 trees, but could 
+            already be high enough for 10 trees. So if you're more common with the 
+            behaviour of the tracker, this option is not yet that advanced - the 
+            more the better goes just asymptotically (1-exp(-ax)).
+        </p>
+
+        <h2>Advanced Mode</h2>
+
+        <p>
+            The <b>advanced</b> mode allows the user to change more options. Roughly spoken
+            it allows to do everthing from the simple mode step by step with the
+            ability to change some parameters. This widget sheet is seperated into 4 boxes,
+        </p>
+        <ul><li>Poster,</li><li>Intrinsic Data,</li><li>Generate 3D-Points,</li><li>Generate Tracking Data.</li></ul>
+        <p>
+            They represent the different steps and the appropriated options. Every step
+            can be skipped by beeing executed automatically like in the simple mode.
+        </p>
+
+
+
+        <h3>Poster</h3>
+         
+		<p>
+            First of all, the image is loaded. Now you can scroll the image for best view.
+            After clicking the <b>mark area</b> button you can choose the area
+            of the image that will be cropped due to some learning advantages (mark area
+            with left mouse button pressed and move area with right button pressed). So if
+            there is a border in the picture that is not in the tracked poster, you can
+            cut it of. Afterwards just click <b>crop</b>. Then you can
+            <b>save</b> this poster. Like in the <b>simple</b> mode
+            the best is to choose a filename without any extension in an empty path. Take
+            a look into section <b>Created Files</b> for more information.
+        </p>
+        <p>
+            For skipping this step you can instantly click <b>save</b> or start
+            with the next step - a saving Dialog will appear. The Image will be cropped
+            with maximum size and equally distributed borders.
+        </p>
+        <h3>Intrinsic Data</h3>
+        <p>
+            With the <b>load</b> button it is possible to chose your own
+            intrinsic data. If you skip this step standard intrinsic data will be used.
+        </p>
+        <h3>Generate 3D-Points</h3>
+
+        <p>
+            All the learning parameters for the amount of the random poses can be changed
+            here. If you change the maximum and minumum values you will instantaneously
+            see this pose in the viewer. The <b>number of keypoints</b> is an
+            interesting parameter, so try what happens, if you change it, it could be
+            usefull for larger posters to raise this number, but be careful, it's linear
+            with the generating time of patches and trees.
+        </p>
+        <p>
+            It is recommended to produce the keypoints randomly.
+        </p>
+        <h3>Generate Tracking Data</h3>
+        <p>
+            <b>Generate Patches</b> is moreless a debug-step, you will need
+            just the trees.
+        </p>
+		<p>
+			After you changed the options click <b>process all</b>, wait a few
+			minutes and finally click <b>create tracker</b> to create the .x3d
+			and the .pm files.
+		</p>
+        <h2>Expert Properties</h2>
+        <p>
+            Experts may also change the activity attributes. You could change the
+            <b>camera height</b> and <b>width</b>, but the result
+            corresponds with the <b>patch size</b>, so try what happens. The
+            <b>number of random poses</b> is an interesting value, it limits
+            the number of random poses for the keypoint searching step, sometimes the
+            results are better with more points, sometimes with less,...
+
+        </p>
+        <p>
+            <b>Search depth</b> gives the maximum level of the keypoints, in
+            other words the invariance for zoom. It could make sense for high resolution
+            pictures to raise this value.
+        </p>
+        <h2>Created Files</h2>
+        <p>
+            The files are located in the same directory as the chosen image. If there
+			was nothing else than the picture, the structure will be the following:
+        </p>
+        <ul><li>
+                <b>ImageName.jpg</b>, the image
+            </li><li>
+                <b>posterTracker.pm</b>, the picmod file for the tracking
+            </li><li>
+                <b>PosterTracker.x3d</b>, the file for the poster tracking
+            </li><li>
+                <b>ImageNameData/PictureName.wrl</b>, the model with the cropped image as texture
+            </li><li>
+                <b>ImageNameData/treeXXXX.txt</b>, the produced randomized trees
+            </li><li>
+                <b>ImageNameData/AllPatchesXXXX.rtp</b>, the produced patches (optional)
+            </li></ul>
+
+        <h2>Using the tracker and embedding it into the AR application</h2>
+
+            <p>
+                The initially chosen filename with extension .x3d is a tracker for the learned
+                poster and the chosen properties.
+            </p>
+            <p>
+                The generated x3d-file uses the camera parameters which are estimated by the tracking module and 
+                uses those to render the model contained in the generated wrl-file. After the generation step, this file
+                simply contains the 3D model of the cropped image as textures. The image is located in the x/y-plane, and 
+                the world origin is in the center of the image. If the x3d-file is executed with InstantPlayer, the overlay on the real camera
+                image is simply the reference image. This can be used to validate the poster tracking quality.
+                For more impressive augmentations, the wrl-file can be replaced with something more fancy.
+            </p>
+            <p>
+                <a href="BookAugmentation.avi"> Here is a link to the tracking video! </a>
+            </p>
+            <div class="imgContainer"><img src="AugmentedBookSequence.jpg" align="center"/><div class="imgCaption">Image: Tracking a book with its own cover as augmentation</div></div>
+
+
+        <h2>Advanced features and tricks</h2>
+        <ul><li>
+			The standard camera is a DirectShow device. If other cameras are used, the VideoSourceAction in the pm-file needs
+            to be adapted. To obtain the correct configuration of a connected camera, the InstantVision GUI can be used.
+            Just  create a VideoSourceAction, select the correct device and resolution, and check if the acquired image looks fine.
+            If everything is ok, save the configuration and copy/paste the VideoSouceAction into your poster tracker pm-file.
+            </li><li>
+            It is recommended to use not too big images. An ImageResizeAction converts all camera images into a resolution of 320x240.
+            If your DirectShow device supports resolutions of 320x240, the ImageResizeAction in the pm-file can be removed.                
+            </li><li>
+            By default only 4 pyramid levels of the reference image are used. If the reference image is very large, this can be not enough, 
+            especially is the reference image appears very small in the camera image.
+            The number of pyramid levels can be extended by adjustinf the attribute <b>levels</b> of the <b>BuildPyramidAction</b>.
+            </li><li>
+            By default 20 trees are use to initialize the poster tracker. Since the trees recquire quite a bit of memory, it can be usefull
+            to decrease the number of trees. Therefore some trees in the Data directory can be simply deleted or moved somehwere else.
+            In many szenarios good results could be observed if only 10 trees were used.                
+            </li><li>
+			If you want to track more than one poster just repeat the first step of the simple method for every poster you want to add.
+			</li><li>
+			By default a teapot is projected on the poster. If you want to change this open the .x3d file with an xml editor and replace the
+			teapot by something else.
+			</li></ul>            
+    
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

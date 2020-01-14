@@ -1,0 +1,239 @@
+#VRML V2.0 utf8
+
+DEF script Script {	  
+	eventIn SFTime update
+	eventIn SFBool hot
+	eventIn SFFloat set_xRotation
+	eventIn SFFloat set_yRotation
+	eventIn SFFloat set_zRotation
+	eventIn SFFloat set_xTranslation
+	eventIn SFFloat set_yTranslation
+	eventIn SFFloat set_zTranslation
+	eventOut SFRotation rotation_changed
+	eventOut SFVec3f translation_changed	
+
+	url "javascript:
+
+    var oldTimeStamp = -1;
+    var xRotation = 0;
+    var yRotation = 0;
+    var zRotation = 0;
+    var rotation = new SFRotation(0, 1, 0, 0);
+    var rotationFactor = 1.0;
+    var xTranslation = 0;
+    var yTranslation = 0;
+    var zTranslation = 0;
+    var translation = new SFVec3f(0, 0, 0);
+    var translationDelta = new SFVec3f(0, 0, 0);
+    var translationFactor = 2.0;
+
+    function update(timeStamp)
+    {
+    	if (oldTimeStamp < 0)
+    	{
+        	oldTimeStamp = timeStamp;
+        	return;
+    	}
+
+    	var delta = timeStamp - oldTimeStamp;
+    	oldTimeStamp = timeStamp;
+
+    	var factor = delta * rotationFactor * Math.PI;
+    	var xRotationDelta = new SFRotation(1, 0, 0, factor * xRotation);
+    	var yRotationDelta = new SFRotation(0, 1, 0, factor * yRotation);
+    	var zRotationDelta = new SFRotation(0, 0, 1, factor * zRotation);
+    	rotation = xRotationDelta.multiply(rotation);
+    	rotation = yRotationDelta.multiply(rotation);
+    	rotation = zRotationDelta.multiply(rotation);
+    	rotation_changed = rotation;
+
+    	factor = delta * translationFactor;
+    	translationDelta.x = factor * xTranslation;
+    	translationDelta.y = factor * yTranslation;
+    	translationDelta.z = factor * zTranslation;
+    	translation = translation.add(translationDelta);
+    	translation_changed = translation;
+    }
+
+    function set_xRotation(value)
+    {
+    	xRotation = value - 0.5;
+    }
+
+    function set_yRotation(value)
+    {
+    	yRotation = value - 0.5;
+    }
+
+    function set_zRotation(value)
+    {
+    	zRotation = value - 0.5;
+    }
+
+    function set_xTranslation(value)
+    {
+    	xTranslation = value - 0.5;
+    }
+
+    function set_yTranslation(value)
+    {
+    	yTranslation = value - 0.5;
+    }
+
+    function set_zTranslation(value)
+    {
+    	zTranslation = value - 0.5;
+    }
+
+	function hot(value)
+	{
+		Browser.println('hot: ' + value);
+	}
+	"
+}
+
+
+DEF timeSensor TimeSensor {
+	loop TRUE
+}
+ROUTE timeSensor.time TO script.update
+
+
+DEF iosM IOSensor {
+	type "spacemouse"
+	eventOut SFFloat X*Rotation
+	eventOut SFFloat Y*Rotation
+	eventOut SFFloat Z*Rotation
+	eventOut SFFloat X*Translation
+	eventOut SFFloat Y*Translation
+	eventOut SFFloat Z*Translation
+	eventOut SFBool Button*
+}
+
+
+DEF navInfo NavigationInfo {
+	interactionType "ray"
+	type "any"
+	#sceneScale 0.01
+	headlight TRUE
+}
+
+Viewpoint {
+	position 0 0 20
+}
+
+
+Viewspace {
+	scaleToScene TRUE
+	children [
+    	DEF userBodyTrans Transform {
+        	children [
+            	DEF userBody UserBody {
+            		children [	   
+                		Transform {
+                    		rotation 1 0 0 -1.5707963
+							translation	0 0 -0.05
+							scale .05 .05 .05
+                    		children [
+                        		Transform {
+                        			translation 0 1.1 0
+                        			children DEF CYL Shape {
+                            			appearance Appearance {
+                                			material Material { 
+                                    			diffuseColor 1 1 1 
+                                    			emissiveColor .1 .1 .1
+                                			}
+                            			}
+                            			geometry Cylinder { 
+											height 2 
+											radius .005
+										}
+                        			}
+                        		}
+                        		Transform {		  
+                        			translation 0 0.1 0
+                        			children Shape {
+                            			appearance Appearance {
+                                			material Material { 
+                                    			diffuseColor .2 .2 1 
+                                    			emissiveColor .1 .1 .1
+                                    			specularColor .3 .3 .3
+                                			}
+                            			}
+                            			geometry Cone { 
+                                			height 0.2 
+                                			bottomRadius 0.05 
+                            			}
+                        			}
+                        		}
+                    		]
+                		}
+            		]
+            	}
+        	]
+    	}
+	]
+}
+
+
+ROUTE iosM.X*Rotation TO script.set_xRotation
+ROUTE iosM.Y*Rotation TO script.set_yRotation
+#ROUTE iosM.Z*Rotation TO script.set_zRotation
+ROUTE iosM.X*Translation TO script.set_xTranslation
+ROUTE iosM.Y*Translation TO script.set_yTranslation
+ROUTE iosM.Z*Translation TO script.set_zTranslation
+ROUTE iosM.Button* TO script.hot
+
+ROUTE iosM.Button* TO userBody.hot 
+ROUTE script.rotation_changed TO userBodyTrans.set_rotation
+ROUTE script.translation_changed TO userBodyTrans.set_translation
+
+
+
+################# SCENE #################
+DEF trans Transform {
+	translation 0 0 0
+	children [					
+		DEF transwarp MatrixTransform {
+			children [
+				Transform {
+					children [
+						Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 1 1 0
+								}
+							}
+							geometry Box {
+								size 2 2 2
+							}
+						}
+					]
+				}
+			]
+		}
+		DEF space SpaceSensor {
+			ROUTE space.matrix_changed TO transwarp.matrix
+		}
+	]
+}
+Transform {
+	translation	0 0 -4
+	children [			
+		Transform {
+			children [
+				Shape {
+					appearance Appearance {
+						material Material {
+							diffuseColor 1 0 0
+						}
+					}
+					geometry Box {
+						size 4 4 1
+					}
+				}
+			]
+		}
+	]
+}
+################# SCENE #################

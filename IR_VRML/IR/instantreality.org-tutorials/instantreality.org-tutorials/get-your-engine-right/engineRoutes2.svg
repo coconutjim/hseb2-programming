@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://inkscape.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.43"
+   sodipodi:docbase="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup"
+   sodipodi:docname="engineRoutes2.svg">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="TriangleOutL"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="TriangleOutL"
+       style="overflow:visible">
+      <path
+         id="path5782"
+         d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none"
+         transform="scale(0.8)" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="535.43214"
+     inkscape:cy="589.74934"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     inkscape:window-width="813"
+     inkscape:window-height="806"
+     inkscape:window-x="23"
+     inkscape:window-y="32" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.27788186;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1307"
+       width="161.44162"
+       height="81.580589"
+       x="81.422058"
+       y="165.1433"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="121.42857"
+       y="183.79074"
+       id="text2182"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275"><tspan
+         sodipodi:role="line"
+         id="tspan2184"
+         x="121.42857"
+         y="183.79074">TimerJob</tspan></text>
+    <path
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.97468126;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-mid:none;marker-end:url(#TriangleOutL);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 242.809,228.49904 L 292.47218,228.49904"
+       id="path2214"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="188.03139"
+       y="233.74576"
+       id="text5890"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275"><tspan
+         sodipodi:role="line"
+         id="tspan5892"
+         x="188.03139"
+         y="233.74576">finished</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.27788186;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect2186"
+       width="161.44162"
+       height="81.580589"
+       x="509.45914"
+       y="165.14331"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="519.46564"
+       y="185.21933"
+       id="text2188"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275"><tspan
+         sodipodi:role="line"
+         id="tspan2190"
+         x="519.46564"
+         y="185.21933">SynchronizeJob</tspan></text>
+    <path
+       id="path4835"
+       d="M 671.57114,227.09295 L 722.54199,227.09295"
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.98742998;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#TriangleOutL);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text5894"
+       y="232.3172"
+       x="619.63989"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       xml:space="preserve"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275"><tspan
+         y="232.3172"
+         x="619.63989"
+         id="tspan5896"
+         sodipodi:role="line">finished</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="515.35419"
+       y="230.88863"
+       id="text5898"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275"><tspan
+         sodipodi:role="line"
+         id="tspan5900"
+         x="515.35419"
+         y="230.88863">start</tspan></text>
+    <g
+       id="g5959"
+       transform="translate(-22.67718,0)"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275">
+      <rect
+         inkscape:export-ydpi="58.880001"
+         inkscape:export-xdpi="58.880001"
+         inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes1.png"
+         y="166.55672"
+         x="749.45917"
+         height="78.753815"
+         width="161.44162"
+         id="rect2192"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.2555474;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <text
+         inkscape:export-ydpi="58.880001"
+         inkscape:export-xdpi="58.880001"
+         inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes1.png"
+         sodipodi:linespacing="125%"
+         id="text2194"
+         y="186.6479"
+         x="783.7514"
+         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="186.6479"
+           x="783.7514"
+           id="tspan2196"
+           sodipodi:role="line">RenderJob</tspan></text>
+      <text
+         inkscape:export-ydpi="58.880001"
+         inkscape:export-xdpi="58.880001"
+         inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes1.png"
+         xml:space="preserve"
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         x="753.94812"
+         y="230.88863"
+         id="text5902"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan5904"
+           x="753.94812"
+           y="230.88863">start</tspan></text>
+    </g>
+    <g
+       id="g5920"
+       transform="translate(217.3232,-121.4286)"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275">
+      <rect
+         inkscape:export-ydpi="58.880001"
+         inkscape:export-xdpi="58.880001"
+         inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes1.png"
+         y="285.8576"
+         x="79.27919"
+         height="81.580589"
+         width="161.44162"
+         id="rect5906"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.27788186;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <text
+         inkscape:export-ydpi="58.880001"
+         inkscape:export-xdpi="58.880001"
+         inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes1.png"
+         sodipodi:linespacing="125%"
+         id="text5908"
+         y="310.25546"
+         x="92.361183"
+         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="310.25546"
+           x="92.361183"
+           id="tspan5910"
+           sodipodi:role="line">WebServiceJob</tspan></text>
+      <text
+         inkscape:export-ydpi="58.880001"
+         inkscape:export-xdpi="58.880001"
+         inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes1.png"
+         xml:space="preserve"
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         x="188.70244"
+         y="354.34726"
+         id="text5912"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan5914"
+           x="188.70244"
+           y="354.34726">finished</tspan></text>
+      <text
+         inkscape:export-ydpi="58.880001"
+         inkscape:export-xdpi="58.880001"
+         inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes1.png"
+         sodipodi:linespacing="125%"
+         id="text5916"
+         y="352.9187"
+         x="84.416725"
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="352.9187"
+           x="84.416725"
+           id="tspan5918"
+           sodipodi:role="line">start</tspan></text>
+    </g>
+    <path
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.96176356;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-mid:none;marker-end:url(#TriangleOutL);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 454.87923,229.50504 L 503.23473,229.50504"
+       id="path5944"
+       inkscape:export-filename="/usr/local/src/Avalon/doc/tutorials/xml/Other/engineSetup/engineRoutes2.png"
+       inkscape:export-xdpi="58.027275"
+       inkscape:export-ydpi="58.027275" />
+  </g>
+</svg>

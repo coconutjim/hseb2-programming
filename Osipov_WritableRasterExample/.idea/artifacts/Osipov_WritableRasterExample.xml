@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="Osipov_WritableRasterExample">
+    <output-path>$PROJECT_DIR$/out/artifacts/Osipov_WritableRasterExample</output-path>
+    <root id="archive" name="Osipov_WritableRasterExample.jar">
+      <element id="module-output" name="Osipov_WritableRasterExample" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

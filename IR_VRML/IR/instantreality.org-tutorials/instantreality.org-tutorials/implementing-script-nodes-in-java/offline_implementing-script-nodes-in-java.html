@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Implementing Script nodes in Java</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Implementing <a href='/documentation/nodetype/Script'>Script</a> nodes in Java</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Script,
+        Java<br/><strong>Author(s): </strong>Patrick Dähne<br/><strong>Date: </strong>2011-04-12</p>
+  <p><strong>Summary: </strong>This tutorial explains how to implement X3D <a href='/documentation/nodetype/Script'>Script</a> nodes in Java.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        <p>X3D, like many other 3D file formats, describes geometries of 3D objects that make up the scene and their materials in a hierarchical graph structure called the "<a href="http://en.wikipedia.org/wiki/Scenegraph">Scene graph</a>". Geometries and materials are defined as nodes in that scene graph that keep their data in fields. But X3D differs from most other 3D file formats in its ability to also describe the dynamic behaviour of the scene. X3D nodes are small "<a href="http://en.wikipedia.org/wiki/Finite_state_machine">state machines</a>". They can receive events via event-in slots, change their state according to the event, and send resulting events via event-out slots. Event-out slots and event-in slots are connected by "routes". As a result, the classical scene graph gets augmented by a data flow graph that describes the dynamic properties of the scene.</p>
+        <p>VRML/X3D already contains a large set of nodes that can be used to build typical VR applications, e.g. interpolator nodes that allow to define <a href="http://en.wikipedia.org/wiki/Key_frame">key frame</a> animations. But of course the standard set of nodes cannot cover all possible applications. For that reason, you can extend the standard set of nodes by your own nodes. This can be done with a special kind of node, the "<a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/Part01/components/scripting.html#Script">Script</a>" node.</p>
+        <p>The <a href='/documentation/nodetype/Script'>Script</a> node is some kind of node framework. It only has a minimal number of fields that control the operation of the <a href='/documentation/nodetype/Script'>Script</a> node, and it does not have any behaviour of its own. The idea is that the application programmer defines additional fields, event-in slots and event-out slots when instantiating the <a href='/documentation/nodetype/Script'>Script</a> node in the scene, i.e. he can define the interface of the respective <a href='/documentation/nodetype/Script'>Script</a> node. Furthermore, he can define the behaviour of the respective <a href='/documentation/nodetype/Script'>Script</a> node, i.e. how it reacts to incoming events, by using a piece of code written in a programming language that the browser supports. VRML/X3D defines how to use <a href="http://en.wikipedia.org/wiki/JavaScript">JavaScript</a> and <a href="http://en.wikipedia.org/wiki/Java_(programming_language)">Java</a> to program the behaviour of <a href='/documentation/nodetype/Script'>Script</a> nodes. Instant Player supports both of these languages. This tutorial only explains how to use Java in <a href='/documentation/nodetype/Script'>Script</a> nodes. There is another tutorial that explains how to use JavaScript in <a href='/documentation/nodetype/Script'>Script</a> nodes.</p>
+        <p class="warning"><b>Warning: </b>Instant Player fully supports the old VRML Java API. The new X3D JAVA-SAI Script-interface is not implemented. Look at the <a href="/apidocs/scripting/java/">API-Specification</a> for details</p>
+        <p class="warning"><b>Warning: </b>The current implementation is unstable and might crash. When you create new threads, do not try to access the X3D scene graph from these thread - the scene graph is not yet thread safe!</p>
+        <p>For more information about Java in <a href='/documentation/nodetype/Script'>Script</a> nodes, have a look into the <a href="http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part1/java.html">VRML specification</a> available from <a href="http://www.web3d.org/">http://www.web3d.org/</a>.</p>
+        <p>In the following sections, we will extend a simple scene consisting of a red sphere with a <a href='/documentation/nodetype/Script'>Script</a> node with some simple behaviour written in Java: Whenever the user clicks onto the sphere, it should toggle its color between red and green. To detect click events, we have to add a "<a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/Part01/components/pointingsensor.html#TouchSensor">TouchSensor</a>" to the scene. TouchSensors detect click events on neighbouring subtrees of the scene graph, i.e. on subtrees that are siblings of the <a href='/documentation/nodetype/TouchSensor'>TouchSensor.</a> So usually you add the shape node you want to click on as well as the <a href='/documentation/nodetype/TouchSensor'>TouchSensor</a> to a "<a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/Part01/components/group.html#Group">Group</a>" node. But in this example, the sphere is the only object in the scene, so we can omit the <a href='/documentation/nodetype/Group'>Group</a> node. So the resulting example without the <a href='/documentation/nodetype/Script'>Script</a> node looks like this when using classic VRML encoding:</p>
+        <div class="code"><h3>Code: <a href='/documentation/nodetype/Scene'>Scene</a> used in the following examples (VRML encoding)</h3><pre>#VRML V2.0 utf8
+
+Shape
+{
+  appearance Appearance
+  {
+    material DEF mat Material
+    {
+      diffuseColor 1 0 0
+    } # Material
+  } # Appearance
+  geometry Sphere
+  {
+  } # Sphere
+} # Shape
+
+DEF ts TouchSensor
+{
+} # TouchSensor</pre></div>
+        <p>In XML encoding, the same scene looks like this:</p>
+        <div class="code"><h3>Code: <a href='/documentation/nodetype/Scene'>Scene</a> used in the following examples (XML encoding)</h3><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;X3D profile='Full' version='3.0'&gt;
+  &lt;Scene&gt;
+
+    &lt;Shape&gt;
+      &lt;Appearance&gt;
+        &lt;Material DEF='mat' diffuseColor='1 0 0'/&gt;
+      &lt;/Appearance&gt;
+      &lt;Sphere/&gt;
+    &lt;/Shape&gt;
+
+    &lt;TouchSensor DEF='ts'/&gt;
+
+  &lt;/Scene&gt;
+&lt;/X3D&gt;</pre></div>
+        <p>You can download the complete example scenes at the end of this tutorial.</p>
+
+        <h2>Defining the Interface</h2>
+        <p>First of all, we have to define the interface of the <a href='/documentation/nodetype/Script'>Script</a> node, i.e. its field, event-in slots and event-out slots. Like when instantiating other nodes in the scene, we start with the type of the node ("Script"). Because we have to connect the script node via routes with other nodes in the scene, we also have to give it a name ("script" in this example). So we start as always:</p>
+        <div class="code"><h3>Code: The plain <a href='/documentation/nodetype/Script'>Script</a> node (VRML encoding)</h3><pre>DEF script Script
+{
+  directOutput TRUE
+  mustEvaluate TRUE
+}</pre></div>
+        <p>In XML encoding, the <a href='/documentation/nodetype/Script'>Script</a> node looks like this:</p>
+        <div class="code"><h3>Code: The plain <a href='/documentation/nodetype/Script'>Script</a> node (XML encoding)</h3><pre>&lt;Script DEF='script' directOutput='true' mustEvaluate='true'&gt;
+&lt;/Script&gt;</pre></div>
+        <p>As you can see in the code above, there are two SFBool fields of the <a href='/documentation/nodetype/Script'>Script</a> node ("directOutput" and "mustEvaluate") that we set to TRUE. I won't go into detail what these fields are good for - actually, Instant Player ignores these fields, but you might run into problems on other players when you do not set them to TRUE. When you're curious, have a look at the <a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/Part01/components/scripting.html#Script">Script node specification</a> to find out what these fields are good for. As rule of thumb, start your own <a href='/documentation/nodetype/Script'>Script</a> nodes as shown above.</p>
+        <p>Now, how do we define the fields and slots of our <a href='/documentation/nodetype/Script'>Script</a> node? Normally, we write a list of field names followed by their field values between the braces (when using VRML encoding), or we specify the field values as attribues of the opening XML tag. For script nodes, we do more or less the same. The only difference is that we also have to specify whether we have a field, an event-in slot or an event-out slot, as well as the X3D data type.</p>
+        <p>So, what do we need? First of all, we need to receive click events from the <a href='/documentation/nodetype/TouchSensor'>TouchSensor.</a> The <a href='/documentation/nodetype/TouchSensor'>TouchSensor</a> has an SFBool event-out slot "isActive" that provides these events. So we need an SFBool event-in slot. We'll call it also "isActive" (we could use any name here, but it's always a good idea to use names that make clear what the event-in slot is good for). Furthermore, we want to change the color of the sphere, so we need an SFColor event-out slot. We'll call that event-out slot "color_changed". Finally, we want to toggle the color, so we need an SFBool field that saves the current state (whether the sphere currently is red or green). We'll call that field "flag"). So the complete interface of our <a href='/documentation/nodetype/Script'>Script</a> node looks like this:</p>
+        <div class="code"><h3>Code: <a href='/documentation/nodetype/Script'>Script</a> node with interface declarations (VRML encoding)</h3><pre>DEF script Script
+{
+  directOutput TRUE
+  mustEvaluate TRUE
+
+  eventIn SFBool isActive
+  eventOut SFColor color_changed
+  field SFBool flag FALSE
+  exposedField SFBool foo FALSE
+}</pre></div>
+        <p>In XML encoding, the <a href='/documentation/nodetype/Script'>Script</a> node with the interface declarations looks like this:</p>
+        <div class="code"><h3>Code: <a href='/documentation/nodetype/Script'>Script</a> node with interface declarations (XML encoding)</h3><pre>&lt;Script DEF='script' directOutput='true' mustEvaluate='true'&gt;
+  &lt;field accessType='inputOnly' name='isActive' type='SFBool'/&gt;
+  &lt;field accessType='outputOnly' name='color_changed' type='SFColor'/&gt;
+  &lt;field accessType='initializeOnly' name='flag' type='SFBool' value='false'/&gt;
+  &lt;field accessType='inputOutput' name='foo' type='SFBool' value='false'/&gt;
+&lt;/Script&gt;</pre></div>
+        <p>As you can see, we have to specify an initial value for our "flag" field, in this case "FALSE". You have to specify initial values for all the fields of your <a href='/documentation/nodetype/Script'>Script</a> node. On the other hand, you cannot specifiy initial values for event-in slots and event-out slots.</p>
+        <p>
+        By the way, exposed fields (or inputOutput fields in X3D slang) where forbidden in the original VRML-Spec but are allowed in X3D <a href='/documentation/nodetype/Script'>Script</a> nodes. Instant Player now (with Beta7) supports exposed/inputOutput-Fields but there are still incompatibilities between different browsers so you have to be carefull. 
+        </p>
+        <p>Before we finally write the code, we connect the <a href='/documentation/nodetype/Script'>Script</a> node to the <a href='/documentation/nodetype/TouchSensor'>TouchSensor</a> and the <a href='/documentation/nodetype/Material'>Material</a> node:</p>
+        <div class="code"><h3>Code: Connecting the <a href='/documentation/nodetype/Script'>Script</a> node (VRML encoding)</h3><pre>ROUTE ts.isActive TO script.isActive
+ROUTE script.color_changed TO mat.set_diffuseColor</pre></div>
+        <p>In XML encoding, the routes look like this:</p>
+        <div class="code"><h3>Code: Connecting the <a href='/documentation/nodetype/Script'>Script</a> node (XML encoding)</h3><pre>&lt;ROUTE fromNode='ts' fromField='isActive' toNode='script' toField='isActive'/&gt;
+&lt;ROUTE fromNode='script' fromField='color_changed' toNode='mat' toField='set_diffuseColor'/&gt;</pre></div>
+
+        <h2>Writing the Code</h2>
+        <p>After defining the interface, we have to write the Java code that handles incoming events, changes the state of the node accordingly, and sends resulting events. In our case, we need code that listens to the "isActive" event-in slot, toggles the state of the "flag" field, and sends a red or green color to the "color_changed" event-out slot depending on the state of the "flag" field.</p>
+        <p>You have to specify the file that contains the code in the "url" field of the <a href='/documentation/nodetype/Script'>Script</a> node (that is one of the native fields of the <a href='/documentation/nodetype/Script'>Script</a> node). E.g. when your Java class code is saved in a file called "MyCode.class" next to your X3D file, you have to specify the (relative) <a href="http://en.wikipedia.org/wiki/URL">URL</a> to that file like this:</p>
+<div class="code"><h3>Code: Referencing the Java byte code from the <a href='/documentation/nodetype/Script'>Script</a> node</h3><pre>Script
+{
+  # Your fields here
+  url "MyCode.class"
+}</pre></div>
+        <p>Ok, let's start coding. As always when programming in Java, we have to create a new class. Our new class must extend a class provided by the X3D browser, "vrml.node.Script". That class defines some empty methods that get called by the X3D browser that you may override with your own implementations:</p>
+        <dl><dt>void initialize()</dt>:
+            <dd>Gets called once after loading the VRML scene.</dd><br/><dt>void shutdown()</dt>:
+            <dd>Gets called once before leaving/unloading the VRML scene.</dd><br/><dt>void processEvent(vrml.Event event)</dt>:
+            <dd>Gets called whenever an event is received from any of the event-in slots of the <a href='/documentation/nodetype/Script'>Script</a> node.</dd><br/><dt>void processEvents(int count, vrml.Event events[])</dt>:
+            <dd>This method is an alternative to the previous method. It allows some optimisation when there at a given point in the execution of the scene more than one event-in slot of the <a href='/documentation/nodetype/Script'>Script</a> node received an event. The previous processEvent method gets nevertheless called for each event.</dd><br/><dt>void eventsProcessed()</dt>:
+            <dd>Get called after processing all available events.</dd><br/></dl>
+        <p>The following pseudo code shows the sequence in which these methods get called:</p>
+        <div class="code"><pre>script.initialize();
+while (doRender == true)
+{
+  vrml.Event[] events = getEventsForScriptNode();
+  int count = events.length;
+  script.processEvents(count, events);
+  for (int i = 0; i &lt; count; ++i)
+    script.processEvent(events[i]);
+  script.eventsProcessed();
+}
+script.shutdown();</pre></div>
+        <p>An empty template you can use when you start implementing your own scripts looks like this:</p>
+        <div class="code"><h3>Code: Empty skeleton of a Java <a href='/documentation/nodetype/Script'>Script</a> node implementation</h3><pre>import vrml.*;
+import vrml.node.*;
+import vrml.field.*;
+
+public class ScriptTemplate extends vrml.node.Script
+{
+  public void initialize()
+  {
+  }
+
+  public void processEvents(int count, vrml.Event events[])
+  {
+  }
+
+  public void processEvent(vrml.Event event)
+  {
+  }
+
+  public void eventsProcessed()
+  {
+  }
+
+  public void shutdown()
+  {
+  }
+}</pre></div>
+        <p>Usually, you'll just need to override the "initialize", "processEvent" and "shutdown" methods. "processEvents" and "eventsProcesses" are only needed under rare circumstances.</p>
+        <p>Back to our example. Well call our class "Tutorial" and save it in a file called "Tutorial.java". We want to react to mouse-click events from our <a href='/documentation/nodetype/TouchSensor'>TouchSensor,</a> so we have to override the "processEvent" method:</p>
+        <div class="code"><h3>Code: Tutorial Java implementation</h3><pre>public class MyCode extends vrml.node.Script
+{
+  public void processEvent(vrml.Event event)
+  {
+  }
+}</pre></div>
+        <p>The first thing we have to do in our "processEvent" method is to check from which event-in slot we received the event. In our example we just have one event-in slot, so we actually do not to do that, but for demonstration purposes we'll nevertheless check if we got the event from our "isActive" event-in slot:</p>
+        <div class="code"><h3>Code: Checking for "isActive" events</h3><pre>if (event.getName().equals("isActive"))
+{
+}</pre></div>
+        <p>Now that we are sure that we actually got an event from the "isActive" event-in slot, we have to check whether we got a "TRUE" or "FALSE" value. The "vrml.Event" class has a method "getValue()" which returns the event-in slot that received the event (the name of the method is misleading - you get the event-in slot, not the value). "getValue()" returns an object of the generic type "vrml.ConstField" which we have to cast into the concrete type of our event-in slot, "vrml.field.ConstSFBool". To get the actual value of the event, we have to call the "getValue()" method of the event-in slot:</p>
+        <div class="code"><h3>Code: Checking for "TRUE" events</h3><pre>vrml.field.ConstSFBool isActive = (vrml.field.ConstSFBool)event.getValue();
+if (isActive.getValue() == true)
+{
+}</pre></div>
+        <p>Now that we now that we got a "TRUE" event on the "isActive" event-in slot, we have to toggle the "flag" field and send either a red or a green color to the "color_changed" event-out slot. Before we can do that, we need to get references to the "flag" field and the "color_changed" event-out slot. A good place to do that is the "initialize()" method, so we also override that method in our class:</p>
+        <div class="code"><h3>Code: Getting the "flag" field and the "color_changed" event-out slot</h3><pre>private vrml.field.SFBool flag;
+private vrml.field.SFColor color_changed;
+
+public void initialize()
+{
+  flag = (vrml.field.SFBool)getField("flag");
+  color_changed = (vrml.field.SFColor)getEventOut("color_changed");
+}</pre></div>
+<p>Now we are able to finish the implementation of our "processEvent" method:</p>
+        <div class="code"><h3>Code: Sending red or green color events</h3><pre>if (flag.getValue() == false)
+{
+  flag.setValue(true);
+  color_changed.setValue(0, 1, 0);
+}
+else
+{
+  flag.setValue(false);
+  color_changed.setValue(1, 0, 0);
+}</pre></div>
+        <p>The complete code looks like that:</p>
+        <div class="code"><h3>Code: Complete Java implementation</h3><pre>public class MyCode extends vrml.node.Script
+{
+  private vrml.field.SFBool flag;
+  private vrml.field.SFColor color_changed;
+
+  public void initialize()
+  {
+    flag = (vrml.field.SFBool)getField("flag");
+    color_changed = (vrml.field.SFColor)getEventOut("color_changed");
+  }
+
+  public void processEvent(vrml.Event event)
+  {
+    if (event.getName().equals("isActive"))
+    {
+      vrml.field.ConstSFBool isActive = (vrml.field.ConstSFBool)event.getValue();
+      if (isActive.getValue() == true)
+      {
+        if (flag.getValue() == false)
+        {
+          flag.setValue(true);
+          color_changed.setValue(0, 1, 0);
+        }
+        else
+        {
+          flag.setValue(false);
+          color_changed.setValue(1, 0, 0);
+        }
+      }
+    }
+  }
+}</pre></div>
+
+        <h2>Compiling the Code</h2>
+        <p>To compile the Java code, you need the Java archive "instantreality.jar". The location of "instantreality.jar" depends on where on your machine you have installed Instant Player:</p>
+        <ul><li>Under Windows, "instantreality.jar" is located in the "bin" folder of Instant Player's installation folder. By default, Instant Player gets installed under "C:\Program Files\Instant Reality" (on english versions of Windows), so the location of "instantreality.jar" is usually "C:\Program Files\Instant Reality\bin\instantreality.jar".</li><li>Under Mac OS, "instantreality.jar" is located inside the application bundle. When you installed Instant Player into your "Applications" folder, the location of "instantreality.jar" is "/Applications/Instant Player.app/Contents/MacOS/instantreality.jar". Please note that the Finder hides the contents of application bundles. To access them, right-click on the application icon and choose "Show Package Contents" from the context menu.</li></ul>
+        <p>When you have located "instantreality.jar", you can either specify its path on the command line when calling the Java compiler, our you can add it to the "CLASSPATH" environment variable (see Java documentation for more information about that). When you specify the path on the command line, the compiler call looks like this (don't forget to adjust the path to "instantreality.jar" when you enter this command):</p>
+        <div class="code"><pre>javac -classpath "C:\Program Files\Instant Reality\bin\instantreality.jar" MyCode.java</pre></div>
+        <p>The result of this call (when everything went ok) is the compiled Java byte code in the file "Tutorial.class". When you get an error message telling you that the packages "vrml" or "vrml.node" do not exist, the compiler did not find "instantreality.jar". Check the path again you specified on the command line!</p>
+        <p>Now we are finished with the Java code for our example. We just have to add the <a href='/documentation/nodetype/Script'>Script</a> node the our X3D file "Java.wrl". You can load the X3D scene in your X3D browser and check if it actually works as expected.</p>
+
+        <h2>Pitfalls, Tipps and Tricks</h2>
+        <p>Even though programming <a href='/documentation/nodetype/Script'>Script</a> nodes in Java is straightforward and easy, there are some gotchas. In this section I'll keep a list of things that you should keep in mind when developing Java code:</p>
+
+        <h2>Debugging</h2>
+        <p>Debugging X3D Java code is a little bit uncomfortable because none of the existing X3D players has an integrated Java debugger. But many X3D players have some kind of error console where they print warnings and error messages. Instant Player also has such a console - you get it when you click onto the "Console" item in the "Window" menu. You can print your own message to that console by using the standard output stream "System.out" or the standard error output stream "System.err". You'll also find information about all uncatched Java exceptions in the console.</p>
+        <p>For example, in our "processEvent()" event handler we've developed above, we could add a "System.out.println()" call that prints the value of the incoming event to the console as well as the outgoing color values:</p>
+        <div class="code"><h3>Code: processEvent event handler with debug output</h3><pre>public void processEvent(vrml.Event event)
+{
+  if (event.getName().equals("isActive"))
+  {
+    vrml.field.ConstSFBool isActive = (vrml.field.ConstSFBool)event.getValue();
+    System.out.println("isActive(" + isActive.getValue() + ")"); // Debug output
+    if (isActive.getValue() == true)
+    {
+      if (flag.getValue() == false)
+      {
+        flag.setValue(true);
+        System.out.println("color is green"); // Debug output
+        color_changed.setValue(0, 1, 0);
+      }
+      else
+      {
+        flag.setValue(false);
+        System.out.println("color is red"); // Debug output
+        color_changed.setValue(1, 0, 0);
+      }
+    }
+  }
+}</pre></div>
+        <p>Keep in mind that event though the "System.out.println()" method takes a single String object parameter, you can create arbitrary complex messages by concatenating strings with the "+" operator. Due to the fact that Java automatically converts all objects to strings, you can also print arbitrary objects - when printing your own Java objects, you have to provide "toString()" methods for your objects. All standard VRML Java objects that represent VRML data types already have such a "toString()" method, so can directly print all VRML data types.</p>
+        <p>Load that code in your browser. Click onto the sphere several times, and you'll get some debug output like this in the console:</p>
+        <div class="code"><h3>Code: Debug output in the console</h3><pre>isActive(true)
+color is green
+isActive(false)
+isActive(true)
+color is red
+isActive(false)
+isActive(true)
+color is green
+isActive(false)
+</pre></div>
+
+        <h2>The Sandbox - or: How to cope with AccessControlExceptions</h2>
+        <p>For security reasons, all Java byte code is executed in a restricted sandbox, i.e. the code cannot execute potentially harmful operations like reading or writing files or opening network connections. Your code will throw an "AccessControlException" whenever it tries to execute a forbidden operation. In this case, you'll have to grant your code additional permissions using a special tool, the "policytool". There is a special tutorial that explains how to break out of the Java sandbox.</p>
+
+        <h2>Converting between X3D timestamps and Java Date objects</h2>
+        <p>X3D timestamps in Java are double values that represent the number of seconds since January 1, 1970, 00:00:00 GMT. That might be a good representation for a computer, but not for a human - it is little bit difficult to deal with X3D timestamps directly. Java has a special class called "java.util.Date" to work with dates and times. But how do you convert a X3D timestamp into a Java Date object and vice versa?</p>
+        <p>Converting a X3D timestamp into a Date object is straightforward. One variant of the Date constructor takes the number of milliseconds since January 1, 1970, 00:00:00 GMT. So you simply have to multiply the X3D timestamp by 1000:</p>
+        <div class="code"><h3>Code: Converting a X3D timestamp into a Java Date object</h3><pre>java.util.Date date = new java.util.Date((long)(timestamp * 1000.0));</pre></div>
+        <p>The other way round is straightforward, too. The "getTime()" method of the Date class returns the number of milliseconds since January 1, 1970, 00:00:00 GMT. So you simply have to divide that value by 1000:</p>
+        <div class="code"><h3>Code: Converting a Java Date object into a X3D timestamp</h3><pre>double timestamp = (double)date.getTime() / 1000.0;</pre></div>
+
+        <h2>Example files</h2>
+        <p>Here you can download the complete example we developed in this tutorial. The test scene is available in classic VRML encoding ("Java.wrl") as well as XML encoding ("Java.x3d"). The Java source is in "MyCode.java" and the compiled byte code in "MyCode.class". "ScriptTemplate.java" contains the code skeleton you can use for your own implementations.</p>
+        
+    Files:
+    <ul class="files"><li><a href="Java.wrl">Java.wrl</a></li><li><a href="Java.x3d">Java.x3d</a></li><li><a href="MyCode.java">MyCode.java</a></li><li><a href="MyCode.class">MyCode.class</a></li><li><a href="ScriptTemplate.java">ScriptTemplate.java</a></li></ul>
+
+        </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

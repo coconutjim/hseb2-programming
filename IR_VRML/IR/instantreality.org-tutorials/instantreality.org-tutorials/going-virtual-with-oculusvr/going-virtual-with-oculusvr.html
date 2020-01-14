@@ -1,0 +1,119 @@
+<div id="tutorialContainer">
+  <h2 class="title">Going virtual with OculusVR</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Oculus,
+        Virtual Reality,
+        HMD,
+        Tracking<br/><strong>Author(s): </strong>Tobias Alexander Franke<br/><strong>Date: </strong>2013-25-06</p>
+  <p><strong>Summary: </strong>
+    This tutorial will show you how to set up tracking with the Oculus VR HMD in InstantReality and X3DOM.
+  </p>
+  <div id="content">
+    <h2>OculusVR</h2>
+    <p>
+    The <a href="http://www.oculusvr.com/">Oculus Rift</a> is a low-cost and lightweight stereo HMD for VR applications. It is integrated into InstantIO and can be easily used with your X3D application.
+        </p>
+        
+        <p>
+        After connecting the kit to your PC, first make sure that your Oculus Rift set is running properly <a href="https://developer.oculusvr.com/">by downloading the SDK and running one of the sample applications</a>. If the application is responding to rotation, then you're good to go. Please also consider that the Oculus effectively represents just another screen connected to your PC. Applications which want to display a proper context must be run in fullscreen on this screen. Depending on your configuration, this screen might be either combined with your current monitor or it might be an extension.
+        </p>
+        
+        <p>
+        The InstantIO node for an Oculus looks like this:
+        </p>
+        
+    <div class="code"><h3>Code: OpenNI InstantIO node</h3><pre>&lt;IOSensor DEF='ovr' type='OculusRift'&gt;
+   &lt;field accessType='outputOnly'  name='Orientation'       type='SFRotation'/&gt;
+   &lt;field accessType='outputOnly'  name='Acceleration'      type='SFVec3f'/&gt;
+   &lt;field accessType='outputOnly'  name='PredictionDelta'   type='SFFloat'/&gt;
+   &lt;field accessType='inputOnly'   name='EnablePrediction'  type='SFBool'/&gt;
+&lt;/IOSensor&gt;
+</pre></div>
+
+    <p>
+        The Oculus node will provide you with the <tt>Orientation</tt> of the HMD (which you can for instance directly route into a <tt>Viewpoint</tt>), the current 3D <tt>Accelration</tt> and a <tt>PredicitionDelta</tt> value, depending on it being turned on (default) or off. You can do this manually by sending a bool value to <tt>EnablePredicition</tt>.
+    </p>
+        
+    <h2>Going virtual</h2>
+    <p>
+        In order to get the orientation of the camera to work within a scene, a very simple way to do this is to route the <tt>Orientation</tt> field of the Oculus to a <tt>Viewpoint</tt>.
+    </p>
+        
+        <div class="code"><h3>Code: Routing the orientation of an Oculus to a Viewpoint</h3><pre>&lt;IOSensor DEF='ovr' type='OculusRift'&gt;
+   &lt;field accessType='outputOnly' name='Orientation' type='SFRotation'/&gt;
+&lt;/IOSensor&gt;
+
+&lt;Viewpoint DEF='v' position='0 2 0'&gt;
+&lt;/Viewpoint&gt;
+
+&lt;ROUTE fromNode='ovr' fromField='Orientation' toNode='v' toField='orientation'/&gt;
+</pre></div>
+
+    <p>
+        In a second step, we need to render the scene for each eye with a distortion to match the diopter of the lenses which are currently used in the HMD. The Oculus comes with three different types that have a different distortion, and you need to be aware which type of lenses you are currently using. To read more about this, please check with the manual in your box.
+    </p>
+        
+        <p>
+                Since Instant Reality has always been designed to target VR applications, both stereo rendering and distortion filters are readily available from X3D (see the <a href="http://doc.instantreality.org/documentation/nodetype/ShearedStereoViewModifier/">ShearedStereoViewModifier</a> and <a href="http://doc.instantreality.org/documentation/nodetype/ImprovedDistortionDisplayFilter/">ImprovedDistortionDisplayFilter</a> nodes) and you needn't lift a finger. Render context dependend changes of your X3D scene are handled inside an <tt>Engine</tt> block in your X3D application, in which we can define the window of the context and how the scene will be rendered. Consider the following code:
+        </p>
+        
+        <div class="code"><h3>Code: The distored stereo view setup</h3><pre>&lt;Engine&gt;
+    &lt;RenderJob DEF='render'&gt;
+        &lt;WindowGroup&gt;
+            &lt;Window sample='4' size='1280 800'&gt;
+                &lt;Viewarea upperRight='0.5 1'&gt;
+                    &lt;ShearedStereoViewModifier       DEF='leftSVM' leftEye='TRUE' eyeSeparation='0.04' zeroParallaxDistance='0.01'/&gt;
+                    &lt;ImprovedDistortionDisplayFilter DEF='leftDIS' leftEye='TRUE'/&gt;
+                &lt;/Viewarea&gt; 
+                
+                &lt;Viewarea lowerLeft='0.5 0'&gt;
+                    &lt;ShearedStereoViewModifier       DEF='rightSVM' leftEye='FALSE' eyeSeparation='0.04' zeroParallaxDistance='0.01'/&gt;
+                    &lt;ImprovedDistortionDisplayFilter DEF='rightDIS' leftEye='FALSE'/&gt;
+                &lt;/Viewarea&gt;
+                
+            &lt;/Window&gt;
+        &lt;/WindowGroup&gt;
+    &lt;/RenderJob&gt;
+&lt;/Engine&gt;
+        </pre></div>
+    
+        <p>
+                We define a <tt>Window</tt> with a size of 1280x800 pixels (the current resolution of the Oculus Rift Developer Kit Version) and sample count of 4 (MSAA antialiasing), which is useful to avoid heavy aliasing noticable inside the HMD. The window is separated into two <tt>Viewareas</tt>, defined by their position on the screen. Each <tt>Viewarea</tt> has a <tt>ShearedStereoViewModifier</tt>, controlling two things: which eye is to be served with this area, and what paralax distance <tt>eyeSeparation</tt> is used to view the scene. You can use this parameter to get a better 3D impression (or switch it off entirely).
+        </p>
+        
+        <p>
+                The <tt>ImprovedDistortionDisplayFilter</tt> controls the distortion of the viewarea. To do this, the rendered image is used in a second render pass and distorted by a fragment shader. This shader is controlled by several parameters given to the filter: <tt>HResolution</tt>and <tt>VResolution</tt> which are the width and height in pixels of the screen (a current Devkit Oculus has a 1280 by 800 resolution, but the paramter is for one eye, which leaves us with 640 by 800 per eye). <tt>VScreenSize</tt> and <tt>HScreenSize</tt> are the physical width and height of the screen in meters. The distortion is done with a polynomial of four coefficients, which are set with the <tt>distortionK</tt> field. Finally, the <tt>LensSeparationDistance</tt> parameter is the separation of your virtual lenses or cameras. This parameter controls how you perceive depth.
+        </p>
+
+        <p>
+                Instead of setting these parameters manually, the Oculus node provides them automatically for the connected device. We can therefore simply route the parameters directly to both distortion filters:
+        </p>
+
+        <div class="code"><h3>Code: The distored stereo view setup</h3><pre>&lt;ROUTE fromNode='ovr' fromField='FieldOfView'             toNode='v'          toField='fieldOfView'/&gt;
+    
+&lt;ROUTE fromNode='ovr' fromField='HResolution'             toNode='engine::leftDIS'  toField='width'/&gt;
+&lt;ROUTE fromNode='ovr' fromField='VResolution'             toNode='engine::rightDIS' toField='height'/&gt;
+
+&lt;ROUTE fromNode='ovr' fromField='HScreenSize'             toNode='engine::leftDIS'  toField='hScreenSize'/&gt;
+&lt;ROUTE fromNode='ovr' fromField='VScreenSize'             toNode='engine::rightDIS' toField='vScreenSize'/&gt;
+
+&lt;ROUTE fromNode='ovr' fromField='DistortionK'             toNode='engine::leftDIS'  toField='distortionK'/&gt;
+&lt;ROUTE fromNode='ovr' fromField='DistortionK'             toNode='engine::rightDIS' toField='distortionK'/&gt;
+
+&lt;ROUTE fromNode='ovr' fromField='LensSeparationDistance'  toNode='engine::leftDIS'  toField='lensSeparationDistance'/&gt;
+&lt;ROUTE fromNode='ovr' fromField='LensSeparationDistance'  toNode='engine::rightDIS' toField='lensSeparationDistance'/&gt;
+</pre></div>
+
+        <p>
+              You may have noticed one more parameter being routed from the Oculus node, which is the <tt>FieldOfView</tt>. To ensure that the distortion doesn't affect your perceived image, a correct field of view has to be set. This parameter also comes preconfigured from the Oculus, so we reroute it to the same <tt>Viewpoint</tt> we use for the orientation.
+        </p>
+
+        <p>
+              If you have come this far you should see a working stereo rendering of your scene with correct distortion applied. Now simply move the window to the Oculus screen and go fullscreen in your InstantPlayer, put on your Oculus and dive right in!
+        </p>
+		
+		
+    Files:
+    <ul class="files"><li><a href="example/oculus.x3d">oculus.x3d - The main configuration of the Oculus with an inline to a file containing the scene</a></li><li><a href="example/classroom.wrl">classroom.wrl - A sample scene that is being inlined</a></li></ul>
+
+  </div>
+</div>

@@ -1,0 +1,46 @@
+#X3D V3.0 utf8
+
+Engine {
+jobs [
+  DEF render RenderJob { 
+    windowGroups [
+      WindowGroup {
+        windows [
+          LocalWindow {
+          fullScreen TRUE
+          size 600 300
+            views [
+              Viewarea {
+                lowerLeft  0 0
+                upperRight 0.5 1
+                modifier [
+                  ShearedStereoViewModifier {
+                    leftEye  TRUE
+                    rightEye FALSE
+                  }
+                ]
+              }
+              Viewarea {
+                lowerLeft  0.5 0
+                upperRight 1 1
+                modifier [
+                  ShearedStereoViewModifier {
+                    leftEye  FALSE
+                    rightEye TRUE
+                  }	
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }	
+]
+}
+Scene {
+  children [
+    Inline { url [ "tie.wrl" ] }
+  ]
+}
+

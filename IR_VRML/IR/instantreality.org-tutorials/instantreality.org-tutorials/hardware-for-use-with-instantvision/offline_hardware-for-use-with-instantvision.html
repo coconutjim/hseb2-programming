@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Hardware for use with InstantVision</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Hardware for use with InstantVision</h2>
+  <p class="description"><strong>Keywords:</strong><br/>hardware,
+        camera,
+        vision<br/><strong>Author(s): </strong>Mario Becker<br/><strong>Date: </strong>2009-01-10</p>
+  <p><strong>Summary: </strong>This is not exactly a tutorial more like a hardware compability list.</p>
+  <div id="content">
+        
+
+        <h2>Hardware</h2>
+        
+        <p>
+        here comes a short (most likely incomplete) description of hardware we prefere to use.
+        </p>
+        
+        <ul><li>Cameras</li><li>Optics</li><li>Hubs (Firewire, USB)</li></ul>
+
+        <h2>Cameras</h2>
+            
+            <p>
+            
+            </p>
+            
+            <p>
+            most of the pro cameras have C-Mount or CS-Mount optics. The difference is the 5mm larger distance beween optics and chip in the C-Mount. Thus C-Mounts optics can be used on CS-Mount cameras with an 5mm distance ring, other way around is a no go.
+            </p>
+            
+            <p>
+            There are standards for the software API, which are supported by some vendors.
+            </p>
+            
+            <ul><li>DC1394 - (firewire, digital camera) the best standard definition so far, supported by PtGrey, ImagingSource, some Sony cameras and Apple iSight. Documentation for this is on projects/VisionLib/doc.
+                        On linux these run with libdc1394 and coriander.
+                        On windows there is a free API and test program CMU</li><li>USB-camera - (USB <a href='/documentation/nodetype/Video'>Video</a> Class, http://linux-uvc.berlios.de) can run with Windows DirectShow, Linux-V4L2, MacOSX-quicktime</li><li>GigE - new standard for ethernet based cameras, not yet supported by InstantVision</li></ul>
+            
+            <p>
+            Optics - most pro cameras do not come with optics, these have to be ordered independently ! Read below.
+            </p>
+
+        <h2>Point-Grey Cameras</h2>
+
+            All PtGrey (alias PGR or Point-Grey) cameras ptgrey.com come with firewire connection. All can be triggered externally and provide some GPIO's (general purpose io-pins). PGR cams work as standard dc1394 cameras on all real operating systems. For windows there is a driver/software/developer pack, make sure to install the PGR driver for the cameras.
+            <div class="imgContainer"><img src="flea.JPG" align="center"/><div class="imgCaption">Image: PtGrey Flea camera</div></div>
+            <dl><dt>Dragonfly:</dt>:
+            <dd>
+                "low" end (at ptgrey scale) VGA camera, the image quality is so lala. 
+                An advantage is the small seperate camera head which can be positioned at difficult places.
+                </dd><br/><dt>Firefly:</dt>:
+            <dd>
+                low end (at ptgrey scale) but still good VGA camera, had some trouble with shutter/gain adjustment when running in trigger mode.
+                </dd><br/><dt>Flea (Flea2):</dt>:
+            <dd>
+                CS-Mount (C-Mount) compact high quality camera, resulution 1024x768. The Flea2 also supports Firewire 800, the new fast firewire connection available on some Mac's, or with a FW PCIe card.
+                </dd><br/><dt>Scorpion:</dt>:
+            <dd>
+                CS-Mount high end camera, supporting high resolutions like 1280x960.
+                </dd><br/></dl>
+
+            Prices: Flea2 about 650€ Firefly is cheeper, Scorpion was like 1200€. Available from newcompetence
+
+        <h2>IDS-Imaging</h2>
+
+            Are similar high quality cameras like PtGrey but use <b>USB bus</b>, which can cause problems (with more then one camera on a bus) due to missing bandwidth allocation support. IDS
+
+            They need a vendor driver/API on Linux and Windows, which is available on the website, MacOS is not supported.
+
+            They are available in 3 different casings:
+            
+            <div class="imgContainer"><img src="ueye.JPG" align="center"/><div class="imgCaption">Image: IDS ueye camera</div></div>
+            <dl><dt>Cheep plastik (LE version):</dt>:
+            <dd>
+                Good for playing around, not recommended for customer apps due to the rickety usb connector. 
+                CS-Mount. These are also available as OEM version without casing and with the small 12mm
+                lens mount.
+                </dd><br/><dt>Standard alu:</dt>:
+            <dd>
+                CS-mount alu/plastic casing. Screwable cable (also with trigger and io lines) available and highly recommended.
+                </dd><br/><dt>Rugget metal casing (RE version):</dt>:
+            <dd>
+                Casing is made of one piece of milled aluminum, fairly solid, no technical difference to standard version.
+                </dd><br/></dl>
+            
+            <p>
+            Also there are different (quite a lot) resolutions and chip sizes available, different filters can also be ordered. We made good experience with the 1024x768 CCD version (UI-2230) and also with the 768x480 CCD version (UI-1220). For IR tracking we usualy use a monochrome UI-1220 with IR filter.
+            </p>
+            <p>
+            Prices for these cameras range from 250€ for the plastic (-LE) cameras to about 800€ for XGA alu versions. The support and salesteam is in Germany and usually quite helpfull.
+            </p>
+
+        <h2>Imaging Source</h2>
+            <p>
+            Less pricy cameras with dc1394 firewire or USB. We only got one DMK 21BF04 so far for 390€ which is ok. imaging source
+            </p>
+
+        <h2>VRmagic</h2>
+            <p>
+            We have a VRmC-3 somewhere, it's small, quality is good, we have implemented this only for Windows.
+            </p>
+        
+        <h2>low budget</h2>
+            <p>
+            Most of the "standard" web cams do not support real parameter adjustment, 
+            they usually come with "user-friendly" automatic image adjustment,
+            the few sliders in the driver software are mostly useless crap. 
+            Also there is a crappy marketing trend to sell "high res" cameras where "high res" 
+            refers to some extrapolated fantasy image resolution, 
+            the real resolution is barely documented and mostly worse then VGA.
+            </p>
+            <p>
+            Needless to say that features like trigger or synchronisation you can forget with these.
+            </p>
+
+            <dl><dt>Apply iSight</dt>:
+            <dd>
+                    No longer available in europe due to RoHS. For 150€ it's a quite good dc1394 firewire camera. No trigger, no IO.
+                    </dd><br/><dt>Philips ToYouCam</dt>:
+            <dd>
+                    Webcam, kind of useable, can do IR too, our camera of choise for as longe as it lived.
+                    </dd><br/><dt>Logitech Quick Cam Pro 9000</dt>:
+            <dd>
+                    USB-UVC/V4L2 compatible camera with 640x480@15fps and 960x720@5 fps resolution. Image quality is good but it comes with rolling shutter which is visible. The parameters are not realy adjustable over the v4l2 api -&gt; or maybe I did not understand how. Under linux these devices are supported by kernel &gt;= 2.6.26 or an external module (uvc video) for earlier versions.
+                    </dd><br/></dl>
+            <div class="imgContainer"><img src="logiQCP9000.jpg" align="center"/><div class="imgCaption">Image: Logitech QuickCamPro 9000</div></div>
+
+
+        <h2>Optics</h2>
+            sizes, adjustables
+
+            <h2>Iris / Blende:</h2>
+                <p>
+                First act in adjusting something should be open/adjust the iris, this regulates the amount of light getting through. A closed iris will also make the image sharper because the system becomes closer to an idea pinhole camera.
+                </p>
+
+            <h2>Focus:</h2>
+                <p>
+                There are some optics without a focus adjustment, even the more expensive ones. To get the focus right you can unscrew the optics and insert one or more distance rings which will increase the distance to the chip by 0.5mm. And as mentioned above... most of the pro cameras have C-Mount or CS-Mount optics. The difference is the 5mm larger distance beween optics and chip in the C-Mount. Thus C-Mounts optics can be used on CS-Mount cameras with an 5mm distance ring, other way around is a no go.
+                </p>
+                
+            <h2>Zoom / Variable focal length:</h2>
+                <p>
+                Some optics come with a zoom, play around with that.
+                </p>
+
+            <h2>How to calc focal length</h2>
+                <p>
+                One day you might be asked "which optics do I need for this and that", time to start a little calculation. It's just a bit rule of three (Dreisatz) like (distance / objectsize) = (f / chip size) chip size is usually in inch! There are calculators around the web, focal length calculator.
+                </p>
+
+            <h2>IntrinsicData</h2>
+                <p>
+                Is a descriptor in our <a href='/documentation/nodetype/VisionLib'>VisionLib</a> for the optical system (chip + optics). Each camera plus optics needs to be calibrated before you use it for some serious tracking tasks.
+                </p>
+                
+                <p>
+                For calibration see the tutorial "CameraCalibration".
+                </p>
+                
+                
+
+
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Engine DEF='engine'>
+    <TimerJob DEF='timer'/>
+    <SynchronizeJob DEF='synchronize'/>
+    <RenderJob DEF='render'>
+      <WindowGroup>
+        <Window position='10 50' size='640 480'/>
+      </WindowGroup>
+    </RenderJob>
+  </Engine>
+  <Scene DEF='scene'>
+    <IOSensor DEF='VisionLib' type='VisionLib'>
+      <field accessType='initializeOnly' name='configFile' type='SFString' value='FaceTrackerIIS.pm'/>
+      <field accessType='initializeOnly' name='dataAttributeSlots' type='SFString' value='true'/>
+      <field accessType='initializeOnly' name='addDataBases' type='SFString' value='VideoSourceImage;DetectedFaces;JsonString;'/>
+      <field accessType='outputOnly' name='VideoSourceImage' type='SFImage'/>
+      <field accessType='outputOnly' name='DetectedFaces' type='MFVec3f'/>
+      <field accessType='outputOnly' name='JsonString_out_value' type='SFString'/>
+    </IOSensor>
+    <Viewpoint DEF='vp' description='vp' zNear='0.01' zFar='6000' fieldOfView='0.58'/>
+    <Environment DEF='env' frustumCulling='false'/>
+    <PolygonBackground DEF='bg_video0' texCoords='0 1 0 1 1 0 1 0 0 0 0 0' fixedImageSize='640 480'>
+      <Appearance>
+        <PixelTexture2D DEF='tex' envMode='replace' autoScale='false' minFilter='nearest' magFilter='nearest'/>
+      </Appearance>
+    </PolygonBackground>
+    <ForegroundBindable DEF='fg'>
+      <ScreenTextOverlay DEF='sto' bgColor='0 0 0 1' verticalAlign='BOTTOM'/>
+    </ForegroundBindable>
+    <Script DEF='script'>
+      <field accessType='inputOnly' name='processJsonString' type='SFString'/>
+      <field accessType='inputOnly' name='set_size' type='SFVec2f'/><![CDATA[javascript:
+				
+				var sto = Browser.currentScene.getNamedNode('sto');
+                
+                var width = 640;
+                var height = 480;
+
+
+				function processJsonString(val)
+                {
+                    //Browser.println('ProcessJsonString: '+ val);
+                    
+                    
+                    var myObject = eval('(' + val + ')');                    
+                    var f = myObject.faces;
+                    
+                    //Browser.println('ProcessJsonStringSize: '+ f.length);
+                    
+                    sto.text.length = 0;
+
+                    sto.text[0] = 'Number of faces: ' + f.length;
+                    //sto.text[1] = val;
+
+                    for (var i=0; i<f.length; i++) {
+                        var s = 'Face '+(i+1)+': ';
+                        if (f[i].attribute) {
+                            if (f[i].attribute.Gender && f[i].attribute.Gender != '') {
+                                s += 'Gender: '+f[i].attribute.Gender+' - ';
+                            }
+                            else
+                                s += 'Gender: undefined - ';
+                        }
+                        else
+                            s += 'Gender: undefined - ';
+
+                        if (f[i].rating) {
+                            if (f[i].rating.Age && f[i].rating.Age != '')
+                                s += 'Age: '+f[i].rating.Age+' - ';
+                            else
+                                s += 'Age: undefined - ';
+
+                            if (f[i].rating.Happy && f[i].rating.Happy != '')
+                                s += 'Happy: '+f[i].rating.Happy+' ';
+                            else
+                                s += 'Happy: 0 ';
+                        }
+                        else
+                            s += 'Age: undefined - Happy: 0 ';
+
+                        if (s.length>8)
+                            sto.text[i+1] = s;
+                    }
+                    
+                    
+
+//                    var lines = val.split("\n");
+//                    for (i=0; i<lines.length; i++)
+//                    {
+//                        if (lines[i] != '')
+//                            sto.text[i+1] = lines[i];
+//                    }
+
+                    var p = Browser.currentScene.getNamedNode('myCoords');
+                    var ils = Browser.currentScene.getNamedNode('myILS');
+                    
+                     
+                    var p2 = Browser.currentScene.getNamedNode('myPoints');
+                    
+      
+                    p.point.length=0;
+                    ils.coordIndex.length=0;
+                    p2.point.length=0;
+                    
+                        
+                    for(i=0; i<f.length; i++ )
+                    { 
+                        var y1= f[i].region.top;
+                        var y2= f[i].region.bottom;
+                        var x1= f[i].region.left;
+                        var x2= f[i].region.right;
+                        //Browser.println('ProcessJsonStringSize: '+ x1 + '   ' +y1 + '   ' +x2 + '   ' +y2);
+                        p.point[i*4+0] = new SFVec3f(x1, -y1, 0);
+                        p.point[i*4+1] = new SFVec3f(x2, -y1, 0);
+                        p.point[i*4+2] = new SFVec3f(x2, -y2, 0);
+                        p.point[i*4+3] = new SFVec3f(x1, -y2, 0);
+                        
+                        ils.coordIndex[i*6+0] = i*4+0;
+                        ils.coordIndex[i*6+1] = i*4+1;
+                        ils.coordIndex[i*6+2] = i*4+2;
+                        ils.coordIndex[i*6+3] = i*4+3;
+                        ils.coordIndex[i*6+4] = i*4+0;
+                        ils.coordIndex[i*6+5] = -1;
+                        
+                        if (f[i].marker)
+                        {
+                            
+                           //Browser.println('markers exist: '+ f[i].marker.toString);
+                           //Browser.println('ProcessJsonStringSize: '+ f[i].marker.LeftEye.x + '   ' +f[i].marker.LeftEye.y);
+                            p2.point[i*2+0] = new SFVec3f(f[i].marker.LeftEye.x,-f[i].marker.LeftEye.y,0);
+                            p2.point[i*2+1] = new SFVec3f(f[i].marker.RightEye.x,-f[i].marker.RightEye.y,0);
+                        }
+                        
+                    }
+                                        
+                }
+                
+                function set_size(val) 
+                {
+                    Browser.println('set_size: '+val);
+                    width = val.x;
+                    height = val.y;
+                    
+                    var newWidth = height/3 * 4;
+                    var originTrans = new SFVec3f(-newWidth/2, height/2, 0);
+                    var newScale = new SFVec3f(height/480, height/480, 1);   
+                    var t = Browser.currentScene.getNamedNode('t1');                    
+                    t.translation = originTrans;
+                    t.scale = newScale;
+                }
+         ]]>
+    </Script>
+    <NavigationInfo type='"NONE"'/>
+    <Viewspace DEF='viewSpace' applyEyeTransform='true' translation='0 0 -5'>
+      <ScreenGroup DEF='screenGroup'>
+        <Transform DEF='t1' translation='-320 240 0'>
+          <Shape>
+            <Appearance>
+              <LineProperties linewidthScaleFactor='2'/>
+            </Appearance>
+            <IndexedLineSet DEF='myILS' colorPerVertex='false' colorIndex='0' coordIndex='0 1 2 3 0 -1'>
+              <Coordinate DEF='myCoords' point='10 10 0 120 10 0 120 120 0 10 120 0'/>
+              <Color color='1 0 0'/>
+            </IndexedLineSet>
+          </Shape>
+          <Shape>
+            <Appearance>
+              <Material emissiveColor='1 1 0'/>
+              <PointMode size='10'/>
+            </Appearance>
+            <PointSet>
+              <Coordinate DEF='myPoints' point='0 0 0 100 -100 0 300 -220 0'/>
+            </PointSet>
+          </Shape>
+        </Transform>
+      </ScreenGroup>
+    </Viewspace>
+    <ROUTE fromNode='VisionLib' fromField='JsonString_out_value' toNode='script' toField='processJsonString'/>
+    <ROUTE fromNode='VisionLib' fromField='VideoSourceImage' toNode='tex' toField='set_image'/>
+    <ROUTE fromNode='env' fromField='renderAreaDimension_changed' toNode='script' toField='set_size'/>
+  </Scene>
+</X3D>

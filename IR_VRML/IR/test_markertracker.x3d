@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D>
+    <Engine DEF='engine'>
+        <TimerJob DEF='timer'/>
+        <SynchronizeJob DEF='synchronize'/>
+        <RenderJob DEF='render'>
+            <WindowGroup>
+                <Window position='10 50' size='640,480' fullScreen='false' />
+            </WindowGroup>
+        </RenderJob>
+    </Engine>
+    <Scene DEF='scene'>
+        <IOSensor DEF='VisionLib' type='VisionLib' configFile='markerTracker/MarkerTracker.pm'
+         actionAttributeSlots='true' dataAttributeSlots='true' allowVisionWidgets='false'>
+            <field accessType='outputOnly' name='ImageLiveColour' type='SFImage'/>
+            <field accessType='outputOnly' name='InstantCamera_ModelView' type='SFMatrix4f'/>
+            <field accessType='outputOnly' name='InstantCamera_Projection' type='SFMatrix4f'/>
+            <field accessType='outputOnly' name='InstantCamera_Position' type='SFVec3f'/>
+            <field accessType='outputOnly' name='InstantCamera_Orientation' type='SFRotation'/>
+            <field accessType='outputOnly' name='ImageReaderAction_out_bMarkOrigin' type='SFString'/>
+            <field accessType='inputOnly' name='ImageReaderAction_in_bMarkOrigin' type='SFString'/>
+        </IOSensor>
+
+        <Viewfrustum DEF='vf' />
+        
+        <PolygonBackground positions='0 0, 1 0, 1 1, 0 1' 
+                texCoords='0 1 0, 1 1 0, 1 0 0, 0 0 0'>
+            <Appearance>
+                <PixelTexture2D DEF='tex' autoScale='false' 
+                envMode='replace' minFilter='nearest' magFilter='nearest' />
+            </Appearance>
+        </PolygonBackground>
+        
+        <!-- routes for vision data -->
+        <ROUTE fromNode='VisionLib' fromField='ImageLiveColour' toNode='tex' toField='image'/>
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_ModelView' toNode='vf' toField='modelview'/>
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_Projection' toNode='vf' toField='projection'/>
+    
+    
+        <Foreground DEF='fg'>
+            <ScreenTextOverlay DEF='sto' text='' />
+        </Foreground>
+            
+        <!-- script to dump matrix -->
+        <Script DEF="script">
+            <field name='set_resettrack' type='SFString' accessType='outputOnly'/>
+            <field name='mouse_press' type='SFInt32' accessType='inputOnly'/>
+            <field name='key_press' type='SFString' accessType='inputOnly'/>
+            <field name='time' type='SFTime' accessType='inputOnly'/>
+            
+            <![CDATA[
+                ecmascript:
+                
+                var set_resettrack = 0;
+                var vf = Browser.currentScene.getNamedNode('vf');
+                var sto = Browser.currentScene.getNamedNode('sto');
+                
+                function time(val)
+                {
+                    sto.text[0] = 'Viewfrustum';
+                    sto.text[1] = ' ';
+                    sto.text[2] = 'modelview:';
+                    sto.text[3] = vf.modelview;
+                    sto.text[4] = 'projection:';
+                    sto.text[5] = vf.projection;
+                }
+                
+            ]]>
+        </Script>
+        <TimeSensor DEF='ts' loop='true' cycleInterval='0.1' />
+        <ROUTE fromNode='ts' fromField='cycleTime' toNode='script' toField='time'/>
+        
+        
+        <!-- Demos how to set attributes in an Action -->
+        <!-- note, that IOSensor VisionLib needs to have actionInSlots='true' -->
+        <!-- and all Attributes have to be declared as slots -->
+        <KeySensor DEF='keySensor'/>
+        <ValueTrigger DEF='trigger1'>
+          <field accessType='initializeOnly' name='filter' type='SFString' value='a'/>
+          <field accessType='inputOutput' name='color' type='SFString' value='1'/>
+        </ValueTrigger>
+        <ValueTrigger DEF='trigger2'>
+          <field accessType='initializeOnly' name='filter' type='SFString' value='b'/>
+          <field accessType='inputOutput' name='color' type='SFString' value='0'/>
+        </ValueTrigger>
+        <ROUTE fromNode='keySensor' fromField='keyPress' toNode='trigger1' toField='trigger'/>
+        <ROUTE fromNode='keySensor' fromField='keyPress' toNode='trigger2' toField='trigger'/>
+        <ROUTE fromNode='trigger1' fromField='color_changed' toNode='VisionLib' toField='ImageReaderAction_in_bMarkOrigin'/>
+        <ROUTE fromNode='trigger2' fromField='color_changed' toNode='VisionLib' toField='ImageReaderAction_in_bMarkOrigin'/>
+
+        
+        <!-- actual scene to be rendered on top of marker -->
+        <Inline url='markerTracker/Data/CoordFrame.wrl'  />
+        
+    </Scene>
+</X3D>

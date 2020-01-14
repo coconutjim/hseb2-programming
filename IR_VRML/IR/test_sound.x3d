@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <Viewpoint DEF='cam' position='0 0 20'/>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+    <Toggler DEF='controller' status='true'/>
+    <Transform DEF='trans'>
+      <Shape>
+        <Text string='"Spatial Sound Source"'>
+          <FontStyle justify='"MIDDLE"' family='SANS' />
+        </Text>
+      </Shape>
+      <Sound DEF='sound' maxBack='50' maxFront='50' minBack='3' minFront='3'>
+        <AudioClip DEF='source' loop='true' url='"sound/motor.wav"'/>
+      </Sound>
+    </Transform>
+    <TimeSensor DEF='ts' cycleInterval='20' loop='true'/>
+    <PositionInterpolator DEF='pi' key='0 0.5 1' keyValue='-10 0 0 10 0 0 -10 0 0'/>
+    <ROUTE fromNode='source' fromField='isActive' toNode='controller' toField='set_status'/>
+    <ROUTE fromNode='ts' fromField='fraction_changed' toNode='pi' toField='set_fraction'/>
+    <ROUTE fromNode='pi' fromField='value_changed' toNode='sound' toField='set_location'/>
+  </Scene>
+</X3D>

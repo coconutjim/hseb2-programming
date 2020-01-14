@@ -1,0 +1,91 @@
+<div id="tutorialContainer">
+  <h2 class="title">Direct scene manipulations with Java</h2>
+  <p class="description"><strong>Keywords:</strong><br/>script,
+        java,
+        dynamic<br/><strong>Author(s): </strong>Michael Zoellner<br/><strong>Date: </strong>2007-06-21</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to use Java in script nodes for making your scene dynamic.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        Java is an alternative language next to Javascript for creating dynamic X3D scenes. It's main benefits compared to Javascript are the better performance and the higher flexibility of development. With Java script nodes it is possible to expand X3D's and instantplayer's capabilities by using Java functions and libraries to create custom interfaces and features.
+
+        <h2>Setting up the Scene and the Script</h2>
+        <p>
+        Java script nodes are exactly looking like Javascript nodes in X3D. Only the "url" field is linking to a .class file instead of a .js file.
+        </p>
+        <div class="code"><h3>Code: The Script Node</h3><pre>
+&lt;Script DEF='javanode' directOutput='true' url='InstantJava.class'&gt;
+	&lt;field name='set_touchtime' type='SFTime' accessType='inputOnly'/&gt;
+	&lt;field name='get_newcolor' type='SFColor' accessType='outputOnly'/&gt;
+&lt;/Script&gt;
+        </pre></div>
+        <p>
+        The two fields of the script node are defining the incoming and outgoing values. <i>set_touchtime</i> will route an SFTime value into Java. <i>get_newcolor's</i> value will get filled by Java and routed on a <i>Material</i> node in the Scene.
+        </p>
+        
+        <h2>Setting up a Java Class</h2>
+        <p>
+        Java Classes extend <i>vrml.node.Script</i>. Just like JavaScript Java Scripts have the common <i>initialize()</i>, <i>shutdown()</i> and <i>processEvent()</i> functions. This is an example how a basic Java Class looks like:
+        </p>
+        <div class="code"><h3>Code: Basic Java Class</h3><pre>
+import vrml.*;
+import vrml.field.*;
+import vrml.node.*;
+import vrml.Event;
+
+public class InstantJava extends Script
+{	
+	public void initialize()
+	{
+		System.out.println("initializing java..");
+	}
+	
+	public void processEvent( Event e )
+	{
+	
+	}
+	
+	public void shutdown()
+	{
+		System.out.println("bye!");
+	}
+}
+		</pre></div>
+		
+		<h2>Getting Values from the Scene</h2>
+		<p>
+		Incoming events are processed in the <i>processEvent()</i> function. In this example the <i>touchTime</i> field of a TouchSensor is routed on the script and catched by an if condition. The event has to be casted into the right type.
+		</p>
+		
+		<div class="code"><h3>Code: processEvent</h3><pre>
+public void processEvent( Event e )
+{
+	if (e.getName().equals("set_touchtime"))
+	{
+		ConstSFTime time = (ConstSFTime)e.getValue();
+		System.out.println( "touched at " + time.getValue());
+	}
+}
+		</pre></div>
+		
+		<h2>Writing back Values to the Scene</h2>
+		<p>
+		In order to send values to the scene we have to get the eventOut in the initialize() function and cast it into the right type. With the function <i>setValue(value)</i> we are sending the values to the script node's field in the scene.
+		</p>
+		
+		<div class="code"><h3>Code: processEvent</h3><pre>
+public SFColor get_newcolor;
+	
+public void initialize()
+{
+	get_newcolor = (SFColor)getEventOut("get_newcolor");
+	get_newcolor.setValue(1, 0.5, 0);
+}
+		</pre></div>
+		
+		<div class="imgContainer"><img src="random_color_box.jpg" align="center"/><div class="imgCaption">Image: random color box</div></div>
+		
+        
+    Files:
+    <ul class="files"><li><a href="InstantJava.x3d">InstantJava.x3d</a></li><li><a href="InstantJava.java">InstantJava.java</a></li><li><a href="InstantJava.class">InstantJava.class</a></li></ul>
+    </div>
+</div>

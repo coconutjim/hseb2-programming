@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+    <Viewpoint position='0 0 30'/>
+    <NavigationInfo type='"none" "any"'/>
+    
+    <Transform>
+      <Transform DEF='Tisch' rotation='1 0 0 1.5708' scale='4 3 2' translation='0 0 -10'>
+        <Transform translation='-4 -2 4'>
+          <Shape DEF='TischBein'>
+            <Appearance>
+              <Material/>
+              <ImageTexture DEF='HolzTex' url='"texture/holz.gif"'/>
+            </Appearance>
+            <Cylinder height='4.2' radius='0.3'/>
+          </Shape>
+        </Transform>
+        <Transform translation='4 -2 4'>
+          <Shape USE='TischBein'/>
+        </Transform>
+        <Transform translation='-4 -2 -4'>
+          <Shape USE='TischBein'/>
+        </Transform>
+        <Transform translation='4 -2 -4'>
+          <Shape USE='TischBein'/>
+        </Transform>
+        <Shape>
+          <Appearance>
+            <Material/>
+            <ImageTexture USE='HolzTex'/>
+          </Appearance>
+          <Box size='10 0.3 10'/>
+        </Shape>
+      </Transform>
+      <Transform translation='-4 -4 -9.5'>
+        <Transform DEF='multiTrafo'>
+          <Shape>
+            <Appearance>
+              <ImageTexture url='"texture/froekk.jpg"'/>
+            </Appearance>
+            <Box size='4.5 4.5 0.1'/>
+          </Shape>
+        </Transform>
+        <HypersurfaceSensor DEF='multiTouch' minScale='0.5 0.5 1' maxScale='5 5 1'/>
+      </Transform>
+      <Transform translation='3 3 -9.5'>
+        <Transform DEF='multiTrafo1'>
+          <Shape>
+            <Appearance>
+              <ImageTexture url='"texture/edda.jpg"'/>
+            </Appearance>
+            <Box size='4.5 6 0.1'/>
+          </Shape>
+        </Transform>
+        <HypersurfaceSensor DEF='multiTouch1' minScale='0.5 0.5 1' maxScale='5 5 1'/>
+      </Transform>
+      <Transform translation='-11 6 -9.5'>
+        <Transform DEF='multiTrafo2'>
+          <Shape>
+            <Appearance>
+              <ImageTexture url='"texture/welpen.jpg"'/>
+            </Appearance>
+            <Box size='7.1 4.1 0.1'/>
+          </Shape>
+        </Transform>
+        <HypersurfaceSensor DEF='multiTouch2' minScale='0.5 0.5 1' maxScale='5 5 1'/>
+      </Transform>
+      <Transform translation='-4 4.5 -9.5'>
+        <Transform DEF='multiTrafo3'>
+          <Shape>
+            <Appearance>
+              <ImageTexture url='"texture/bogga.jpg"'/>
+            </Appearance>
+            <Box size='3.64 4.99 0.1'/>
+          </Shape>
+          <Transform rotation='1 0 0 1.5708' translation='0 -3.2 0.5'>
+            <Shape>
+              <Appearance>
+                <Material DEF='mat' ambientIntensity='0' diffuseColor='1 0.46 0.44' emissiveColor='0.5 0.23 0.22' shininess='0'/>
+              </Appearance>
+              <Cylinder height='0.15' radius='0.75'/>
+            </Shape>
+            <TouchSensor DEF='touch'/>
+          </Transform>
+        </Transform>
+        <HypersurfaceSensor DEF='multiTouch3' minScale='0.5 0.5 1' maxScale='5 5 1'/>
+      </Transform>
+    </Transform>
+    
+    <Script DEF='script'>
+      <field accessType='inputOnly' name='touched' type='SFTime'/>
+      <field accessType='inputOnly' name='isActive' type='SFBool'/>
+      <field accessType='initializeOnly' name='mat' type='SFNode'>
+        <Material USE='mat'/>
+      </field>
+      <![CDATA[javascript:
+		var toggle = true;
+		function touched(val)
+		{
+			if (toggle)
+			{
+				mat.diffuseColor = new SFColor(0,1,0);
+			}
+			else
+			{
+				mat.diffuseColor = new SFColor(1,0,0);
+			}
+			toggle = !toggle;
+		}
+
+		function isActive(val)
+		{
+			if (!val)
+				touched(val);
+		}
+	]]>
+    </Script>
+    
+    <ROUTE fromNode='multiTouch' fromField='translation_changed' toNode='multiTrafo' toField='set_translation'/>
+    <ROUTE fromNode='multiTouch' fromField='rotation_changed' toNode='multiTrafo' toField='set_rotation'/>
+    <ROUTE fromNode='multiTouch' fromField='scale_changed' toNode='multiTrafo' toField='set_scale'/>
+    <ROUTE fromNode='multiTouch1' fromField='translation_changed' toNode='multiTrafo1' toField='set_translation'/>
+    <ROUTE fromNode='multiTouch1' fromField='rotation_changed' toNode='multiTrafo1' toField='set_rotation'/>
+    <ROUTE fromNode='multiTouch1' fromField='scale_changed' toNode='multiTrafo1' toField='set_scale'/>
+    <ROUTE fromNode='multiTouch2' fromField='translation_changed' toNode='multiTrafo2' toField='set_translation'/>
+    <ROUTE fromNode='multiTouch2' fromField='rotation_changed' toNode='multiTrafo2' toField='set_rotation'/>
+    <ROUTE fromNode='multiTouch2' fromField='scale_changed' toNode='multiTrafo2' toField='set_scale'/>
+    <ROUTE fromNode='multiTouch3' fromField='translation_changed' toNode='multiTrafo3' toField='set_translation'/>
+    <ROUTE fromNode='multiTouch3' fromField='rotation_changed' toNode='multiTrafo3' toField='set_rotation'/>
+    <ROUTE fromNode='multiTouch3' fromField='scale_changed' toNode='multiTrafo3' toField='set_scale'/>
+    <!--ROUTE fromNode='touch' fromField='touchTime' toNode='script' toField='touched'/-->
+    <ROUTE fromNode='touch' fromField='isActive' toNode='script' toField='isActive'/>
+  </Scene>
+</X3D>

@@ -1,0 +1,46 @@
+#VRML V2.0 utf8
+
+DEF render RenderJob {
+	windowGroups [
+    	WindowGroup {						
+    		windows	[
+        		DEF win Window {
+					#fullScreen TRUE
+					#position 0 0
+					size 700 525
+        			#drawCursor FALSE
+        			views [
+            			DEF viewarea Viewarea {	
+							description	"default"
+                			grabFile "video/out%05d.jpg"				  
+                			#grabFrames -1 
+							navigator DEF navigator Navigator2D { 
+								pickScene FALSE
+							}
+						}		   
+        			]
+        		} # Window
+    		]
+    	} # WindowGroup
+	]
+} # RenderJob
+
+ROUTE viewarea.keyPress     TO navigator.keyPress
+ROUTE viewarea.keyRelease   TO navigator.keyRelease
+ROUTE viewarea.mousePress   TO navigator.mousePress
+ROUTE viewarea.mouseRelease TO navigator.mouseRelease
+ROUTE viewarea.mouseMove    TO navigator.mouseMove
+ROUTE navigator.mouseOver   TO viewarea.mouseOver
+
+# updated with tracking positions
+DEF script Script {
+    eventIn SFVec2f posIn  
+    field SFNode nav USE navigator
+	
+	url "javascript:
+    function posIn(val)
+    {
+        nav.pickPositions = new MFVec2f( val );
+    }
+	"
+}

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+	<Scene DEF='scene'>
+
+		<ComposedShader DEF='shShader'>
+			<field accessType='inputOutput' name='coefficients' type='MFVec3f' value='
+				0 0 0 
+				0 0 0 0 0 0 0 0 0 
+				0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+				0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0'/>
+
+			<ShaderPart type='vertex' url='"prt_vp.glsl"'/>
+			<ShaderPart type='fragment' url='"prt_fp.glsl"'/>
+		</ComposedShader>
+
+		<SphericalHarmonicsGenerator DEF='shGenerator' bands='4' mapMode='latLong'>
+			<ImageTexture DEF='sphericalImage' url='"latlong.hdr"'/>
+		</SphericalHarmonicsGenerator>
+		
+		<SphericalHarmonicsMatrix DEF='shMatrix' bands='4' rotation='
+			1 0 0 0 
+			0 1 0 0 
+			0 0 1 0 
+			0 0 0 1'/>
+
+		<SkydomeBackground>
+			<Appearance containerField='appearance'>
+				<ImageTexture USE='sphericalImage'/>
+			</Appearance>
+		</SkydomeBackground>
+
+		<MatrixTransform DEF='rotation' invert='true'>
+			<Transform translation='-70 0 -130'>
+				<AppearanceGroup>
+					<Inline url='"pieta.x3d"'/>
+
+					<Appearance containerField='appearance'>
+						<MultiTexture>
+							<ImageTexture USE='sphericalImage'/>
+							<SphericalHarmonicsGenerator USE='shGenerator'/>
+						</MultiTexture>
+
+						<ComposedShader USE='shShader'/>
+					</Appearance>
+				</AppearanceGroup>
+			</Transform>
+		</MatrixTransform>
+
+		<TimeSensor DEF='timer' cycleInterval='10' loop='true'/>
+		<OrientationInterpolator DEF='orientInter' key='0 0.5 1.0' keyValue='0 1 0 0 0 1 0 3.141592653589793 0 1 0 6.283185307179586'/>
+		<MatrixComposer DEF='matrixComposer'/>
+
+		<ROUTE fromNode='timer' fromField='fraction_changed' toNode='orientInter' toField='set_fraction'/>
+		<ROUTE fromNode='orientInter' fromField='value_changed' toNode='matrixComposer' toField='set_rotation'/>
+
+		<ROUTE fromNode='matrixComposer' fromField='matrix_changed' toNode='shMatrix' toField='set_rotation'/>
+		<ROUTE fromNode='matrixComposer' fromField='matrix_changed' toNode='rotation' toField='set_matrix'/>
+
+		<ROUTE fromNode='shGenerator' fromField='coefficients_changed' toNode='shMatrix' toField='set_coefficients'/>
+		<ROUTE fromNode='shMatrix' fromField='coefficients_changed' toNode='shShader' toField='set_coefficients'/>
+	
+		<ROUTE fromNode='shGenerator' fromField='coefficients_changed' toNode='shShader' toField='set_coefficients'/>
+	</Scene>
+</X3D>

@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Multiple display cluster</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Multiple display cluster</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        engine,
+        distribution,
+        cluster,
+        load balancing,
+        multi display,
+        stereo<br/><strong>Author(s): </strong>Patrick Riess,
+        Marcus Roth<br/><strong>Date: </strong>2007-11-29</p>
+  <p><strong>Summary: </strong>
+    This tutorial shows how to setup a cluster for a multi display configuration. It will also 
+    implement real load balancing with this setup and extend it to a stereo configuration with 
+    five PCs.
+</p>
+  <div id="content">
+        <h2>Preconditions for this tutorial</h2>
+        <p> 
+        Please read the <i>Cluster Basics</i> tutorial in the <i>Clustering</i> category to get an overview of how to configure 
+        a PC cluster using InstantCluster. For information about stereo configurations you should take a look into the 
+        <i>Multiple Views and Stereo</i> tutorial category (especially <i>Multiple Windows and Views</i>, <i>Stereo Basics</i> and 
+        <i>Passive Stereo</i> tutorials).
+        </p>
+        <h2>Multi display cluster</h2>
+        <p>
+        In this chapter we want to use three PCs of our cluster to render a scene over two displays. On one PC, just the application will 
+        run in a local window to provide interaction. Two other PCs (displaypc1 and displaypc2) are designated to display the scene over two screens. 
+        </p>
+        <h2>Different concepts</h2>
+        <p>
+        There are two concepts of doing this. The first one is by using the known <a href="/documentation/nodetype/ClusterWindow">ClusterWindow</a> node and the 
+        second is the <a href="/documentation/nodetype/TiledClusterWindow">TiledClusterWindow</a> which is especially created for <i>n * m</i> displays arrangements and 
+        provides overlapping features. The latter is based on the first one internally and just simplifies the usage on some setups. 
+        </p>
+        <p>
+        So the question is, when to use which node. The following list should get you on the right way. You should use a 
+        <a href="/documentation/nodetype/TiledClusterWindow">TiledClusterWindow</a> if:
+        </p>
+        <ul><li>you use multiple homogeneous displays to act as one big display</li><li>all displays are in one plane</li><li>above points apply and you want to use stereo</li><li>you don't want to see "borders" between your displays (overlapping projections)</li></ul>
+        On the other side a <a href="/documentation/nodetype/ClusterWindow">ClusterWindow</a> is preferred if:
+        <ul><li>you use a single display cluster</li><li>you setup a CAVE, i.e. multiple displays, but not in the same plane</li><li>you want to configure view areas manually (e.g. for a CAVE), otherwise <a href='/documentation/nodetype/TiledClusterWindow'>TiledClusterWindow</a> is better to use</li></ul>
+        
+        <p>
+        The main difference is the reduction of work when you have to configure stereo 
+        setups in a multi display cluster, because <a href="/documentation/nodetype/TiledClusterWindow">TiledClusterWindow</a> configures view areas and different projection parameters 
+        for each area by itself. Another difference is the ability of this node to take overlapping into account. For CAVE setups you have 
+        to configure view areas manually, so you are free to arrange CAVE walls as you want.
+        In this tutorial both approaches will be explained and you will soon realize the advantage of the <a href="/documentation/nodetype/TiledClusterWindow">TiledClusterWindow</a>.
+        </p>
+        <h2>Using ClusterWindow</h2>
+        <p>
+        The appropriate <a href="/documentation/nodetype/RenderJob">RenderJob</a> section will look like this:
+        </p>
+        <div class="code"><h3>Code: Multi display cluster configuration using ClusterWindow</h3><pre>
+...
+DEF render <a href='/documentation/nodetype/RenderJob'>RenderJob</a> { 
+   windowGroups [
+    <a href='/documentation/nodetype/WindowGroup'>WindowGroup</a> {
+      windows [
+        <a href='/documentation/nodetype/LocalWindow'>LocalWindow</a> {
+          #This window is just for interaction
+          enabled FALSE
+        }
+        <a href='/documentation/nodetype/ClusterWindow'>ClusterWindow</a> {
+          servers [ "displaypc1" "displaypc2" ]
+          size 1024 768
+          hServers 2
+          vServers 1
+        }
+      ]
+    }
+   ]
+}	
+...
+        </pre></div>
+        <p>
+        We see two windows here, the first one is the <a href="/documentation/nodetype/LocalWindow">LocalWindow</a>, which only exists for user interaction. 
+        We disable rendering here, otherwise the PC with the local window would have to render the whole scene itself. This 
+        can be a problem with large models, especially when using load balancing for the cluster later.
+        </p>
+        <p>
+        The important part of the configuration is the <a href="/documentation/nodetype/ClusterWindow">ClusterWindow</a>. This line
+        </p>
+        <div class="code"><pre>servers [ "displaypc1" "displaypc2" ]</pre></div>
+        <p>
+        lists the hostnames of PCs, which should take part in the cluster. It is followed by the specification of the display area by 
+        setting the number of horizontal and vertical displays:
+        </p>
+        <div class="code"><pre>
+size 1024 768
+hServers 2
+vServers 1
+        </pre></div>
+        <p>
+        By setting <i>hServers</i> to 2 and <i>vServers</i> to 1, the whole window consists of two horizontal aligned displays. 
+        As there are just two displays (hServers * vServers), the first two servers (displaypc1 and displaypc2) are responsible for displaying the window area which 
+        is as large as the specified window size multiplied with <i>hServers</i> and <i>vServers</i>. Here the whole window area is 2048 x 768 pixels. 
+        Alternatively you can use the option <i>fullscreen TRUE</i> to expand the window area over both displays completely. 
+        The local window is opened on the machine from where the VRML file is loaded.
+        </p>
+        <div class="imgContainer"><img src="bmw.png" align="center"/><div class="imgCaption">Image: Multi display cluster setup with 2 display PCs and one application PC</div></div>
+        <h2>Using TiledClusterWindow</h2>
+        <p>
+        The appropriate <a href="/documentation/nodetype/RenderJob">RenderJob</a> section will look like this:
+        </p>
+        <div class="code"><h3>Code: Multi display cluster configuration using TiledClusterWindow</h3><pre>
+...
+DEF render <a href='/documentation/nodetype/RenderJob'>RenderJob</a> { 
+   windowGroups [
+    <a href='/documentation/nodetype/WindowGroup'>WindowGroup</a> {
+      windows [
+        <a href='/documentation/nodetype/LocalWindow'>LocalWindow</a> {
+          #This window is just for interaction
+          enabled FALSE
+        }
+        <a href='/documentation/nodetype/TiledClusterWindow'>TiledClusterWindow</a> {
+          servers [ "displaypc1" "displaypc2" ]
+          fullScreen TRUE
+          columns 2
+          rows 1
+        }
+      ]
+    }
+   ]
+}	
+...
+        </pre></div>   
+        <p>
+        In this configuration the tiled window has 2 columns and 1 row as in the <a href='/documentation/nodetype/ClusterWindow'>ClusterWindow</a> case. When using the <a href='/documentation/nodetype/TiledClusterWindow'>TiledClusterWindow,</a> 
+        there are a few additional options, like overlapping:
+        </p>
+        <div class="code"><h3>Code: Overlapping in TiledClusterWindow</h3><pre>
+overlapX 20
+overlapY 0
+        </pre></div>
+        <p>
+        These lines result in a region between the two displays which is rendered twice. So when using two video beamers, you 
+        can adjust these by taking the overlapping into account and an intersection will not be as noticable as without overlaps. 
+        </p>
+        <div class="imgContainer"><img src="overlap1.png" align="center"/><div class="imgCaption">Image: Two displays with X-overlap rendering</div></div>
+        <div class="imgContainer"><img src="overlap2.png" align="center"/><div class="imgCaption">Image: Overlapped displays (overlapping highlighted)</div></div>
+        
+        <h2>Load balancing</h2>
+        <p>
+        The next two lines set up the load balancing, where the field <i>showBalancing</i> is just for debugging purpose 
+        and pigments those areas of the rendered image which are generated by other servers and copied over the network. 
+        You just have to add these into the <a href="/documentation/nodetype/ClusterWindow">ClusterWindow</a> node or <a href="/documentation/nodetype/TiledClusterWindow">TiledClusterWindow</a> 
+        respectively.
+        </p>
+        <div class="code"><h3>Code: Load balancing</h3><pre>
+balance TRUE
+showBalancing TRUE
+        </pre></div>
+        <p>
+        That means both cluster PCs support each other by rendering parts of the scene on their local framebuffer and sending the 
+        results (pixels of the image region) back. The role changes depending on which PC has the higher load. 
+        </p>
+        <p>
+        If you want to use load balancing in a multi display setup you should enable <i>fullScreen</i> 
+        option and adjust the <i>size</i> field to the <b>overall</b> resolution in the <a href="/documentation/nodetype/ClusterWindow">ClusterWindow</a>.
+        <div class="code"><h3>Code: Display size in ClusterWindow</h3><pre>
+size 2048 768
+fullScreen TRUE
+hServers 2
+vServers 1
+        </pre></div>
+        </p>        
+        <p>
+        In <a href="/documentation/nodetype/TiledClusterWindow">TiledClusterWindow</a> the size of the window 
+        is defined by setting the width and height of one tile. Together 
+        with <i>columns</i> and <i>rows</i> fields the window size is calculated internally:
+        </p>
+        <div class="code"><h3>Code: Tile size in TiledClusterWindow</h3><pre>
+fullScreen TRUE
+tileWidth 1024
+tileHeight 768
+        </pre></div>
+        <p>
+        Tile sizes have usually to be adapted to the native resolution of one single display.
+        </p>
+        <p>
+        We will also attach an additional PC which is only used as support for the display PCs. We write the PC's name at the end 
+        of the servers list, because the first (defined through <i>hServer/vServers</i> or <i>rows/columns</i>) servers are automatically used as display.
+        </p>
+        <div class="code"><pre>servers [ "displaypc1" "displaypc2" "supportpc" ]</pre></div>
+        <p class="important"><b>Important: </b> Load balancing in multi display setups currently only works in fullscreen.</p>
+        <div class="imgContainer"><img src="multi.png" align="center"/><div class="imgCaption">Image: Multi display cluster setup with 3 computers and one application PC</div></div>
+        
+        <h2>Multi display stereo configuration</h2>
+        <p>
+        In a stereo configuration the existance of <a href="/documentation/nodetype/TiledClusterWindow">TiledClusterWindow</a> will become clear. Imagine a 
+        stereo setup of two displays, i.e. two PCs for the displays of the left eye and two PCs for the displays of the right 
+        eye. One display (one tile) has the resolution of 1280 x 1024 pixels, so the whole window will have 2560 x 1024. 
+        </p>
+        <p>
+        To foreclose the solution with a <a href='/documentation/nodetype/TiledClusterWindow'>TiledClusterWindow</a> here is the simple configuration:
+        </p>
+        <div class="code"><h3>Code: Stereo with two displays using TiledClusterWindow</h3><pre>
+...
+DEF render <a href='/documentation/nodetype/RenderJob'>RenderJob</a> { 
+   windowGroups [
+    <a href='/documentation/nodetype/WindowGroup'>WindowGroup</a> {
+      windows [
+        <a href='/documentation/nodetype/LocalWindow'>LocalWindow</a> {
+          #This window is just for interaction
+          enabled FALSE
+        }
+        <a href='/documentation/nodetype/TiledClusterWindow'>TiledClusterWindow</a> {
+          servers [ "display_leftSide_leftEye"
+                    "display_leftSide_rightEye"  
+                    "display_rightSide_leftEye" 
+                    "display_rightSide_rightEye" ]
+          fullScreen TRUE
+          tileWidth 1280
+          tileHeight 1024
+          stereo TRUE
+          eyeSeparation 0.08
+          zeroParallaxDistance 1
+          columns 2
+          rows 1
+        }
+      ]
+    }
+   ]
+}	
+...
+        </pre></div>
+        <p>
+        The role of a server in the servers list is well defined here. If <i>stereo</i> is set to TRUE, the first server (display_leftSide_leftEye) 
+        will render the left eye camera of the first display, second server (display_leftSide_rightEye) will render the right eye camera of the 
+        first display. With third and fourth servers it's the same but for the right side. In a grid of <i>m</i> columns and <i>n</i> 
+        rows of displays the first one is always lower left and the last one upper right. Additional servers are only used by load balancing 
+        if it is switched on.
+        </p>
+        <div class="imgContainer"><img src="tiledstereo.png" align="center"/><div class="imgCaption">Image: Tiled stereo setup with two displays and four PCs</div></div>
+        <p>
+        The <a href="/documentation/nodetype/ClusterWindow">ClusterWindow</a> approach is more flexible as you can setup view areas which can be stereo or not. You can try to setup 
+        the above scenario to get the same result on the displays using <a href="/documentation/nodetype/ClusterWindow">ClusterWindow</a>, but you might not want to. A hint: You'll need 
+        a window with four displays fitting in and four viewports each modified by a <a href="/documentation/nodetype/ProjectionViewModifier">ProjectionViewModifier</a>. 
+        How this is done and where you will need this is discussed in the next tutorial for setting up a CAVE environment.
+        </p>  
+        
+    Files:
+    <ul class="files"><li><a href="MultiDisplayLoadBalancing.wrl">MultiDisplayLoadBalancing.wrl</a></li><li><a href="TiledDisplayLoadBalancing.wrl">TiledDisplayLoadBalancing.wrl</a></li><li><a href="TiledDisplayStereo.wrl">TiledDisplayStereo.wrl</a></li><li><a href="tie.wrl">tie.wrl (test model)</a></li></ul>
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

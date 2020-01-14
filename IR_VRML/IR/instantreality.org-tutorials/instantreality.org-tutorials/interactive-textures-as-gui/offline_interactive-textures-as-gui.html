@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Interactive Textures as GUI</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Interactive Textures as GUI</h2>
+  <p class="description"><strong>Keywords:</strong><br/>2D User Interface,
+        Interaction,
+        Pointing Sensors,
+        Texturing,
+        UITexture,
+        BrowserTexture<br/><strong>Author(s): </strong>Yvonne Jung<br/><strong>Date: </strong>2010-05-04</p>
+  <p><strong>Summary: </strong>
+	This tutorials explains the usage of interactive textures as 2D user interfaces embedded into 3D scenes.
+    </p>
+  <div id="content">
+		<h2>Introduction</h2>
+		<p>
+		Because existing 3D interaction techniques and widgets are often not specific enough to provide sufficient usability for many application types, we provide an extension to the X3D texturing concept by introducing interactive textures, which allows embedding standard 2D UIs, web-content or full applications into 3D scenes. This has the benefit that users are already familiar with the (well-designed) interface elements from standard 2D applications and that also additional textual information describing the interaction task can easily be provided. Furthermore, the new node set eases rapid prototyping of interactive 3D applications.
+		</p><p>
+		The base type of all textures that handle 2D GUIs is called <a href="/documentation/nodetype/InteractiveTexture">InteractiveTexture</a> and defines some basic slots to route interaction such as keyboard and mouse input to it.  Input via mouse or other pointing devices is realized with two fields: 'pointer', which is the 2D position on the texture that internally is translated into the UI native space via a simple window-viewport transformation, and 'button1' to transfer clicking or similar binary actions. If this inSlot receives TRUE, a mouse pressed event is processed (and treated as left mouse button), else release is triggered. E.g. by using a standard X3D <a href="/documentation/nodetype/TouchSensor">TouchSensor</a> node, the 'pointer' and 'button1' slots can be filled with valid values by using the sensor's 'hitTexCoord_changed' and 'isActive' eventOut slots. 
+		</p><p>
+		Keyboard input has been implemented according to the interface specification of the standard <a href="/documentation/nodetype/KeySensor">KeySensor</a> node, which in essence maps all outSlots as inSlots for keyboard interaction.
+Obviously, the field 'updateMode' defines the update mode. It can have the following values: "onInteraction" handles mouse-move-like events (which is the default), "conservative" only regards click-like events and widget updates, and "always" can handle time-based content, but soon gets slow when having many textures in the scene due to the GPU upload.
+		</p>
+		
+		<h2>The UITexture</h2>
+		<p>
+		The proposed <a href="/documentation/nodetype/UITexture">UITexture</a> can be used to draw a user interface defined by the <a href="http://qt.nokia.com/">Qt Designer tool</a> (hence keep in mind that Qt 4.x need to be installed for first creating an UI file with the designer GUI). Therefore, the name of the Qt Designer based UI file can be set in the MFString field 'url'. If the node's 'show' field is TRUE, the dialog form is shown in a separate window, which is not only useful for debugging purposes, but also for developing interactive 3D desktop applications. This texture node is very specialized as it only accepts Qt-based dialog forms. 
+		</p><p>
+		In the following we will exemplarily discuss the usage of the proposed interactive textures using the color chooser example shown in the screenshot below. As can be seen in the code fragment, the <a href="/documentation/nodetype/UITexture">UITexture</a> can be applied onto a 3D <a href='/documentation/nodetype/Shape'>Shape</a> the usual way. Whereas "color.ui" denotes the pre-designed Qt UI file, the texture additionally supports dynamic fields, which denote certain signals and slots (the Qt concept for event propagation) as defined in the UI file. In this example, the exposedField "reddial" references the Qt-specific QDial widget element for changing the amount of red in the material of the colored box behind the UI.
+		<p/>
+		Because the widget can be used as input and output (slot and signal) respectively, in this case we are using an exposed field instead of an in- or out-slot. Finally, when a value was changed, the current state of all QDial widgets is routed to a <a href="/documentation/nodetype/Script">Script</a> node for assembling an SFColor value that is routed to the 'diffuseColor' field  of the <a href='/documentation/nodetype/Material'>Material</a> of the <a href='/documentation/nodetype/Box'>Box</a> node. If the types match, the last step certainly can be skipped.
+		</p>
+		
+<div class="code"><h3>Code: Code snippet showing the usage of an <a href='/documentation/nodetype/UITexture'>UITexture</a> node for changing field values (in VRML encoding).</h3><pre>
+Transform {
+  children [
+    DEF GUI <a href='/documentation/nodetype/Shape'>Shape</a> {
+      appearance <a href='/documentation/nodetype/Appearance'>Appearance</a> {
+        texture DEF colorUi <a href='/documentation/nodetype/UITexture'>UITexture</a> {
+        ...
+        exposedField SFInt32 reddial   0
+        exposedField SFInt32 greendial 0
+        exposedField SFInt32 bluedial  0
+        url "color.ui"
+      }
+    }
+    ...
+    }
+    DEF colorUITouch <a href='/documentation/nodetype/TouchSensor'>TouchSensor</a> {}
+  ]
+}
+Shape { 
+  appearance <a href='/documentation/nodetype/Appearance'>Appearance</a> {
+    material DEF mat <a href='/documentation/nodetype/Material'>Material</a> {}
+    geometry <a href='/documentation/nodetype/Box'>Box</a> { size 3 4 2 }
+}
+...
+ROUTE colorUITouch.isActive TO colorUi.button1
+ROUTE colorUITouch.hitTexCoord_changed TO colorUi.pointer
+...
+ROUTE colorUi.reddial   TO script.red
+ROUTE colorUi.greendial TO script.green
+ROUTE colorUi.bluedial  TO script.blue
+ROUTE script.color TO mat.diffuseColor
+</pre></div>
+
+	<div class="imgContainer"><img src="uiTexture.png" align="center"/><div class="imgCaption">Image: Interactive color chooser realized with the <a href='/documentation/nodetype/UITexture'>UITexture</a> node.</div></div>
+
+	<h2>The BrowserTexture</h2>
+    <p>
+	A <a href="/documentation/nodetype/BrowserTexture">BrowserTexture</a> can be used to display web pages through a texture node. The texture thereby allows scene authors to integrate and navigate through web information inside an X3D scene. The fields 'updateMode', 'url' etc. were already explained previously, with the exception that here 'url' either denotes the location of the web page to be displayed and or directly contains embedded (D)HTML code. The latter exemplarily is depicted in the following code fragment.
+	</p><p>
+If a link was clicked on the web page, the 'link_changed' eventOut is updated with the new URL. This is useful in combination with the 'delegateLinkHandling' field. If it is TRUE, the texture's location is updated and it displays the web page of the link that was clicked. Otherwise, the current page is kept and only the clicked link in the 'link_changed' eventOut is updated.
+	</p><p>
+The eventIn 'back' triggers loading the previous document in the history list. Likewise, 'forward' loads the next document in the list, 'reload' reloads the current document, and 'stop' obviously stops loading the document. 
+Similar to the X3D <a href="/documentation/nodetype/LoadSensor">LoadSensor</a>, the 'load_finished' event is sent when the page has finished loading, which is further refined by 'load_progress' field. The next image shows an example scenario.
+    </p>
+	
+<div class="code"><h3>Code: BowserTexture example with embedded HTML instead of using only a URL (in XML encoding).</h3><pre>
+&lt;Transform&gt;
+  &lt;Shape&gt;
+    &lt;Appearance&gt;
+      &lt;BrowserTexture DEF='webUi' minFilter='linear' magFilter='linear' delegateLinkHandling="false"&gt;
+	  &lt;![CDATA[
+	   &lt;div style='color:yellow;font-size:14pt;border-style:solid;background-color:olivedrab;text-align:center;'&gt;
+	   ...and here some nicely formatted text with CSS for testing.&lt;/div&gt;
+	   &lt;div onClick='javascript:alert("A Message <a href='/documentation/nodetype/Box'>Box</a> pops up :-)");' style='margin:15;text-align:center;border-style:solid;'&gt;
+	   Click me!&lt;/div&gt;
+	  ]]&gt;
+      &lt;/BrowserTexture&gt;
+    &lt;/Appearance&gt;
+    &lt;IndexedFaceSet DEF='plane' texCoordIndex='0 1 2 3 -1 3 2 1 0 -1' coordIndex='0 1 2 3 -1 3 2 1 0 -1'&gt;
+      &lt;Coordinate point='0 0 0 1 0 0 1 1 0 0 1 0'/&gt;
+      &lt;TextureCoordinate point='0 1 1 1 1 0 0 0'/&gt;
+    &lt;/IndexedFaceSet&gt;
+  &lt;/Shape&gt;
+  &lt;TouchSensor DEF='webUiTouch'/&gt;
+&lt;/Transform&gt;
+&lt;ROUTE fromNode='webUiTouch' fromField='isActive' toNode='webUi' toField='set_button1'/&gt;
+&lt;ROUTE fromNode='webUiTouch' fromField='hitPoint_changed' toNode='webUi' toField='set_pointer'/&gt;
+</pre></div>
+	
+	<div class="imgContainer"><img src="browser_texture.png" align="center"/><div class="imgCaption">Image: A <a href='/documentation/nodetype/BrowserTexture'>BrowserTexture</a> applied to an interactive 3D iPhone model.</div></div>
+		
+        <h2>The X11Texture</h2>
+        <p>
+		The most generalized approach of displaying UI elements is to map an entire desktop environment onto a texture. The <a href="/documentation/nodetype/X11Texture">X11Texture</a> can display an X11 screen with the help of <i>Xvfb</i>, a virtual framebuffer exporting the X11 display into an image format. For this reason, this node is only available on Unix/ Linux platforms. Since X11 allows running single applications without a desktop manager, this texture type can be used to run anything ranging from games to full blown desktop solutions (see next image).
+		</p><p>
+		Most of the parameters of the <a href="/documentation/nodetype/X11Texture">X11Texture</a> are related to <i>Xvfb</i> itself: 'xserver' specifies the location of the <i>Xvfb</i> server application to be executed in an environment defined by 'shell' (e.g. "/bin/bash"), where 'display' defines the X11 display to be used (e.g. 3). Here, 'maxFps' determines the update frequency. Finally, 'command' is the command or application launched inside the server (e.g. "xterm -e top&amp;; xclock"). 
+        </p>
+        
+        <div class="imgContainer"><img src="x11tex_xfce.png" align="center"/><div class="imgCaption">Image: An XFCE desktop environment mapped on a curved 3D surface via the X11Texture.</div></div>
+		
+		
+    Files:
+    <ul class="files"><li><a href="ui.wrl">UITexture example (color chooser)</a></li><li><a href="color.ui">Corresponding UI file</a></li></ul>    
+	</div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

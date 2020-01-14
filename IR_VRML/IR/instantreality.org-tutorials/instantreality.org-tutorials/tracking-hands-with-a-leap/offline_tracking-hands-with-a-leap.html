@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Tracking hands with a Leap</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Tracking hands with a Leap</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Leap,
+        Hand,
+        Tracking<br/><strong>Author(s): </strong>Tobias Alexander Franke<br/><strong>Date: </strong>2013-10-06</p>
+  <p><strong>Summary: </strong>
+    In this tutorial we will create a simple connection to a Leap device.
+  </p>
+  <div id="content">
+    <h2>LeapMotion</h2>
+    <p>
+        The <a href="https://leapmotion.com/">Leap device</a> is a small, low-cost hand tracker with very high accuracy. It can track up to four hands in paralell with 
+        each finger and its orientation. As an example, a Leap can be used for applications connected to large displays without touch input, or to explicitely have 
+        touch-less interaction for dirty or contagious environments.
+    </p>
+    
+    <h2>Prerequisites</h2>
+    <p>
+        Getting a Leap device to run is easy: go to the <a href="https://leapmotion.com/developers">developer center and download the SDK</a>. 
+        It contains the driver and some example applications. The driver in this case is the Leap application, which will run in your taskbar
+        (both on Mac OS X and Windows). Please test the device before using the Leap node to make sure it is correctly
+        installed and attached by using the Visualizer, which comes with the SDK.
+    </p>
+    
+    <h2>The node</h2>
+    <h2>Instantiating a Leap device</h2>
+    <p>
+        The <a href="http://doc.instantreality.org/documentation/nodetype/NI">Leap node</a> 
+        in its complete instantiation is accessed via InstantIO as follows:
+    </p>
+    
+    <div class="code"><h3>Code: OpenNI InstantIO node</h3><pre>&lt;IOSensor DEF='leap' type='LeapMotion'&gt;
+    &lt;field accessType='outputOnly'  name='NumHands'          type='SFInt32'/&gt;
+    &lt;field accessType='outputOnly'  name='HandIDs'           type='MFInt32'/&gt;
+    &lt;field accessType='outputOnly'  name='PalmNormals'       type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='PalmVelocities'    type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='PalmPositions'     type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='HandDirections'    type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='HandsJSON'         type='MFString'/&gt;
+    
+    &lt;field accessType='outputOnly'  name='NumTools'          type='SFInt32'/&gt;
+    &lt;field accessType='outputOnly'  name='ToolIDs'           type='SFInt32'/&gt;
+    &lt;field accessType='outputOnly'  name='ToolDirections'    type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='ToolPositions'     type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='ToolVelocities'    type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='ToolsJSON'         type='MFString'/&gt;
+    
+    &lt;field accessType='outputOnly'  name='NumFingers'        type='MFInt32'/&gt;
+    &lt;field accessType='outputOnly'  name='FingerPositions'   type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='FingerDirections'  type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='FingerVelocities'  type='MFVec3f'/&gt;
+    &lt;field accessType='outputOnly'  name='FingerHandIDs'     type='MFInt32'/&gt;
+    
+    &lt;field accessType='outputOnly'  name='Gestures'          type='MFString'/&gt;
+    &lt;field accessType='outputOnly'  name='GesturesJSON'      type='MFString'/&gt;
+&lt;/IOSensor&gt;
+</pre></div>
+
+    <p>
+        A Leap can detect three entities: Tools, Hands and Fingers. Each entity has its own list of Outslots in the node that you can access.
+    </p>
+
+    <p>
+        <ul><li>
+                The first bunch of slots you can access are related to hands. <tt>NumHands</tt> is an integer for the number of currently detected hands, and <tt>HandIDs</tt> is a vector of integer IDs for each hand. The tracked center of a hand is the palm: for each hand, <tt>PalmNormals</tt>, <tt>PalmVelocities</tt> and <tt>PalmPositions</tt> contain the normal, current velocitiy and position in space. The average pointing direction is available in <tt>HandDirections</tt>. You can get all of this information, including fingers on each hand, in a special container for each hand called <tt>HandsJSON</tt>.
+            </li><li>
+                Nearly identical to hands are the tools. Tools are basically pointing devices and other things that can be tracked.
+            </li><li>
+                Fingers are provided for each hand. This is why <tt>NumFingers</tt> is an <tt>MFInt32</tt>: it contains the number of tracked fingers for each hand. The vectors <tt>FingerPositions</tt>, <tt>FingerDirections</tt> and <tt>FingerVelocities</tt> are therefore scaled to the number of fingers for each hand. A final field, <tt>FingerHandIDs</tt> can be used to figure out which hand a finger belongs to.
+            </li><li>
+                Simple gestures which are recognized by the Leap can be queried from the <tt>Gestures</tt> field. However, if the gesture contains meta information such as the velocitiy of tap, or the radius of a circle, you may want to access <tt>GestureJSON</tt> instead. Each gesture is reported with a standardized JSON container, which contains a gesture-dependent <tt>info</tt> sub-container with all the meta data attached to it. 
+            </li></ul>
+    </p>
+        
+    <h2>A simple example</h2>
+    <p>
+        So in this small example, we will instantiate a <a href='/documentation/nodetype/LeapMotion'>LeapMotion</a> node to fetch the first hand position. With this position we will translate a sphere around an empty scene.
+    </p>
+        
+        <div class="code"><h3>Code: Leaping around with a box</h3><pre>&lt;IOSensor DEF='leap' type='LeapMotion'&gt;
+    &lt;field accessType='outputOnly' name='PalmPositions' type='MFVec3f'/&gt;
+&lt;/IOSensor&gt;
+
+&lt;Transform DEF='trans'&gt;
+    &lt;Shape&gt;
+        &lt;Appearance&gt;
+            &lt;Material DEF='mat'/&gt;
+        &lt;/Appearance&gt;
+        &lt;Sphere/&gt;
+    &lt;/Shape&gt;
+&lt;/Transform&gt;
+
+&lt;Script DEF='script'&gt;
+    &lt;field name='palmPositions_changed' accessType='inputOnly' type='MFVec3f' /&gt;
+    
+    &lt;field accessType='outputOnly' name='trans' type='SFNode'&gt;
+        &lt;Transform USE='trans'/&gt;
+    &lt;/field&gt;
+    
+    &lt;field accessType='outputOnly' name='mat' type='SFNode'&gt;
+        &lt;Material USE='mat'/&gt;
+    &lt;/field&gt;
+       
+    &amp;lt;![CDATA[ecmascript:
+        
+        function palmPositions_changed(value, t)
+        {
+            var f = 100.0;
+            
+            trans.translation = SFVec3f(value[0].x/f, 
+                                        (value[0].y - 250.0)/f, 
+                                        value[0].z/f);
+            
+            mat.diffuseColor = SFColor(1.0 - Math.abs(value[0].x/f), 
+                                       Math.abs(value[0].y/f), 
+                                       Math.abs(value[0].z/f));
+        }
+    
+    ]]&amp;gt;
+&lt;/Script&gt;            
+
+&lt;ROUTE fromNode='leap' fromField='PalmPositions' toNode='script' toField='palmPositions_changed'/&gt;
+</pre></div>
+
+    <p>
+        The positions generated in <tt>PalmPositions</tt> are routed to the script, which extracts the first entry of the array, scales it and sets the translation of the sphere to the new value. Also, the diffuse color of the material changes. Simply copy and paste this code into an existing X3D scene and you should be ready to go!
+    </p>
+    
+	
+    Files:
+    <ul class="files"><li><a href="example/hand_tracker.x3d">hand_tracker.x3d - Tracking one hand to move a sphere</a></li></ul>
+  </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

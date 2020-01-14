@@ -1,0 +1,357 @@
+<div id="tutorialContainer">
+  <h2 class="title">Implementing Script nodes in JavaScript</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Script,
+        JavaScript<br/><strong>Author(s): </strong>Patrick Dähne<br/><strong>Date: </strong>2009-01-08</p>
+  <p><strong>Summary: </strong>This tutorial explains how to implement X3D Script nodes in JavaScript.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        <p>X3D, like many other 3D file formats, describes geometries of 3D objects that make up the scene and their materials in a hierarchical graph structure called the "<a href="http://en.wikipedia.org/wiki/Scenegraph">Scene graph</a>". Geometries and materials are defined as nodes in that scene graph that keep their data in fields. But X3D differs from most other 3D file formats in its ability to also describe the dynamic behaviour of the scene. X3D nodes are small "<a href="http://en.wikipedia.org/wiki/Finite_state_machine">state machines</a>". They can receive events via event-in slots, change their state according to the event, and send resulting events via event-out slots. Event-out slots and event-in slots are connected by "routes". As a result, the classical scene graph gets augmented by a data flow graph that describes the dynamic properties of the scene.</p>
+        <p>VRML/X3D already contains a large set of nodes that can be used to build typical VR applications, e.g. interpolator nodes that allow to define <a href="http://en.wikipedia.org/wiki/Key_frame">key frame</a> animations. But of course the standard set of nodes cannot cover all possible applications. For that reason, you can extend the standard set of nodes by your own nodes. This can be done with a special kind of node, the "<a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/Part01/components/scripting.html#Script">Script</a>" node.</p>
+        <p>The Script node is some kind of node framework. It only has a minimal number of fields that control the operation of the Script node, and it does not have any behaviour of its own. The idea is that the application programmer defines additional fields, event-in slots and event-out slots when instantiating the Script node in the scene, i.e. he can define the interface of the respective Script node. Furthermore, he can define the behaviour of the respective Script node, i.e. how it reacts to incoming events, by using a piece of code written in a programming language that the browser supports. VRML/X3D defines how to use <a href="http://en.wikipedia.org/wiki/JavaScript">JavaScript</a> and <a href="http://en.wikipedia.org/wiki/Java_(programming_language)">Java</a> to program the behaviour of Script nodes. Instant Player supports both of these languages. This tutorial only explains how to use JavaScript in Script nodes. There is another tutorial that explains how to use Java in Script nodes.</p>
+        <p class="warning"><b>Warning: </b>Instant Player fully supports the old VRML JavaScript API. The new X3D (SAI) API is only partially implemented. Look at the <a href="/apidocs/scripting/javascript/">API-specification</a> for details</p>
+        <p>For more information about JavaScript in Script nodes, have a look into the <a href="http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part1/javascript.html">VRML specification</a> available from <a href="http://www.web3d.org/">http://www.web3d.org/</a>. Don't get confused by the fact that the specification talks about ECMAScript - that's just another name for JavaScript.</p>
+        <p>In the following sections, we will extend a simple scene consisting of a red sphere with a Script node with some simple behaviour written in JavaScript: Whenever the user clicks onto the sphere, it should toggle its color between red and green. To detect click events, we have to add a "<a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/Part01/components/pointingsensor.html#TouchSensor">TouchSensor</a>" to the scene. TouchSensors detect click events on neighbouring subtrees of the scene graph, i.e. on subtrees that are siblings of the TouchSensor. So usually you add the shape node you want to click on as well as the TouchSensor to a "<a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/Part01/components/group.html#Group">Group</a>" node. But in this example, the sphere is the only object in the scene, so we can omit the Group node. So the resulting example without the Script node looks like this when using classic VRML encoding:</p>
+        <div class="code"><h3>Code: Scene used in the following examples (VRML encoding)</h3><pre>#VRML V2.0 utf8
+
+Shape
+{
+  appearance Appearance
+  {
+    material DEF mat Material
+    {
+      diffuseColor 1 0 0
+    } # Material
+  } # Appearance
+  geometry Sphere
+  {
+  } # Sphere
+} # Shape
+
+DEF ts TouchSensor
+{
+} # TouchSensor</pre></div>
+        <p>In XML encoding, the same scene looks like this:</p>
+        <div class="code"><h3>Code: Scene used in the following examples (XML encoding)</h3><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;X3D profile='Full' version='3.0'&gt;
+  &lt;Scene&gt;
+
+    &lt;Shape&gt;
+      &lt;Appearance&gt;
+        &lt;Material DEF='mat' diffuseColor='1 0 0'/&gt;
+      &lt;/Appearance&gt;
+      &lt;Sphere/&gt;
+    &lt;/Shape&gt;
+
+    &lt;TouchSensor DEF='ts'/&gt;
+
+  &lt;/Scene&gt;
+&lt;/X3D&gt;</pre></div>
+        <p>You can download the complete example scenes at the end of this tutorial.</p>
+
+        <h2>Defining the Interface</h2>
+        <p>First of all, we have to define the interface of the Script node, i.e. its field, event-in slots and event-out slots. Like when instantiating other nodes in the scene, we start with the type of the node ("Script"). Because we have to connect the script node via routes with other nodes in the scene, we also have to give it a name ("script" in this example). So we start as always:</p>
+        <div class="code"><h3>Code: The plain Script node (VRML encoding)</h3><pre>DEF script Script
+{
+  directOutput TRUE
+  mustEvaluate TRUE
+}</pre></div>
+        <p>In XML encoding, the Script node looks like this:</p>
+        <div class="code"><h3>Code: The plain Script node (XML encoding)</h3><pre>&lt;Script DEF='script' directOutput='true' mustEvaluate='true'&gt;
+&lt;/Script&gt;</pre></div>
+        <p>As you can see in the code above, there are two SFBool fields of the Script node ("directOutput" and "mustEvaluate") that we set to TRUE. When you're curious, have a look at the <a href="http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/Part01/components/scripting.html#Script">Script node specification</a> to find out what these fields are good for. As rule of thumb, start your own Script nodes as shown above.</p>
+        <p>Now, how do we define the fields and slots of our Script node? Normally, we write a list of field names followed by their field values between the braces (when using VRML encoding), or we specify the field values as attribues of the opening XML tag. For script nodes, we do more or less the same. The only difference is that we also have to specify whether we have a field, an event-in slot or an event-out slot, as well as the X3D data type.</p>
+        <p>So, what do we need? First of all, we need to receive click events from the TouchSensor. The TouchSensor has an SFBool event-out slot "isActive" that provides these events. So we need an SFBool event-in slot. We'll call it also "isActive" (we could use any name here, but it's always a good idea to use names that make clear what the event-in slot is good for). Furthermore, we want to change the color of the sphere, so we need an SFColor event-out slot. We'll call that event-out slot "color_changed". Finally, we want to toggle the color, so we need an SFBool field that saves the current state (whether the sphere currently is red or green). We'll call that field "flag"). So the complete interface of our Script node looks like this:</p>
+        <div class="code"><h3>Code: Script node with interface declarations (VRML encoding)</h3><pre>DEF script Script
+{
+  directOutput TRUE
+  mustEvaluate TRUE
+
+  eventIn SFBool isActive
+  eventOut SFColor color_changed
+  field SFBool flag FALSE
+  exposedField SFBool foo TRUE
+}</pre></div>
+        <p>In XML encoding, the Script node with the interface declarations looks like this:</p>
+        <div class="code"><h3>Code: Script node with interface declarations (XML encoding)</h3><pre>&lt;Script DEF='script' directOutput='true' mustEvaluate='true'&gt;
+  &lt;field accessType='inputOnly' name='isActive' type='SFBool'/&gt;
+  &lt;field accessType='outputOnly' name='color_changed' type='SFColor'/&gt;
+  &lt;field accessType='initializeOnly' name='flag' type='SFBool' value='false'/&gt;
+  &lt;field accessType='inputOutput' name='foo' type='SFBool' value='false'/&gt;
+&lt;/Script&gt;</pre></div>
+        <p>As you can see, we have to specify an initial value for our "flag" field, in this case "FALSE". You have to specify initial values for all the fields of your Script node. On the other hand, you cannot specifiy initial values for event-in slots and event-out slots.</p>
+        <p>
+        By the way, exposed fields (or inputOutput fields in X3D slang) where forbidden in the original VRML-Spec but are allowed in X3D Script nodes. Instant Player now (with Beta7) supports exposed/inputOutput-Fields but there are still incompatibilities between different browsers so you have to be carefull. 
+        </p>
+        <p>Before we finally write the code, we connect the Script node to the TouchSensor and the Material node:</p>
+        <div class="code"><h3>Code: Connecting the Script node (VRML encoding)</h3><pre>ROUTE ts.isActive TO script.isActive
+ROUTE script.color_changed TO mat.set_diffuseColor</pre></div>
+        <p>In XML encoding, the routes look like this:</p>
+        <div class="code"><h3>Code: Connecting the Script node (XML encoding)</h3><pre>&lt;ROUTE fromNode='ts' fromField='isActive' toNode='script' toField='isActive'/&gt;
+&lt;ROUTE fromNode='script' fromField='color_changed' toNode='mat' toField='set_diffuseColor'/&gt;</pre></div>
+
+        <h2>Writing the Code</h2>
+        <p>After defining the interface, we have to write the JavaScript code that handles incoming events, changes the state of the node accordingly, and sends resulting events. In our case, we need code that listens to the "isActive" event-in slot, toggles the state of the "flag" field, and sends a red or green color to the "color_changed" event-out slot depending on the state of the "flag" field.</p>
+        <p>You have to specify the file that contains the code in the "url" field of the Script node (that is one of the native fields of the Script node). E.g. when you save the JavaScript code in a file called "MyCode.js" next to your X3D file, you have to specify the (relative) <a href="http://en.wikipedia.org/wiki/URL">URL</a> to that file like this:</p>
+        <div class="code"><h3>Code: Script node with code in an external file (VRML encoding)</h3><pre>Script
+{
+  # Your fields here
+  url "MyCode.js"
+}</pre></div>
+        <p>In XML encoding, you specify external JavaScript code like this:</p>
+        <div class="code"><h3>Code: Script node with code in an external file (XML encoding)</h3><pre>&lt;Script url='MyCode.js'&gt;
+  &lt;!-- Your fields here --&gt;
+&lt;/Script&gt;</pre></div>
+        <p>For JavaScript, there exists a more convenient alternative: You can put the JavaScript code directly into the URL. To do that, you have to start the URL with "javascript:" like this:</p>
+        <div class="code"><h3>Code: Script node with code directly in the X3D file (VRML encoding)</h3><pre>Script
+{
+  # Your fields here
+  url "javascript:
+    // Your code here
+  "
+}</pre></div>
+        <p>When using XML encoding, there is also a third option: Instead of writing the JavaScript code into the url field, you can put it as plain text between the opening and the closing Script XML tag. To prevent XML parsers from interpreting the code, you should put it into a CDATA section like this:</p>
+        <div class="code"><h3>Code: Script node with code directly in the X3D file (XML encoding)</h3><pre>&lt;Script url='MyCode.js'&gt;
+  &lt;!-- Your fields here --&gt;
+  &lt;![CDATA[javascript:
+    // Your code here
+  ]]&gt;
+&lt;/Script&gt;</pre></div>
+        <p>Ok, let's start coding. Receiving events in your JavaScript code is quite easy: You simply have to specify a function with the same name as the corresponding event-in slot. This function takes two parameters, the event value and the current time stamp. Whenever the Script node receives a new value from an event-in slot, it calls that function. In our case, we have one event-in slot "isActive", so we have to define a JavaScript function also called "isActive":</p>
+        <div class="code"><h3>Code: Handler for events received from the isActive event-in slot</h3><pre>function isActive(value, timestamp)
+{
+}</pre></div>
+        <p>The TouchSensor node sends a SFBool "TRUE" value when the user presses the left mouse button over the sphere, and sends a "FALSE" value when the user releases that button later on. We only want to change the color when the user presses the mouse button, so we have to check if the value of the event is "TRUE". Furthermore, we are not really interested in the timestamp, so we can simply remove it from the function declaration:</p>
+        <div class="code"><h3>Code: Handler for events received from the isActive event-in slot (continued)</h3><pre>function isActive(value)
+{
+  if (value == true)
+  {
+  }
+}</pre></div>
+        <p>We want to toggle between the red and green color. The current state is saved in a SFBool field called "flag". So we have to write some code which toggles that field between "TRUE" and "FALSE". Doing that is quite easy - fields show up as normal global variables in the X3D code. In our example, there is a global variable "flag" that represents the "flag" field:</p>
+        <div class="code"><h3>Code: Handler for events received from the isActive event-in slot (continued)</h3><pre>function isActive(value)
+{
+  if (value == true)
+  {
+    if (flag == false)
+    {
+      flag = true;
+    }
+    else
+    {
+      flag = false;
+    }
+  }
+}</pre></div>
+        <p>Finally, we want to send red and green SFColor events via our "color_changed" event-out slot. Like fields, event-out slots show up as normal global variables in the JavaScript code. But there is an important difference: You cannot read from event-out slots - when you do so, the result is undefined. The only valid operation is writing values to event-out slots:</p>
+        <div class="code"><h3>Code: Handler for events received from the isActive event-in slot (final version)</h3><pre>function isActive(value)
+{
+  if (value == true)
+  {
+    if (flag == false)
+    {
+      flag = true;
+      color_changed = new SFColor(0, 1, 0);
+    }
+    else
+    {
+      flag = false;
+      color_changed = new SFColor(1, 0, 0);
+    }
+  }
+}</pre></div>
+        <p>Now our code is complete. You can load the X3D scene in your X3D browser and check if it actually works as expected. See the links to the example scenes at the end of this tutorial.</p>
+
+        <p>As mentioned above, fields and event-out slots show up as global variables in your JavaScript code. But there is an important difference between these variables and normal JavaScript variables that you have to keep in mind.</p>
+        <p>Usually, when you assign JavaScript objects to a variable, these objects do not get copied, instead the variable just gets a reference to that object. In the following example, after assigning "a" to "b", both variables point to the same (!) MFColor object:</p>
+        <div class="code"><h3>Code: Assignment to JavaScript variables</h3><pre>a = new MFColor();
+b = a; // Copy reference
+// a and b now both point to the same MFColor object</pre></div>
+        <p>But when you assign a JavaScript object to a variable that represents a field or an event-out slot, that object gets copied, i.e. in the following example, after assigning "a" to "b_field", both variables point to different (!) MFColor objects - "b_field" gets its own MFColor object which is an exact copy of the MFColor object "a":</p>
+        <div class="code"><h3>Code: Assignment to fields and event-out slots</h3><pre>a = new MFColor();
+b_field = a; // Copy value
+// a and b_field now point different MFColor objects</pre></div>
+
+        <p>Another important point is that assigning values to event-out slots does not immediately send an event on that outslots. Events are sent once when leaving the JavaScript code. When you assign values more than once to an event-out slot, only the last value is actually send. The order in which events are sent when leaving the JavaScript code is determined by the order of assignments in the code. To clarify this, have a look at the following code were we assign values to two SFInt32 event-out slots "a_changed" and "b_changed":</p>
+        <div class="code"><pre>a_changed = 1;
+b_changed = 2;
+a_changed = 3;</pre></div>
+        <p>After leaving the JavaScript code, the Script node first sends the value "3" to the "a_changed" event-out slot ("a_changed" is the first event-out slot we assigned a value to, and "3" was the last value assigned to "a_changed"), and then the value "2" to the "b_changed" event-out slot ("b_changed" is the second event-out slot we assigned a value to, and "2" was the last value assigned to "b_changed").</p>
+        <p>So as a rule of thumb: The <b>order</b> of events is determined by the order in which the <b>first</b> assignments to the respective event-out slots take place. The <b>values</b> of the events sent are determined by the <b>last</b> assignments to the respective event-out slots.</p>
+
+        <p>Assignments to elements of multi-value event-out slots are merged into one single multi-value event when leaving the JavaScript code. For example, the following code sends the value "[1 2 3]" to the MFInt32 event-out slot "a_changed":</p>
+
+        <div class="code"><pre>a_changed.length = 0; // Clear the MFInt32 array
+a_changed[0] = 1;
+a_changed[1] = 2;
+a_changed[2] = 3;</pre></div>
+
+        <p class="warning"><b>Warning: </b>This is the behaviour as postulated by the X3D specification and implemented by Instant Player, and there are good reasons to do it this way. Unfortunately, many other X3D players are not specification-conformant in this point. They do not copy values when assigning to fields and event-out slots, and/or they send events directly when assigning values to event-out slots. It's surely a good idea to write code that does not depend on these subtleties of the X3D specification.</p>
+
+        <p>At this point you might wonder how X3D data types like SFBool and SFColor get mapped to JavaScript data types. The answer is: Whenever possible, they get mapped to native JavaScript data types. For example, SFBool simply gets mapped to the JavaScript boolean type. When such a mapping is not possible (like in the case of SFColor), there are special, X3D-specific JavaScript classes. These classes have the same name as the corresponding X3D data type. The following table shows how X3D data types map to JavaScript data types:</p>
+
+<table>
+<tr><th>X3D</th><th>JavaScript</th><th>X3D</th><th>JavaScript</th></tr>
+<tr><td>SFBool</td><td>boolean</td><td>-</td><td>-</td></tr>
+<tr><td>SFColor</td><td>SFColor</td><td>MFColor</td><td>MFColor</td></tr>
+<tr><td>SFFloat</td><td>number</td><td>MFFloat</td><td>MFFloat</td></tr>
+<tr><td>SFImage</td><td>SFImage</td><td>-</td><td>-</td></tr>
+<tr><td>SFInt32</td><td>number</td><td>MFInt32</td><td>MFInt32</td></tr>
+<tr><td>SFNode</td><td>SFNode</td><td>MFNode</td><td>MFNode</td></tr>
+<tr><td>SFRotation</td><td>SFRotation</td><td>MFRotation</td><td>MFRotation</td></tr>
+<tr><td>SFString</td><td>String</td><td>MFString</td><td>MFString</td></tr>
+<tr><td>SFTime</td><td>number</td><td>MFTime</td><td>MFTime</td></tr>
+<tr><td>SFVec2f</td><td>SFVec2f</td><td>MFVec2f</td><td>MFVec2f</td></tr>
+<tr><td>SFVec3f</td><td>SFVec3f</td><td>MFVec3f</td><td>MFVec3f</td></tr>
+</table>
+
+        <p>Besides the special X3D classes like SFColor that represent X3D data types in JavaScript, there exists a single instance of a "Browser" class that allows to interact with the X3D browser, and another class called "VrmlMatrix" which allows to do 4x4 matrix mathematics. For more information about the properties and methods available from these classes, you have to look into the <a href="http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part1/javascript.html">VRML specification</a>.</p>
+
+        <p>In the example above, we learned about event handler functions that get called whenever an event is received on an event-in slot that has the same name as the function. But there are three more handler functions you might implement in your JavaScript code that get called in certain situations:</p>
+        <div class="code"><pre>function initialize()
+{
+  // Your code here...
+}
+
+function prepareEvents()
+{
+  // Your code here...
+}
+
+function eventsProcessed()
+{
+  // Your code here...
+}
+
+function shutdown()
+{
+  // Your code here...
+}</pre></div>
+        <p>"initialize()" gets called when the Script node starts working, e.g. when loading the scene, before any event handler function gets called. It doesn't have any parameters. You can put any initializations needed by your code into this function.</p>
+	<p>"prepareEvents()" gets called only once per timeStamp and before any connecting ROUTEs are processed. This handle is rarely used.</p>
+        <p>"eventsProcessed()" gets called after one of your event handlers has been called. It doesn't have any parameters. This handler is rarely used.</p>
+        <p>"shutdown()" gets called when the Script node stops working, e.g. when leaving a scene. It doesn't have any parameters. It is the last handler that gets called. You can use this function to do any cleanup needed by your code.</p>
+
+        <h2>Pitfalls, Tipps and Tricks</h2>
+        <p>Even though programming Script nodes in JavaScript is straightforward and easy, there are some gotchas. In this section I'll keep a list of things that you should keep in mind when developing JavaScript code:</p>
+
+        <h2>Debugging</h2>
+        <p>Debugging X3D JavaScript code is a little bit uncomfortable because none of the existing X3D players has an integrated JavaScript debugger. But many X3D players have some kind of error console where they print warnings and error messages. Instant Player also has such a console - you get it when you click onto the "Console" item in the "Window" menu. You can print your own message to that console by using the "print()" method. That method takes one parameter, a JavaScript String method containing the message. This is an extension of the X3D JavaScript supported by many X3D browsers, a kind of de-facto standard. But be warned, it does not work on all browsers, so you should use this command only for debugging and remove all occurrences of "print()" when you're finished.</p>
+        <p>For example, in our "isActive()" event handler we've developed above, we could add a "print()" call that prints the value of the incoming event to the console as well as the outgoing color values:</p>
+        <div class="code"><h3>Code: isActive event handler with debug output</h3><pre>function isActive(value)
+{
+  print('isActive(' + value + ')'); // Debug output
+  if (value == true)
+  {
+    if (flag == false)
+    {
+      flag = true;
+      print('color is green'); // Debug output
+      color_changed = new SFColor(0, 1, 0);
+    }
+    else
+    {
+      flag = false;
+      print('color is red'); // Debug output
+      color_changed = new SFColor(1, 0, 0);
+    }
+  }
+}</pre></div>
+        <p>Keep in mind that event though the "print()" method takes a single String object parameter, you can create arbitrary complex messages by concatenating strings with the "+" operator. Due to the fact that JavaScript automatically converts all objects to strings, you can also print arbitrary objects - when printing your own JavaScript objects, you have to provide "toString()" methods for your objects. All standard X3D JavaScript objects that represent X3D data types already have such a "toString()" method, so can directly print all X3D data types.</p>
+        <p>Load that code in your browser. Click onto the sphere several times, and you'll get some debug output like this in the console:</p>
+        <div class="code"><h3>Code: Debug output in the console</h3><pre>isActive(true)
+color is green
+isActive(false)
+isActive(true)
+color is red
+isActive(false)
+isActive(true)
+color is green
+isActive(false)
+</pre></div>
+
+        <h2>Global and local variables</h2>
+        <p>In contrast to most other programming languages, JavaScript variables by default are declared in the global scope, not in the local scope. You have to explicitly declare a varable as local by using the JavaScript "var" keyword. When you forget to do so, you'll get strange bugs that are extremly hard to track down.</p>
+        <p>Let's say you want to implement a function "printRectangle()" that prints a rectangle of characters to the console. It takes three parameters, the width and the height of the rectangle (in characters) and the character the rectangle is made of. The implementation of "printRectangle()" calls another function, "printLine()", which prints a single line of the rectangle. Your first version looks like this:</p>
+        <div class="code"><h3>Code: Buggy implementation with global variables</h3><pre>function printLine(len, c)
+{
+  line = new String();
+  for (i = 0; i &lt; len; ++i)
+    line = line.concat(c);
+  print(line);
+}
+
+function printRectangle(width, height, c)
+{
+  for (i = 0; i &lt; height; ++i)
+    printLine(width, c);
+}
+</pre></div>
+        <p>After finishing that implementation, you call your "printRectangle()" function like this:</p>
+        <div class="code"><pre>printRectangle(5, 2, '*');</pre></div>
+        <p>Quite surprisingly, you do not get two lines of five stars, but just one line. What went wrong? The answer is quite easy: Both function use a local variable "i" which counts the number of iterations in the "for" loop. But you forgot to actually declare both "i" as local variables. So they're global, which means that both functions use the same, global variable "i". After returning from "printLine()", the value of the global "i" is 5, which is greater than the height (2), and the "for" loop in "printRectangle()" terminates.</p>
+        <p>There is also another local variable "line" in "printLine()" which is declared at global scope. Even though this doesn't make problems in this example, you should declare it local.</p>
+        <p>So the correct version of your code should look like this (mind the "var" keyword whenever you use a local variable for the first time):</p>
+        <div class="code"><h3>Code: Correct implementation with local variables</h3><pre>function printLine(len, c)
+{
+  var line = new String();
+  for (var i = 0; i &lt; len; ++i)
+    line = line.concat(c);
+  print(line);
+}
+
+function printRectangle(width, height, c)
+{
+  for (var i = 0; i &lt; height; ++i)
+    printLine(width, c);
+}
+</pre></div>
+        <p>As a rule of thumb, always declare your variables with the "var" keyword whenever you use them for the first time, even on the global scope - it will save you a lot of headaches when developing in JavaScript.</p>
+
+        <h2>JavaScript Strings in VRML encoding</h2>
+        <p>A problem that happens quite frequently in VRML encoding when writing JavaScript code directly into the X3D scene is that people forget that they have to escape quotes. For example, the following line of JavaScript code assignes a string "foo" to a variable "s":</p>
+        <div class="code"><h3>Code: Assigning a string constant to a variable</h3><pre>s = "foo";</pre></div>
+        <p>There is nothing wrong with this code, it is 100% JavaScript compliant, but when you put it into a X3D Script node, you'll get a parse error:</p>
+        <div class="code"><h3>Code: Buggy JavaScript code with quotes</h3><pre>Script
+{
+  url "javascript:
+
+    s = "foo";
+
+  "
+}</pre></div>
+        <p>What went wrong? It's quite easy: "url" is a MFString field. MFString fields consist of strings that start with a quote and end with a quote. The VRML parser does not know anything about JavaScript, he just takes the code as a string. So when the parser reaches the quote that starts the JavaScript string constant "foo", he thinks that he finished parsing the MFString field "url" and that "foo" is the name another field - a field that of course does not exist. The result is a parse error.</p>
+        <p>There are three ways to work around that problem: The first one is quite simple - put your code into an external file. In this case you do not have to care about quotes at all.</p>
+        <p>The second solution is to use escape sequences. Whenever you want to put a quote into a VRML string, you have to precede it with a backslash ("\"). So a correct version of the code above with escaped quotes looks like this:</p>
+        <div class="code"><h3>Code: Correct JavaScript code with escaped quotes</h3><pre>Script
+{
+  url "javascript:
+
+    s = \"foo\";
+
+  "
+}</pre></div>
+        <p>The last solution is to use single quotes. In JavaScript, you can specify string constants by putting them between double quotes as well as single quotes. So a correct version of the code above with single quotes looks like this:</p>
+        <div class="code"><h3>Code: Correct JavaScript code with single quotes</h3><pre>Script
+{
+  url "javascript:
+
+    s = 'foo';
+
+  "
+}</pre></div>
+
+        <h2>Converting between X3D timestamps and JavaScript Date objects</h2>
+        <p>X3D timestamps in JavaScript are numerical values that represent the number of seconds since January 1, 1970, 00:00:00 GMT. That might be a good representation for a computer, but not for a human - it is little bit difficult to deal with X3D timestamps directly. JavaScript has a special class called "Date" to work with dates and times. But how do you convert a X3D timestamp into a JavaScript Date object and vice versa?</p>
+        <p>Converting a X3D timestamp into a Date object is straightforward. One variant of the Date constructor takes the number of milliseconds since January 1, 1970, 00:00:00 GMT. So you simply have to multiply the X3D timestamp by 1000:</p>
+        <div class="code"><h3>Code: Converting a X3D timestamp into a JavaScript Date object</h3><pre>var date = new Date(timestamp * 1000);</pre></div>
+        <p>The other way round is straightforward, too. The "getTime()" method of the Date class returns the number of milliseconds since January 1, 1970, 00:00:00 GMT. So you simply have to divide that value by 1000:</p>
+        <div class="code"><h3>Code: Converting a JavaScript Date object into a X3D timestamp</h3><pre>var timestamp = date.getTime() / 1000;</pre></div>
+
+        <h2>Example files</h2>
+        <p>Here you can download the complete example we developed in this tutorial. There is one version with the JavaScript included in the scene ("JavaScript-internal.*"), and one version with the JavaScript code in an external file ("JavaScript-external.*", the code is in "MyCode.js"). Both versions are available in classic X3D encoding as well as XML encoding.</p>
+        
+    Files:
+    <ul class="files"><li><a href="JavaScript-internal.wrl">JavaScript-internal.wrl</a></li><li><a href="JavaScript-internal.x3d">JavaScript-internal.x3d</a></li><li><a href="JavaScript-external.wrl">JavaScript-external.wrl</a></li><li><a href="JavaScript-external.x3d">JavaScript-external.x3d</a></li><li><a href="MyCode.js">MyCode.js</a></li></ul>
+
+        </div>
+</div>

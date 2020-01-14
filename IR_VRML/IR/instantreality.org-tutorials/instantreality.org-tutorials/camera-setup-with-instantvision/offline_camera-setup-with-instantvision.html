@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Camera setup with InstantVision</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Camera setup with InstantVision</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Camera Setup,
+        camera,
+        vision<br/><strong>Author(s): </strong>Mario Becker<br/><strong>Date: </strong>2009-01-10</p>
+  <p><strong>Summary: </strong>This tutorial is about interactive camera selection and setup.</p>
+  <div id="content">
+        
+
+        <p>
+        This is done in the CameraSetup activity in InstantVision.<img class="icon" src="act_videocapture.png"/> 
+        </p>
+
+        <h2>Necassary Data</h2>
+
+            <ul><li>nothing</li></ul>
+
+
+        <h2>Necassary Hardware</h2>
+
+            <ul><li>Any supported camera, check out the supported hardware tutorial.</li></ul>
+
+
+        <h2>Camera Selection</h2>
+
+            <ul><li>the help viewer will show two links, press the camera setup link.</li><li>a camera selection dialog will pop up </li></ul>
+            
+            <div class="imgContainer"><img src="iv-camerasetup01.png" align="center"/><div class="imgCaption">Image: </div></div>
+
+            <ul><li>here you can select a camera source (the driver interface to be used). The available sources may vary. Some of the sources are:
+                <ul><li>ds - DirectShow?, is sort of default device, it is also present on other platforms than Windows and points to a standard source (Quicktime on MaxOSX and Video4Linux2 on Linux)</li><li>ieee1394 - referes to standard conform IEEE1394-DC camera drivers. On Windows it's using the CMUCamera API on Linux and MacOSX it used dc1394-2.x. This source does not support IEEE1394-DV cameras (camcorders)</li><li>ieee1394pgr - Implementation of the www.ptgrey.com API. (Windows only)</li><li>ueye - uses the API of www.ids-imaging.de, these cameras can also be used via the direct show interface but it's not recomendet. The native API gives more control abilities. (This source is available on Windows and Linux)</li><li>v4l2 - Implementation of video4linux2 API, supports TV cards and some UVC compatible cameras (Linux only) </li></ul>
+            </li></ul>
+
+            <ul><li>For sources which can have multiple cameras connected, you can select one specific camera with the "unit" selection box.</li><li>The "mode" box presents a list of the available video modes, covering image resolution and framerates.</li><li>"other parameters" presents a list of additional parameters, supported by the selected camera source. This list can contain things like shutter speed, exposure time etc.</li><li>The text field "Additional Infos" shows a description of the selected camera. </li></ul>
+
+
+        <h2>Runtime Parameters</h2>
+
+        <div class="imgContainer"><img src="iv-camerasetup05.png" align="center"/><div class="imgCaption">Image: </div></div>
+
+        <p>
+        Most camera sources support adjustment of camera parameters during runtime. To get there you need to doubleclick the VideoSourceAction? in the ActionManager?. The camera selection dialog will pop up again, just cancel it because we do not want to change the source. Then go to the also opened "Action Properties" window and select the "Configure" tab. If the camera source does support parameter adjustment the available parameters will be shown in a ToolBar?. The changes here will immidetly affect the image.
+        </p>
+
+
+        <h2>Exporting Results</h2>
+
+        <div class="imgContainer"><img src="iv-camerasetup04.png" align="center"/><div class="imgCaption">Image: </div></div>
+
+        <p>
+        Also in the "Action Properties" window, in the "Parameter" tab under "attrubutes", you can get the source_url for the selected camera source. This is a string representing your settings. You can copy paste it for use in a tracking configuration. 
+        </p>
+
+
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

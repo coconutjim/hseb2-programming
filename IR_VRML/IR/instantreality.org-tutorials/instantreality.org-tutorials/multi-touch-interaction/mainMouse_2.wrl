@@ -1,0 +1,252 @@
+#VRML V2.0 utf8
+
+GradientBackground {
+	position [ 0, 1 ]
+	color [ 0 0.329 0.706, 0 0.008 0.082 ]
+}
+
+Viewpoint {
+	position -3 0 20
+	zNear 1
+}
+
+Transform {
+	children [
+
+		DEF Tisch Transform {
+			translation 0 0 -10
+			rotation 1 0 0 1.57079632679
+			scale 4 3 2
+			children [
+				Transform {
+					children [
+						DEF TischBein Shape {
+							appearance Appearance {
+								material Material {
+								}
+								texture	DEF HolzTex ImageTexture {
+									url "holz.gif"
+								}
+							}
+							geometry Cylinder {
+								radius 0.3
+								height 4.2
+							}
+						}
+					]
+					translation	-4 -2 4
+				}
+				Transform {
+					children [
+						USE	TischBein
+					]
+					translation	4 -2 4
+				}
+				Transform {
+					children [
+						USE	TischBein
+					]
+					translation	-4 -2 -4
+				}
+				Transform {
+					children [
+						USE	TischBein
+					]
+					translation	4 -2 -4
+				}
+				Shape {
+					appearance Appearance {
+						material Material {
+						}
+						texture	USE HolzTex
+					}
+					geometry Box {
+						size 10, 0.3, 10
+					}
+				}
+			]					   
+		}
+
+		Transform {					
+			translation	-4 -4 -9.5 
+			children [
+	
+				DEF multiTrafo Transform {
+					#showProxyGeometry TRUE
+					children [
+						Shape {
+							appearance Appearance {
+								texture	ImageTexture {
+									url "froekk.jpg"
+								}
+							}
+
+							geometry Box {
+								size 4.5 4.5 0.1
+							}
+						}
+					]
+				}
+
+				DEF	multiTouch HypersurfaceSensor {	
+					minScale .5 .5 1
+					maxScale 5 5 1
+					#transformRestriction "rotateTranslate"
+					ROUTE multiTouch.translation_changed TO	multiTrafo.translation
+					ROUTE multiTouch.rotation_changed TO	multiTrafo.rotation
+					ROUTE multiTouch.scale_changed TO		multiTrafo.scale
+				}
+			]
+		}
+
+		Transform {					
+			translation	3 3 -9.5
+			children [
+	
+				DEF multiTrafo1 Transform {
+					#showProxyGeometry TRUE
+					children [
+						Shape {
+							appearance Appearance {
+								texture	ImageTexture {
+									url "edda.jpg"
+								}
+							}
+
+							geometry Box {
+								size 4.5 6 0.1
+							}
+						}
+					]
+				}
+
+				DEF	multiTouch1 HypersurfaceSensor {	
+					minScale .5 .5 1
+					maxScale 5 5 1
+					#transformRestriction "rotateTranslate"
+					ROUTE multiTouch1.translation_changed TO	multiTrafo1.translation
+					ROUTE multiTouch1.rotation_changed TO	multiTrafo1.rotation
+					ROUTE multiTouch1.scale_changed TO		multiTrafo1.scale
+				}
+			]
+		}
+
+		Transform {	
+            translation	-11 6 -9.5
+			#translation	-13 8 -9.5
+			#rotation 1 0 0 1.57079632679			   
+			children [
+                
+				DEF multiTrafo2 Transform {
+					#showProxyGeometry TRUE
+					children [
+						Shape {
+							appearance Appearance {
+								texture	ImageTexture {
+									url "welpen.jpg"
+								}
+							}
+
+							geometry Box {
+								size 7.1 4.1 0.1
+							}
+						}
+					]
+				}
+
+				DEF	multiTouch2 HypersurfaceSensor {	
+					minScale .5 .5 1
+					maxScale 5 5 1
+					ROUTE multiTouch2.translation_changed TO	multiTrafo2.translation
+					ROUTE multiTouch2.rotation_changed TO	multiTrafo2.rotation
+					ROUTE multiTouch2.scale_changed TO		multiTrafo2.scale
+				}
+			]
+		}
+		
+		Transform {	
+            translation	-4 4.5 -9.5		   
+			children [
+                
+				DEF multiTrafo3 Transform {
+					children [
+						Shape {
+							appearance Appearance {
+								texture	ImageTexture {
+									url "bogga.jpg"
+								}
+							}
+
+							geometry Box {
+								size 3.64 4.99 0.1
+							}
+						}
+						Transform {
+									#render FALSE
+									translation	0 -3.2 0.5
+									rotation 1 0 0 1.57079632679			   
+									children [
+										Shape {
+											appearance Appearance {
+												material DEF mat Material {
+													diffuseColor 1 .46 .44
+													emissiveColor .5 .23 .22
+													ambientIntensity 0
+													shininess 0
+												}
+											}
+											geometry Cylinder {
+												radius 0.75
+												height 0.15
+											}
+										}
+										DEF touch TouchSensor {
+											#enabled FALSE
+										}
+									]
+								}
+					]
+				}
+
+				DEF	multiTouch3 HypersurfaceSensor {	
+					minScale .5 .5 1
+					maxScale 5 5 1
+					ROUTE multiTouch3.translation_changed TO	multiTrafo3.translation
+					ROUTE multiTouch3.rotation_changed TO	multiTrafo3.rotation
+					ROUTE multiTouch3.scale_changed TO		multiTrafo3.scale
+				}
+			]
+		}
+	]
+}
+
+DEF	script Script {
+	eventIn	SFTime touched
+	eventIn	SFBool isActive
+	field SFNode mat USE mat
+	
+	url	"javascript:
+		var toggle = true;
+		function touched(val)
+		{
+			if (toggle)
+			{
+				mat.diffuseColor = new SFColor(0,1,0);
+			}
+			else
+			{
+				mat.diffuseColor = new SFColor(1,0,0);
+			}
+			toggle = !toggle;
+		}
+
+		function isActive(val)
+		{
+			if (!val)
+				touched(val);
+		}
+	"
+}
+
+#ROUTE touch.touchTime TO script.touched
+ROUTE touch.isActive TO script.isActive

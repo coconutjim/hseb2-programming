@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Getting Started</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Getting Started</h2>
+  <p class="description"><strong>Keywords:</strong><br/>instant player,
+        basics,
+        interface<br/><strong>Author(s): </strong>Michael Zoellner<br/><strong>Date: </strong>2007-07-20</p>
+  <p><strong>Summary: </strong>
+	This tutorial explains the first steps with instantplayer. It will show you basic functions like loading files, basic navigation in the scene and viewing options.
+    </p>
+  <div id="content">
+		<h2>Starting instantplayer</h2>
+		<p>
+		Double-click the instantplayer icon on your Desktop / Start Menu (Windows) or Application Folder (OS X) in order to start the software. instantplayer's default scene will load.
+		</p>
+		<div class="imgContainer"><img src="default_scene.png" align="center"/><div class="imgCaption">Image: Default Scene</div></div>
+		
+		
+		<h2>Loading the first Scene</h2>
+		<p>
+		There are several ways to load a scene in instantplayer. The most common is to click on <i>"Open File"</i> in the menu bar's <i>"File"</i> section and select an X3D or VRML file on your harddrive.
+		</p>
+		<div class="imgContainer"><img src="file.png" align="center"/><div class="imgCaption">Image: File Dialogue</div></div>
+        
+		<h2>Alternative Methods:</h2>		
+		<ul><li><i>"Open Location"</i> loads X3D and VRML files from a URL. Paste the scene's URL in the dialogue field and click "Open".</li><li>Drag your X3D or VRML file on instantplayer's icon on the Desktop or Application Folder in order to open it.</li><li>Drag the X3D or VRML file on an open instantplayer's window to open it. <i>Tip: You can load 3DS, OBJ and OSG files that way, too.</i></li></ul>
+		<p>Reload the scene by clicking <i>Reload</i>.</p>				
+		
+		<h2>Exploring the Scene</h2>
+		<p>
+		Once the scene is loaded you can start playing around with the camera / viewpoint. If there is no <a href='/documentation/nodetype/NavigationInfo'>NavigationInfo</a> node in the scene that defines a certain navigation mode instantplayer enables the "Examine Mode".
+		</p>
+		
+		<div class="imgContainer"><img src="navigation.png" align="center"/><div class="imgCaption">Image: Navigation</div></div>
+		<h2>Examine Mode Navigation:</h2>
+		
+		<ul><li><i>Zoom:</i> Scroll with the mouse wheel or click the right mouse button and move the cursor vertical.</li><li><i>Shove:</i> Click the middle mouse button and move the cursor around.</li><li><i>Rotate:</i> Click the left mouse button and move the cursor around or press the arrow keys.</li></ul>
+		
+		
+		<h2>Camera Manipulation</h2>
+        
+		<ul><li><i>Reset Camera Position:</i> After playing around in the scene click <i>"Reset Camera Position"</i> in order to get back to the initial position.</li><li><i>Show All:</i> Show all objects in the scene.</li><li><i>Cameras:</i> Select a defined <a href='/documentation/nodetype/Viewpoint'>Viewpoint</a> in the scene. The <a href='/documentation/nodetype/Viewpoint'>Viewpoint</a> node must have the <i>description</i> field set in order to get listed.</li><li><i>Navigation Mode:</i> <a href='/documentation/nodetype/Switch'>Switch</a> the different navigation modes: WALK, EXAMINE, FLY, FREEFLY, LOOKAT</li></ul>		
+		
+		
+		<h2>View Settings</h2>
+		<p>
+		The menu bar's "View" section contains functions like setting the render mode to wireframe and points and switching to fullscreen presentation mode.
+		</p>
+		<ul><li><i>Render Mode:</i> <a href='/documentation/nodetype/Switch'>Switch</a> the render mode of the scene to Filled, Wireframe or Points.</li><li><i>Activate Fullscreen:</i> Activate fullscreen presentation mode. Press <i>Command-F</i> (OS X) or <i>Alt-Enter</i> (Windows) to return to window mode.</li><li><i>Statistic:</i> Activate statistic overlays about Application, Rendering and Keyboard Mapping.</li><li><i>Deactivate Status Bar:</i> Deactivate the message overlays in the lower left corner of the window.</li></ul>		
+		<div class="imgContainer"><img src="view.png" align="center"/><div class="imgCaption">Image: View</div></div>		
+	</div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

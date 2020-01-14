@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ImageMarkerTest
+    This Example shows the integration of an ImageMarkerTracker into 
+    X3D using the instantReality-Framework.
+-->
+<X3D>
+    <!-- We create an engine, that is not necessary, but implemented for convinience -->
+	<Engine DEF='engine'>
+		<TimerJob DEF='timer'/>
+		<SynchronizeJob DEF='synchronize'/>
+		<RenderJob DEF='render'>
+			<WindowGroup>
+                <!-- We define a window of a certain size and position-->
+				<Window position='10 50' size='640,480' fullScreen='false' />
+			</WindowGroup>
+		</RenderJob>
+	</Engine>
+	
+    <!-- Here comes the main part, the scene-->
+	<Scene DEF='scene'>
+        <!-- We initialize the VisionLib backend by configuring the IOSensor with the given config file, that has been created using InstantVision.
+            We use the known camera (InstantCamera) for 2 purposes:
+            1. To gain intrinsic information of the camera like Principal point and Field of view, as well as the Aspect of the cam.
+            2. To modify the position of the object to be displayed
+            
+            Additionally we get the image from the VisionLib backend in order to display it in the background (PolygonBackground)
+        -->
+    	<IOSensor DEF='VisionLib' type='VisionLib' configFile='instantImageMarkerTracking.pm'>
+    		<field accessType='outputOnly' name='VideoSourceImage' type='SFImage'/>
+    		<field accessType='outputOnly' name='InstantCamera_ModelView' type='SFMatrix4f'/>
+            <field accessType='outputOnly' name='InstantCamera_FOV_horizontal' type='SFFloat'/>
+            <field accessType='outputOnly' name='InstantCamera_PrincipalPoint' type='SFVec2f'/>
+            <field accessType='outputOnly' name='InstantCamera_CAM_aspect' type='SFFloat'/>
+    	</IOSensor>
+    
+        <!-- We create a Camera, with some near and far Parameters at a constant position-->
+    	<PerspectiveViewpoint DEF='vp' fovMode='HORIZONTAL' zNear='0.1' zFar='1000' position='0 0 0'/>
+    
+        <!-- We create the background to be displayed. The 'fixedImageSize' Attribute is used to set an aspect ratio of the camera itself. -->
+    	<PolygonBackground fixedImageSize='640 480' mode='HORIZONTAL'>
+    		<Appearance positions='0 0, 1 0, 1 1, 0 1' >
+                <!-- We have to flip the image -->
+      			<TextureTransform rotation='0' scale='1 -1'/>
+       			<PixelTexture2D DEF='tex' autoScale='false'/>
+    		</Appearance>
+    	</PolygonBackground>
+
+        <!-- We create a matrixTransform which represents the position of the Object to be transformed.-->
+       <MatrixTransform DEF='flipperModel'>
+            <!-- We define a nice position in respect to the marker 0 point-->
+            <Transform DEF='flipperTrans' translation='20 3 0'>
+                <!-- and we scale the model -->
+                <Transform scale='0.05 0.05 0.05' rotation='1 0 0 1.0'>
+                    <!-- Include the model from the filesystem -->
+                    <Inline url='flipper.wrl'/>
+                </Transform>
+            </Transform>
+        </MatrixTransform>
+
+         <!-- We route the information from the VisionLib-Backend into our Nodes -->
+         <!-- First the image into the PixelTexture -->
+        <ROUTE fromNode='VisionLib' fromField='VideoSourceImage' toNode='tex' toField='image'/>
+
+        <!-- Within the VisionLib, every tracked object is represented through a camera, instead of a certain position.
+            We route the rotation and translation in form of a matrix into our defined MatrixTransform-Node-
+        -->
+    	<ROUTE fromNode='VisionLib' fromField='InstantCamera_ModelView' toNode='flipperModel' toField='matrix'/>
+        
+        <!-- The other fields, representing the intrinsic parameters of the Camera (characteristics of the lens), are routed into the defined Camera -->
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_FOV_horizontal' toNode='vp' toField='fieldOfView'/>
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_PrincipalPoint' toNode='vp' toField='principalPoint'/>
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_CAM_aspect' toNode='vp' toField='aspect'/>
+    </Scene>
+</X3D>

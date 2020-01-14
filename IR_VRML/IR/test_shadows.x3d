@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Scene DEF='scene'>
+    <GradientBackground position='0 1' color='0 0.329 0.706 0 0.008 0.082'/>
+    <Transform rotation='1 0 0 0.8'>
+      <TouchSensor DEF='touchSensor'/>
+      <Transform DEF='trans'>
+        <SpotLight direction='0.01 -1 0' location='2 12 2'/>
+        <SpotLight direction='-0.01 -1 0' location='-2 12 -2'/>
+      </Transform>
+      <NavigationInfo headlight='false'>
+        <Navigator DEF='nav'/>
+      </NavigationInfo>
+      <Transform DEF='ground' scale='4 0.2 4' translation='0 -1 0'>
+        <Shape>
+          <Appearance>
+            <Material diffuseColor='0.3 0.25 1'/>
+          </Appearance>
+          <Sphere/>
+        </Shape>
+      </Transform>
+      <Transform DEF='boxTrans' translation='0 1.8 0'>
+        <Shape>
+          <Appearance>
+            <Material diffuseColor='1 0 0'/>
+          </Appearance>
+          <Teapot solid='FALSE' />
+        </Shape>
+      </Transform>
+      <Transform DEF='sphere' translation='2.5 0 1.5'>
+        <Shape>
+          <Appearance>
+            <Material diffuseColor='0 1 0'/>
+          </Appearance>
+          <Sphere/>
+        </Shape>
+      </Transform>
+    </Transform>
+    <TimeSensor DEF='time' cycleInterval='10' loop='true'/>
+    <OrientationInterpolator DEF='ori' key='0 0.5 1' keyValue='0 1 0 0 0 1 0 3.1415 0 1 0 6.283'/>
+    <OrientationInterpolator DEF='or2' key='0 0.5 1' keyValue='0 1 0 0 0 1 0 3.1415 0 1 0 6.283'/>
+    <PositionInterpolator DEF='bI' key='0 0.5 1' keyValue='0 2 0 1 0 0 0 2 0'/>
+    <PositionInterpolator DEF='b2' key='0 0.5 1' keyValue='2 0 0 1 0 0 2 0 0'/>
+    <Environment DEF='env' globalShadowIntensity='1' shadowMode='niceUniformSoftShadow' shadowMapSize='1024' shadowOffset='8' shadowSmoothness='0.5' />
+    <Script DEF='shadowModeSwitch'>
+      <field accessType='inputOnly' name='trigger' type='SFBool'/>
+      <field accessType='outputOnly' name='navMessage' type='SFString'/>
+	  <![CDATA[javascript:
+		function trigger (v) {
+		  if (v) {
+		    Browser.println ('switch shadow mode');
+		    navMessage = 'nextShadowMode';
+		  }
+		};
+	  ]]>
+    </Script>
+    <ROUTE fromNode='ori' fromField='value_changed' toNode='trans' toField='set_rotation'/>
+    <ROUTE fromNode='time' fromField='fraction_changed' toNode='ori' toField='set_fraction'/>
+    <ROUTE fromNode='time' fromField='fraction_changed' toNode='or2' toField='set_fraction'/>
+    <ROUTE fromNode='or2' fromField='value_changed' toNode='boxTrans' toField='set_rotation'/>
+    <ROUTE fromNode='time' fromField='fraction_changed' toNode='bI' toField='set_fraction'/>
+    <ROUTE fromNode='time' fromField='fraction_changed' toNode='b2' toField='set_fraction'/>
+    <ROUTE fromNode='b2' fromField='value_changed' toNode='sphere' toField='set_translation'/>
+    <ROUTE fromNode='touchSensor' fromField='isActive' toNode='shadowModeSwitch' toField='trigger'/>
+    <ROUTE fromNode='shadowModeSwitch' fromField='navMessage' toNode='nav' toField='message'/>
+  </Scene>
+</X3D>

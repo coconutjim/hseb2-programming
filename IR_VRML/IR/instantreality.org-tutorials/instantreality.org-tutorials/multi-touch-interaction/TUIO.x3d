@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D>
+  <Scene DEF='scene'>
+    <IOSensor DEF='tuio' type='TUIO' >
+      <field accessType='outputOnly' name='isActive'    type='SFBool'/>
+      
+      <field accessType='outputOnly' name='position'    type='MFVec3f'/>
+      <field accessType='outputOnly' name='eventMap'    type='MFInt32'/>
+      <field accessType='outputOnly' name='sequenceID'  type='SFInt32'/>
+      
+      <field accessType='outputOnly' name='addID'       type='MFInt32'/>
+      <field accessType='outputOnly' name='removeID'    type='MFInt32'/>
+      
+      <field accessType='outputOnly' name='visionLib'   type='MFVec3f'/>
+    </IOSensor>
+    
+    <Group DEF='root' />
+    
+    <Script DEF='script' >
+      <field name='root' accessType='initializeOnly' type='SFNode'><Group USE='root'/></field>
+      
+      <field accessType='inputOnly' type='MFInt32' name='addID' />
+      <field accessType='inputOnly' type='MFInt32' name='removeID' />
+      
+      <field accessType='inputOnly' type='MFVec3f' name='position' />
+      <field accessType='inputOnly' type='MFInt32' name='eventMap' />
+      <field accessType='inputOnly' type='SFInt32' name='sequenceID' />
+      
+      <![CDATA[ecmascript:
+      
+        var nodes = new Array();
+        var nodes_ids = new Array();
+        
+        var tmp_pos = new Array();
+        var id_map = new Array();
+        
+        function addID(ids)
+        {
+          for(var i=0; i<ids.length; ++i)
+          {
+            var transform = Browser.currentScene.createNode("Transform");
+            var shape = Browser.currentScene.createNode("Shape");
+            var box = Browser.currentScene.createNode("Box");
+            var appearance = Browser.currentScene.createNode("Appearance");
+            var material = Browser.currentScene.createNode("Material");
+            
+            material.diffuseColor = SFColor(Math.random(), Math.random(), Math.random());
+            appearance.material = material;
+            shape.geometry = box;
+            shape.appearance = appearance;
+            transform.children[0] = shape;
+            
+            nodes[root.children.length] = transform;
+            nodes_ids[root.children.length] = ids[i];
+            
+            root.children[root.children.length] = transform;
+            
+            sequenceID(-1); // remove flickering of blob at 0/0
+          }
+        }
+        
+        function removeID(ids)
+        {
+          for(var i=0; i<ids.length; ++i)
+          {
+            for(var j=0; j<nodes_ids.length; ++j)
+            {
+              if(nodes_ids[j] == ids[i])
+              {
+                root.removeChild(nodes[j]);
+               
+                delete nodes[j];
+                delete nodes_ids[j];
+                
+                break;
+              }
+            }
+          }
+        }
+        
+        function position(pos)
+        {
+          tmp_pos.length = pos.length;
+          
+          for(var i=0; i<pos.length; ++i)
+            tmp_pos[i] = pos[i];
+        }
+        
+        function eventMap(ids)
+        {
+          id_map.length = ids.length;
+          
+          for(var i=0; i<ids.length; ++i)
+            id_map[i] = ids[i];
+        }
+        
+        function sequenceID(seq)
+        {
+          for(var p=0; p<tmp_pos.length; ++p)
+          {
+            var id = id_map[p];
+            for(var n=0; n<nodes_ids.length; ++n)
+            {
+              if(id == nodes_ids[n])
+              {
+                nodes[n].translation = SFVec3f((tmp_pos[p].x - 0.5) * 10.0, (tmp_pos[p].y - 0.5) * -10.0, 0.0);
+              }
+            }
+          }
+        }
+        
+      ]]>
+    </Script>
+    
+    <!--Logger DEF='logger' level='3' />
+    <ROUTE fromNode='tuio' fromField='visionLib' toNode='logger' toField='write' /-->
+    
+    <ROUTE fromNode='tuio' fromField='addID' toNode='script' toField='addID' />
+    <ROUTE fromNode='tuio' fromField='removeID' toNode='script' toField='removeID' />
+    
+    <ROUTE fromNode='tuio' fromField='position' toNode='script' toField='position' />
+    <ROUTE fromNode='tuio' fromField='eventMap' toNode='script' toField='eventMap' />
+    <ROUTE fromNode='tuio' fromField='sequenceID' toNode='script' toField='sequenceID' />
+  </Scene>
+</X3D>

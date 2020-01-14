@@ -1,0 +1,307 @@
+#VRML V2.0 utf8
+
+
+Background {
+	skyColor 0.2 0.4 0.9
+}
+
+
+# navigationinfo to set type of interaction to ray mode
+DEF navinfo NavigationInfo {
+	interactionType "projection"
+}
+
+
+Foreground{
+
+	overlays[
+
+		# overlay to display some text
+		DEF textOverlay ScreenTextOverlay {
+			enabled TRUE
+			text ["TEST"]
+		
+		}#textoverlay
+	
+
+	]#overlays
+
+}#foreground
+
+# cubes with touchsensors which can be selected
+
+Transform {
+
+	translation	0 0 -10 
+	children [
+
+		DEF	touch1 TouchSensor {
+			enabled	TRUE
+		}
+	
+		Shape {
+			appearance Appearance {
+				material	Material {
+
+				}
+			}
+
+			geometry Box {
+				size 2 2 2
+			}
+		}
+	]
+}
+
+Transform {
+
+	translation	-5 0 -10 
+	children [
+
+		DEF	touch2 TouchSensor {
+			enabled	TRUE
+		}
+	
+		Shape {
+			appearance Appearance {
+				material	Material {
+
+				}
+			}
+
+			geometry Box {
+				size 2 2 2
+			}
+		}
+	]
+}
+
+# iosensor to connect to gamepad
+
+DEF gamepad IOSensor {
+	system "hid"
+	type "joystick"
+	name "HID"
+	enabled TRUE
+	eventOut SFBool *button*8
+	eventOut SFFloat X?axis
+	eventOut SFFloat Y?axis
+ 
+
+}#iosensor gamepad
+
+
+# script to handle data that comes form iosensor
+DEF navScript Script{
+
+	#ins
+	eventIn SFFloat xTranslation
+	eventIn SFFloat yTranslation
+	eventIn SFTime update
+
+
+	#outs
+	eventOut SFVec3f translation_changed
+	eventOut MFString text
+
+
+	url["javascript: 
+
+    	var xTrans = 0;
+		var yTrans = 0;
+		var translation = new SFVec3f(0, 0, 0);
+    	var translationDelta = new SFVec3f(0, 0, 0);
+		var timeStamp=0;
+		var oldTimeStamp=-1;
+
+		function xTranslation(value){
+	
+			xTrans = ((value - 0.5)/1000);
+	
+		}//xTranslation
+	
+		function yTranslation(value){
+	
+			yTrans = -((value - 0.5)/1000);
+	  
+	
+		}//yTranslation
+	
+		function update(timeStamp){
+			if (oldTimeStamp < 0)
+    		{
+        		oldTimeStamp = timeStamp;
+        		return;
+    		}
+
+    		var delta = timeStamp - oldTimeStamp;
+    		oldTimeStamp = timeStamp;
+
+    		var factor = delta;
+	
+			translationDelta.x = factor * xTrans;
+    		translationDelta.y = factor * yTrans;
+    		translationDelta.z = factor * 0;
+    		translation = translation.add(translationDelta);
+			translation_changed = translation;
+	
+		}
+
+		"]
+
+
+}
+
+#userbody
+
+# node to hold userbody in view of user
+Viewspace {
+	scaleToScene TRUE
+	children [
+
+		Transform {
+			# move a little backwards for making visible
+			translation	0 0 -0.001	
+
+			children [
+
+				DEF transform Transform {
+
+					children[
+		
+						DEF userbody UserBody{
+		   
+							children [
+
+								Transform {
+									
+
+									children [
+							
+										Shape {
+
+											geometry Disk2D	{
+												outerRadius 0.00001	 
+											}	
+								
+											appearance Appearance {
+									
+												material Material{
+									
+													diffuseColor 1 0 0
+									
+												}#material
+								  
+											}#appearance
+										}#shape 
+									]
+								}
+					
+							]#children userbody
+		   
+						}#userbody
+					]#children transform
+				}#transform
+
+			]
+		}
+   
+	]#children viewspace
+
+
+}#viewspace
+
+DEF outputScript Script{
+
+	eventIn SFBool touch1
+	eventIn SFBool touch2
+	eventIn SFBool ovtouch1
+	eventIn SFBool ovtouch2
+	eventIn SFBool buttonPress
+
+	field SFNode textNode USE textOverlay
+
+	url["javascript:
+	
+		function touch1(b){
+	
+			if(b){
+				Browser.println('touch1');
+	    		textNode.text=new MFString('cube1 touched');
+			}
+			else
+				textNode.text=new MFString(' ');
+	
+		}
+	
+		function touch2(b){
+	
+			if(b){
+	    		Browser.println('touch2');
+	    		textNode.text=new MFString('cube2 touched');
+			}
+			else
+				textNode.text=new MFString(' ');
+	
+		}//
+
+
+		function ovtouch1(b){
+	
+			if(b){
+				Browser.println('touch1');
+	    		textNode.text=new MFString('cube1 over');
+			}
+			else
+				textNode.text=new MFString(' ');
+	
+		}
+	
+		function ovtouch2(b){
+	
+			if(b){
+	    		Browser.println('touch2');
+	    		textNode.text=new MFString('cube2 over');
+			}
+			else
+				textNode.text=new MFString(' ');
+	
+		}//
+
+	
+		function buttonPress(b){
+	
+			if(b){
+		
+				Browser.println('button pressed');
+		
+			}
+			else{
+		
+				Browser.println('button released');
+			}
+	
+		}//
+		"]
+
+}#outputscript
+
+
+
+DEF timeSensor TimeSensor {
+	loop TRUE
+}
+
+
+#routes
+ROUTE gamepad.X?axis TO navScript.xTranslation
+ROUTE gamepad.Y?axis TO navScript.yTranslation
+ROUTE navScript.translation_changed TO transform.translation
+#ROUTE navScript.text TO textOverlay.text
+ROUTE timeSensor.time TO navScript.update
+ROUTE gamepad.*button*8 TO userbody.hot
+ROUTE gamepad.*button*8 TO outputScript.buttonPress
+ROUTE touch1.isOver TO outputScript.ovtouch1
+ROUTE touch2.isOver TO outputScript.ovtouch2
+ROUTE touch1.isActive TO outputScript.touch1
+ROUTE touch2.isActive TO outputScript.touch2

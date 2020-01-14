@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<head>
+<title>instantreality 1.0 - tutorial - Hair Simulation</title>
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="../css/instantreality.css" />
+<link rel="stylesheet" type="text/css" media="print" href="../css/instantreality_print.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://localhost:8000/media/css/ie-fixes.css" /><![endif]-->
+<script type="text/javascript" src="../js/jquery-latest.pack.js"></script>
+<script type="text/javascript" src="../js/tutorial_detail.js"></script>
+
+<meta name="robots" content="index, follow" />
+
+</head>
+
+
+<body class=" labs">
+
+<!-- Container -->
+<div id="container">
+    
+    <!-- Header -->
+    <h1>instantreality 1.0</h1>
+    <div id="branding">        
+        
+<a href="/labs/" title="Labs"></a>
+
+    </div>
+    <!-- END Header -->
+
+    <!-- Navigation -->
+    <div id="navigation">        
+        
+    </div>    
+
+    <!-- Content -->
+    <div id="content">
+        
+    <div id='tutorial_container'>
+        <button class="printPage button icon_printer">&nbsp;</button>
+        
+        <div id="tutorialContainer">
+  <h2 class="title">Hair Simulation</h2>
+  <p class="description"><strong>Keywords:</strong><br/>hair simulation,
+        hair rendering,
+        virtual humans<br/><strong>Author(s): </strong>Yvonne Jung<br/><strong>Date: </strong>2007-11-29</p>
+  <p><strong>Summary: </strong>This tutorial shows how to use the hair simulation and rendering system.</p>
+  <div id="content">
+        <h2>Introduction</h2>
+        
+        <div class="imgContainer"><img src="teaser.png" align="center"/><div class="imgCaption">Image: Some frames taken from the real-time simulation.</div></div>
+        <p>
+        For simulating and rendering human hair basically two nodes are needed:
+        </p>    
+            <ul><li>the <a href="/documentation/nodetype/CantileverBeamSystem">CantileverBeamSystem</a> for simulation;</li><li>the <a href="/documentation/nodetype/SortedPrimitiveSet">SortedPrimitiveSet</a> for rendering.</li></ul>
+        <p>
+        The <a href='/documentation/nodetype/CantileverBeamSystem'>CantileverBeamSystem</a> internally is based on a kinematic chain for simulating things with hair-like behaviour (drafted in the middle of the next image below). The nodes of the multi-body chain are defined by the vertices of the original geometry. Two types are distinguished, anchors and free moving vertices. Anchors (i.e. the hair roots) are connected to the scalp, whereas all other vertices in the chain are free moving, due to external forces like gravity, and by applying the length conservation constraint.
+        Because this node only does the simulation but not the rendering, the output has to be routed to specialized rendering nodes. Therefore the simulator is best used together with the <a href='/documentation/nodetype/SortedPrimitiveSet'>SortedPrimitiveSet</a> node for rendering purposes as shown in the following image. 
+        </p>
+        <p>
+        Please note: Currently only smooth hairstyles, like the one shown above, can be simulated.
+        </p>
+        <div class="imgContainer"><img src="compo.png" align="center"/><div class="imgCaption">Image: Component structure.</div></div>
+        
+        <h2>Modelling</h2>
+        <p>
+        A person usually has more than 100,000 hairs, which cannot be simulated in real-time. In order to reduce geometric complexity and to avoid rendering problems hair wisps are modelled as small quad strips (see left image below, the 'virtual' vertex is not to be modelled but inserted by the <a href='/documentation/nodetype/CantileverBeamSystem'>CantileverBeamSystem).</a> For creating an inital hair style that can be simulated, you can model it by hand (all you need is a set of quad strips and the corresponding indices, which have to be pasted in the 'coord' and 'index' field respectively). Alternatively you can use tools like e.g. "Hair Department" for C4D; or you can use our special hair creation plugin (also for C4D) that can be found for download at the end of this tutorial in the files section. There you also find a sample export template which should be adapted to yout own needs.
+        </p>
+        <p class="warning"><b>Warning: </b>Our C4D plugin is unsupported, the documentation (manual and video) is in German only, besides this the plugin only runs on windows, and was only tested on XP/ SP2 with Cinema4D R9.</p>
+        
+        <h2>Simulation</h2>
+        <p>
+        The following code example shows the usage of the <a href="/documentation/nodetype/CantileverBeamSystem">CantileverBeamSystem</a> node for hair simulation, which is derived from the abstract <a href="/documentation/nodetype/SimulationSystem">SimulationSystem</a> node.
+        </p>
+        <p>
+        The 'speed' field is a scaling factor for the simulation speed. The 'localCoordSystem' field defines if calculations (e.g. gravitation, given by the 'gravity' field, or forces like wind, given by the 'externalForce' field) shall be evaluated in the local or global coordinate frame. If the world coordinate system is chosen (which is essential if movements due to coordinate transformations shall be treated as forces acting on the system), it is useful, as shown in the next code example, to use an <a href="/documentation/nodetype/InverseWorldTransform">InverseWorldTransform</a> node as parent <a href='/documentation/nodetype/Transform'>Transform</a> for the rendering component, because for speed-up the output (i.e. the coordinates, normals and tangents) of the simulator is already in world coordinates.
+        </p>
+        
+        <div class="code"><h3>Code: Simulation component</h3><pre>
+DEF simu <a href='/documentation/nodetype/CantileverBeamSystem'>CantileverBeamSystem</a> {
+    speed 1.0
+    localCoordSystem FALSE
+    collisionDomainType ["sphere" "sphere"]
+    collisionDomainParam [
+        -0.3 2.96 0.67, 4.4135 0
+        -0.3 3.0 1.86, 4.28995 0
+    ]
+    gravity 0 -10 0
+    externalForce 0 0 0
+    minBend 0.05
+    maxBend 0.1
+    massRadius 0.9
+    coord [
+        #...
+    ]
+    index [
+        #...
+    ]
+    normal [ 0 0 0 ]
+    color [ 1 1 1 ]
+}
+        </pre></div>
+        
+        <p>
+        Besides a convincing simulation a natural behavior in case of collisions is also required. Collisions with the body are a hard constraint and must be treated explicitly. Thus for approximation objects like spheres, ellipsoids and planes, for which intersection tests can be handled efficiently, are used. Therefore, with the 'collisionDomainType' and field collision objects can be specified. Currently three types can be used: SPHERE, ELLIPSOID, PLANE.
+        With the 'collisionDomainParam' field parameters like center and radius for defining a parametric collision object can be defined; if the last param is &gt; 0 this means the object is disconnected (like e.g. a table), else connected (like e.g. the head) to the simulation.
+        </p>
+        <p>
+        Hair-hair collision can't be handled easily in real-time. Thus the interpenetration of hair wisps is avoided by using a slightly different bending factor for every chain (defined by the 'minBend' and 'maxBend' fields), based on the position of its respective anchor, and by arranging hair strips on top of the scalp in different layers within a different distance to the head. For keeping this up during dynamics, each vertex, depending on its position, is assigned a virtual collision sphere with a different radius (defined by the 'massRadius' field), in order to parameterize the distance between connected vertices and to the head individually (as depicted in the right image below).
+        </p>
+        
+        <div class="imgContainer"><img src="simulation.png" align="center"/><div class="imgCaption">Image: From left to right: Quad strip based hair model. Cantilever beam simulation. <a href='/documentation/nodetype/Collision'>Collision</a> handling.</div></div>
+        
+        <h2>Rendering</h2>
+        <p>
+        For creating an impression of thin, semi-transparent hair, textures with hair-like transparent patterns can be mapped onto the hair patches. To provide an impression of hair volume, alpha blending is used, which requires correct back-to-front sorting of the hair wisps. Therefore the <a href='/documentation/nodetype/SortedPrimitiveSet'>SortedPrimitiveSet</a> node contains the 'drawOrder' field. 
+        But back to front sorting of the quad strips arises another artifact, caused by the relatively large extension of the surface compared to one single reference point chosen for sorting purposes. This can be alleviated by sorting the uppermost strips along the head's upvector
+in a second step. To our experience a factor of about fifteen percent produces quite satisfactory results. Therefore the 'upThreshold' field is used. The first three values define the upvector, and the fourth value defines the percentage. Here it can be chosen between two sorting schemes by switching the sign of this parameter; if negative, a faster scheme is used.
+        The 'lowerBound' field specifies the percentage of not rendered primitives behind the head for rendering speed-up. The other fields, like 'coord' etc. are updated by the simulation (see also last code section).
+        </p>
+        <p>
+        However, for simulated quad strips no unique sorting order can be determined and therefore severe sorting artifacts may result. Many artifacts can be alleviated by a multi-pass approach. So, please have a look at the <a href="/documentation/nodetype/MultiPassAppearance">MultiPassAppearance</a> in the next example. Although this is only suitable for presorted hair without animation, in combination with the already explained sorting steps it leads to good results. After rendering all back-facing polygons with depth writes disabled and depth test set to "less", the front-facing polygons are rendered. This is accomplished by means of the <a href='/documentation/nodetype/MultiPassAppearance'>MultiPassAppearance</a> node and the additional use of special render mode nodes like the <a href="/documentation/nodetype/FaceMode">FaceMode</a>, the <a href="/documentation/nodetype/BlendMode">BlendMode</a> and the <a href="/documentation/nodetype/DepthMode">DepthMode</a> for fine grained render state control.
+        </p>
+        
+        <div class="code"><h3>Code: Rendering component</h3><pre>
+DEF IWT <a href='/documentation/nodetype/InverseWorldTransform'>InverseWorldTransform</a> {
+    children [
+        DEF HairTrafo <a href='/documentation/nodetype/Transform'>Transform</a> {
+            children [
+                <a href='/documentation/nodetype/Shape'>Shape</a> {
+                    appearance <a href='/documentation/nodetype/MultiPassAppearance'>MultiPassAppearance</a> {
+                        appearance [
+                            DEF Hair_Appearance1 <a href='/documentation/nodetype/Appearance'>Appearance</a> {
+                                faceMode <a href='/documentation/nodetype/FaceMode'>FaceMode</a> {
+                                    cullFace "auto"
+                                    smooth FALSE
+                                }
+                                blendMode DEF Blend <a href='/documentation/nodetype/BlendMode'>BlendMode</a> {
+                                    srcFactor "src_alpha"
+                                    destFactor "one_minus_src_alpha"
+                                }
+                                depthMode <a href='/documentation/nodetype/DepthMode'>DepthMode</a> {
+                                    readOnly TRUE
+                                    depthFunc "lequal"
+                                }
+                                texture DEF HairTex <a href='/documentation/nodetype/MultiTexture'>MultiTexture</a> {
+                                    texture [
+                                        <a href='/documentation/nodetype/ImageTexture'>ImageTexture</a> {
+                                            url "hair.tif"
+                                        }
+                                        <a href='/documentation/nodetype/ImageTexture'>ImageTexture</a> {
+                                            url "noise.tif"
+                                        }
+                                    ]
+                                }
+                                shaders [
+                                    DEF HairShader <a href='/documentation/nodetype/ComposedShader'>ComposedShader</a> {
+                                        exposedField SFInt32 hairTex 0
+                                        exposedField SFInt32 noiseTex 1
+                                        #...
+                                        parts [
+                                            #...
+                                        ]
+                                    }
+                                ]
+                            }
+                            DEF Hair_Appearance2 <a href='/documentation/nodetype/Appearance'>Appearance</a> {
+                                faceMode <a href='/documentation/nodetype/FaceMode'>FaceMode</a> {
+                                    cullFace "front"
+                                    smooth FALSE
+                                }
+                                blendMode USE Blend
+                                depthMode <a href='/documentation/nodetype/DepthMode'>DepthMode</a> {
+                                    readOnly TRUE
+                                    depthFunc "lequal"
+                                }
+                                texture USE HairTex
+                                shaders USE HairShader
+                            }
+                        ]
+                    }
+                    geometry DEF HairSet <a href='/documentation/nodetype/SortedPrimitiveSet'>SortedPrimitiveSet</a> {
+                        upThreshold 0 1 0 -0.88
+                        mode "QuadSet"
+                        drawOrder "BackToFront"
+                        lowerBound 0.01
+                        coord DEF coord <a href='/documentation/nodetype/Coordinate'>Coordinate</a> {
+                            point [ 0 0 0 ]
+                        }
+                        refPoint DEF refPoint <a href='/documentation/nodetype/Coordinate'>Coordinate</a> {
+                            point [ 0 0 0 ]
+                        }
+                        normal DEF normal <a href='/documentation/nodetype/Normal'>Normal</a> {
+                            vector [ 0 1 0 ]
+                        }
+                        tangent DEF tangent <a href='/documentation/nodetype/Normal'>Normal</a> {
+                            vector [ 0 1 0 ]
+                        }
+                        texCoord DEF texCoord <a href='/documentation/nodetype/TextureCoordinate'>TextureCoordinate</a> {
+                            point [ 0 0 ]
+                        }
+                        color DEF color <a href='/documentation/nodetype/Color'>Color</a> {
+                            color [ 1 1 1 ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
+        </pre></div>
+        
+        <p>
+        As can be seen in the next code fragment, most of the geometry properties fields like 'normal', 'tangent' etc. are calculated and updated by the simulation. An exception is the 'index' field, which holds the topological information, the 'coord' field, which contains the original vertex positions, and the 'color' field, with which additional per vertex colors can be defined.
+        </p>
+        <p>
+        Because on the one hand tangents are very important for implementing a hair shader, but on the other hand X3D does not provide special vertex attributes for tangents, the <a href='/documentation/nodetype/SortedPrimitiveSet'>SortedPrimitiveSet</a> node provides them on texture unit 1.
+        </p>
+        
+        <div class="code"><h3>Code: Update and Routes</h3><pre>
+DEF script <a href='/documentation/nodetype/Script'>Script</a> {
+    eventOut SFVec3f out_wind
+    #...
+}
+
+DEF simulation-TIMER <a href='/documentation/nodetype/TimeSensor'>TimeSensor</a> {
+    cycleInterval 1
+    loop TRUE
+    enabled TRUE
+}
+
+ROUTE simulation-TIMER.time TO simu.set_time       # trigger simulation
+ROUTE script.out_wind       TO simu.externalForce  # start little breeze 
+
+ROUTE simu.refPoint      TO refPoint.set_point
+ROUTE simu.coord_changed TO coord.set_point
+ROUTE simu.tangent       TO tangent.set_vector
+ROUTE simu.normal        TO normal.set_vector
+ROUTE simu.texCoord      TO texCoord.set_point
+ROUTE simu.color         TO color.set_color
+ROUTE simu.index         TO HairSet.index
+        </pre></div>
+
+        <p>
+        The first file links to a hair simulation demo with a special shader for blond hair (the simulation can be stated by clicking the red box, the breeze by clicking the yellow box, and headbanging can be done by interacting with the blue box), whereas the other files belong to the already mentioned hair modelling plugin for C4D.
+        </p>
+                
+        <p>The installer for the hair creation plugin for Cinema4D R9 which was formerly attached to this tutorial has been moved to the downloads page and can now be grabbed from <a href="http://instantreality.org/download/Setup_1.08.exe">this location</a>.</p>
+        
+        
+    Files:
+    <ul class="files"><li><a href="main.wrl">main.wrl</a></li><li><a href="exporttemplate.wrl">sample export template</a></li><li><a href="anleitung.pdf">Manual (in German)</a></li><li><a href="http://instantreality.org/download/Setup_1.08.exe">Installer for hair creation plugin for Cinema4D R9 (with tutorials)</a></li></ul>
+        
+    </div>
+</div>
+
+                
+    </div>
+
+            
+    </div>
+    <!-- END Content -->
+
+    <div id="footer" class="clearfix"></div>
+</div>
+
+
+
+<!-- END Container -->
+
+</body>
+</html>

@@ -1,0 +1,112 @@
+<div id="tutorialContainer">
+  <h2 class="title">Input/Output streams</h2>
+  <p class="description"><strong>Keywords:</strong><br/>IOSensor,
+        interaction,
+        devices<br/><strong>Author(s): </strong>Johannes Behr<br/><strong>Date: </strong>2006-02-22</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to use an IOSensor to connect input/output streams; as example we will use two joystick-axis to control the diffuse-color of a box</p>
+  <div id="content">
+        <h2>Introduction</h2>
+	<p>
+	Instant Player supports various ways to get the device data in/out of your application/scene to handle different classes of applications and scenarios. For web-applications it's desirable to have device-independent setups. On the other hand the system must provide concrete and low-level access to services to handle complex and extensive application-/device-setups which are part of a fixed and controlled desktop or even immersive environments.
+	For device-independent setups, you can just define labeled streams inside of a scene and map this streams outside
+        (e.g. interactive or as part of your engine) to a logical devices. To access the device directly you have to specify a concrete service-type
+	</p>
+
+	<p>
+	This tutorial shows how to utilize IOSensor-nodes to handle both setups.  
+	</p>
+
+        <h2>IOSensor basics</h2>
+        <p>
+	The IOSensor allows you to connect a local or network-device or service. (Side node: To be more precise: it abstracts a backend or namespace of the device-subsystem which is in most cases a single device) There are other X3D extensions and systems which also provide low-level device access but most of them provide one node per logical device-class. We followed a different approach: We have a single IOSensor node type. Every IOSensor node instance can be used to connect to a service/namespace of the supported device-subsystems. Interfaces and parameters of a concrete devices, if any, will be mapped to dynamic fields, similar to the Script node. Therefore the node has, more or less, only two fields.
+	</p>
+	<div class="code"><h3>Code: IOSensor interface</h3><pre class="fix">
+IOSensor : X3DSensorNode {
+	SFString [] type   [auto] [joystick,video,...]
+	SFString [] name   []
+}
+	</pre></div>
+
+	<p>
+	The type specifies the type of device/namespace/backend which should be used or can be set to 'auto'. This switches two essential modes: The implicit or explicit naming of services which leads in most cases to device independent respectively dependent setups.
+	</p>
+	
+	<h2>Implicit Service definition</h2>
+	<p>
+	If your application needs IO-data-streams but would not like to specify which device or service should be used the 'type' field should be set to 'auto'. In this case, the system and runtime environment will try to map the user-given io-slots to concrete devices automatically.</p>	
+<div class="code"><h3>Code: auto device type</h3><pre class="vrml"> 
+DEF camNav IOSensor {
+	eventOut SFFloat speed
+	eventOut SFFloat direction
+}
+</pre></div>
+	<h2>Explicit Service definitions</h2>
+	<p> 
+	If the type field is not auto it should define one of the supported device/backend/namespace types. Ths standard device-abstraction system supports more than 30 backends. All definitions can be accessed by using the 'device management' system provided in the Help-Menu.
+	</p>
+	
+	<p>Current type List is on the <a href="http://www.instantreality.org/device/">web-page</a>.</p>
+
+	<p>Which devices are available depends on the system and environment. The name-field is used as identifier in the device-subsystem. It is not used inside of you X3D-application.</p>
+
+        <h2>Parameter of Services</h2>
+	<p>
+	Every device type provides a list of dynamic SFString fields which can be used as parameter. Most backend types provides e.g. a 'device' field which takes a number (e.g. 0,1,2) or even a description substring of the description:
+	</p>
+
+	<div class="code"><h3>Code: system provided dynamic device field</h3><pre class="vrml">
+DEF myStick IOSensor {
+	type "joystick"
+	device "microsoft"
+}
+ 	</pre></div>
+	<p>	
+	If the type 'joystick' would not provide a dynamic 'device'-field you will get a warning and a list of valid fields in the application log. You can also lookup valid backend-fields using the online interface which is available through the help menu. The paramter-fields only depend on the device type but not on a single serviceinstance. For example all joystick-backends provide e.g. a 'device'-field but every joystick instance provides a different number of buttons and axes. 
+	</p>
+     <h2>IO Slots of Services</h2>
+	<p>
+The IOSensors uses user-provides dynamic in/out-slots to connect to these devices: e.g. the x/y axis of a joystick could be accessed in the following way  
+	</p>
+	<div class="code"><h3>Code: user provided dynamic in/out-slots</h3><pre class="vrml">
+DEF myStick IOSensor {
+	type "joystick"
+	eventOut SFFloat *x*axis*
+	eventOut SFFloat *y*axis*
+}
+DEF myScript Script {
+	eventIn SFFloat speed
+}
+ROUTE myStick.*x*axis TO myScript.speed
+ 	</pre></div>
+	<p>
+	This slots can be used together with ROUTES to process and transmit the events from or to the device. The names of the slots are used to map the device interfaces to the node interface. To increase the usability file-system like wild-cards (* and ?) are supported. Again: Use the backend-interfaces which can be accessed in your Help-menu to check the provided slots.
+	</p>
+	<p>
+	The last example shows how to map the image data of a local camera onto a box.
+	</p>
+	<div class="code"><h3>Code: video example</h3><pre class="vrml">
+DEF video IOSensor {
+  type "video"
+  eventOut SFImage frame*
+}
+
+Shape {
+  appearance Appearance {
+    texture DEF tex PixelTexture { }
+  }
+  geometry Box { }
+}
+
+ROUTE video.frame* TO tex.image
+	</pre></div>
+        <h2>Conclusion</h2>
+		This tutorial shows how to connect external services (e.g. devices) implicit or explicit to you system. This is strait, simple and very powerfull. It can not only be used for devices but for all kinds of external IO streams (e.g networks streams). There are more tutorials and example which (e.g. VisionBackend,) which utilize the IOSensor for more application specific setups. Just look at the available backends. But remember, the key is the type field, if you need device independent data-streams leave it to the default "auto" value and the system will try to map the in/out-slots to the correct streams.
+	<p>
+Furthermore, this tutorial only shows how to get your data in. It does not show how to use the data for interaction and navigation purpose. If you would like to use the data together with high level PointingSensors look at the tutorial <a href="/tutorial/immersive-pointingsensor-interaction/">Immersive PointinSensor Interaction</a>. For a tutorial on abstract 3D-Navigators please have a look at the <a href="/tutorial/navigator/">Navigator tutorial</a>. 
+	</p>
+	
+    Files:
+    <ul class="files"><li><a href="joystickToColorTutorial.x3d">joystickToColorTutorial.x3d</a></li><li><a href="videoCameraTutorial.x3d">videoCameraTutorial.x3d</a></li></ul>
+
+    </div>
+</div>

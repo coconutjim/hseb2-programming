@@ -1,0 +1,44 @@
+#X3D V3.0 utf8
+
+Engine {
+  jobs [
+    DEF render RenderJob {
+      windowGroups [
+        WindowGroup {
+          windows [
+            LocalWindow {
+              size 800 400
+              position 0 0
+              views [
+                Viewarea {
+                  lowerLeft  0 0
+                  upperRight 0.5 1
+                }
+                Viewarea {
+                  lowerLeft  0.5 0
+                  upperRight 1 1
+                }
+              ]
+            }
+            LocalWindow {
+              size 300 300
+              position 500 500
+              views [
+                Viewarea {
+                  lowerLeft  0 0
+                  upperRight 1 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+Scene {
+  children [
+    Inline { url [ "tie.wrl" ] }
+  ]
+}
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' profile='Full' version='3.0' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <Engine DEF='engine'>
+    <RenderJob DEF='render'>
+      <WindowGroup>
+        <Window DEF='win' size='1024 768'>
+          <Viewarea DEF='viewarea' description='viewarea'>
+            <Navigator2D DEF='navigator' pickScene='false' callSensorsOnTouch='false' />
+          </Viewarea>
+        </Window>
+      </WindowGroup>
+    </RenderJob>
+    <ROUTE fromNode='viewarea' fromField='touchPoints' toNode='navigator' toField='touchPoints'/>
+    <ROUTE fromNode='navigator' fromField='mouseOver' toNode='viewarea' toField='mouseOver'/>
+    <ROUTE fromNode='viewarea' fromField='keyPress_changed' toNode='navigator' toField='keyPress'/>
+    <ROUTE fromNode='viewarea' fromField='keyRelease_changed' toNode='navigator' toField='keyRelease'/>
+    <ROUTE fromNode='viewarea' fromField='mousePress_changed' toNode='navigator' toField='mousePress'/>
+    <ROUTE fromNode='viewarea' fromField='mouseRelease_changed' toNode='navigator' toField='mouseRelease'/>
+    <ROUTE fromNode='viewarea' fromField='mouseMove_changed' toNode='navigator' toField='mouseMove'/>
+    <ROUTE fromNode='viewarea' fromField='message' toNode='navigator' toField='message'/>
+  </Engine>
+  <Scene DEF='scene'>
+    <Inline url='"UBManager.wrl"'/>
+    <Inline url='"mainMouse_2.wrl"'/>
+  </Scene>
+</X3D>

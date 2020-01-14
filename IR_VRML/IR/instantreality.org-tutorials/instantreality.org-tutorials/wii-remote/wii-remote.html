@@ -1,0 +1,139 @@
+<div id="tutorialContainer">
+  <h2 class="title">Wii Remote</h2>
+  <p class="description"><strong>Keywords:</strong><br/>Wii Remote,
+        Wiimote<br/><strong>Author(s): </strong>Sven Hertling<br/><strong>Date: </strong>2010-12-10</p>
+  <p><strong>Summary: </strong>
+		This tutorial demonstrates how to connect a Wii Remote to Instant Player and how to write X3D Scenes with Wii Remote interaction.
+		</p>
+  <div id="content">
+		<h2>Introduction</h2>
+		<p>The Wii Remote is actually the Wii's main input device.</p>
+		<p>It is a wireless device, using Bluetooth technology  (HID protocol) to communicate with the host, in this case with the computer.
+		Therefore you need a Bluetooth dongle (maybe your computer has already an integrated Bluetooth receiver).</p>
+		
+		<h2>About the Wii Remote</h2>
+		
+		<ul><li>
+			<b>Input Features</b>
+			<ul><li>Buttons</li><li>Accelerometer</li><li>IR Camera</li></ul>
+			</li><li>
+			<b>Feedback features</b>
+			<ul><li>Rumble</li><li>Player LEDs</li></ul>
+			</li></ul>
+		
+		<div class="imgContainer"><img src="wiimote.png" align="center"/><div class="imgCaption">Image: Wii Remote</div></div>
+		
+		
+		<h2>Connect the Wii Remote</h2>
+		First of all the Wii Remote needs to be connected with your PC or Mac before you can use it. 
+		You can do this in different ways either you pressing button 1 and 2 simultaneously or the red synchronization button under the battery cover.
+		After that the Wii Remote changes into a discoverable mode.
+		If you don't connect the Wii Remote with your computer within 20 seconds,
+		the Wii Remote will turn itself off. 
+		Holding down the two buttons continuously will force the Wii Remote to stay in discoverable mode without turning off.
+		On every operating system you should search a Bluetooth device called 'Nintendo RVL-CNT-01' and check the option not to enter a key or pin.
+    
+		<p>The detailed connection process depends on the operating system you use:</p>
+		<ul><li>
+			<b>Windows:</b>
+			<p>
+			If your operating system is Windows XP SP3 or higher you can use the Windows stack shown below. 
+			Otherwise you should install another stack like Widcomm, Toshiba stack or BlueSoleil.
+			<div class="imgContainer"><img src="win.png" align="center"/><div class="imgCaption">Image: Windows 7</div></div>			
+			</p>
+			</li><li>
+			<b>Linux:</b>
+			<p>
+			If you use Linux, BlueZ is already included with the official Linux kernel distributions and is used by Instant Player.
+			So you only have to put the Wii Remote in discoverable mode when starting Instant Player.
+			</p>
+			</li><li>
+			<b>Mac OS X:</b>
+			Connect your Wii Remote according to the following steps and you are ready to use it.
+			<div class="imgContainer"><img src="mac.png" align="center"/><div class="imgCaption">Image: Mac OS X</div></div>
+			<p>
+			
+			</p>
+			</li></ul>
+		After these steps, the Wii Remote is connected and can be used by Instant Player.
+
+		<h2>Use of the Wii Remote</h2>
+		
+		First, we create a IOSensor with type='Wii' like in the following Code Example:
+		<div class="code"><h3>Code: Wii IOSensor</h3><pre>
+&lt;IOSensor DEF='Wiimote' type='Wii' device='0'&gt;
+	&lt;!--Buttons--&gt;
+	&lt;field accessType='outputOnly' name='A' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='B' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='Up' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='Down' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='Left' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='Right' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='Minus' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='Plus' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='One' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='Two' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='Home' type='SFBool'/&gt;
+		
+	&lt;!--Acceleration + IR--&gt;
+	&lt;field accessType='outputOnly' name='Orientation' type='SFVec3f'/&gt;
+	&lt;field accessType='outputOnly' name='Acceleration' type='SFVec3f'/&gt;
+	&lt;field accessType='outputOnly' name='IRSource' type='MFVec3f'/&gt;
+		
+	&lt;!--Led's + Rumble--&gt;
+	&lt;field accessType='inputOnly' name='SetLEDs' type='SFInt32'/&gt;
+	&lt;field accessType='inputOnly' name='ActivateRumble' type='SFBool'/&gt;
+&lt;/IOSensor&gt;
+		</pre></div>
+		
+		<h2>Device Field</h2>
+		You can use the device field when you need more than one Wii Remote. You can also write an extension name to get the first Wii Remote with this extension.
+		For example, when you want access the second Wii Remote, you can write device='1' (take into account that a device index starts at zero rather than one).
+		If you want to access a BalancedBoard you can write device='balancedboard' or device='nunchuk' for the first Wii Remote with Nunchuk attachment.
+		
+		<h2>Small example</h2>
+		
+		<div class="code"><h3>Code: Rumble when pressing A</h3><pre>
+&lt;IOSensor DEF='Wiimote' type='Wii' device='0'&gt;
+	&lt;field accessType='outputOnly' name='A' type='SFBool'/&gt;
+	&lt;field accessType='inputOnly' name='ActivateRumble' type='SFBool'/&gt;
+&lt;/IOSensor&gt;
+&lt;ROUTE fromNode='Wiimote' fromField='A' toNode='Wiimote' toField='ActivateRumble'/&gt;
+		</pre></div>
+		
+		
+
+
+		<h2>Expansions</h2>
+		<h2>Nunchuck</h2>
+		You can get data from the following fields:
+		<div class="code"><h3>Code: Nunchuck fields</h3><pre>
+&lt;IOSensor DEF='Wiimote' type='Wii' device='nunchuk'&gt;
+	&lt;field accessType='outputOnly' name='NunchukC' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='NunchukZ' type='SFBool'/&gt;
+	&lt;field accessType='outputOnly' name='NunchukAnalogStick' type='SFVec2f'/&gt;
+	&lt;field accessType='outputOnly' name='NunchukAcceleration' type='SFVec3f'/&gt;
+&lt;/IOSensor&gt;
+		</pre></div>
+		NunchukC and NunchukZ are two trigger buttons. NunchukAnalogStick combines x and y axis of the analog stick. NunchukAcceleration is comparable to Wii Remote's 'Acceleration'.
+		
+		
+		<h2>Balanced Board</h2>
+		The Balanced Board contains four pressure sensors in every corner: 
+		<div class="code"><h3>Code: Balanced Board fields</h3><pre>
+&lt;IOSensor DEF='Wiimote' type='Wii' device='balancedboard'&gt;
+	&lt;field accessType='outputOnly' name='BalancedBoardTopLeft' type='SFFloat'/&gt;
+	&lt;field accessType='outputOnly' name='BalancedBoardTopRight' type='SFFloat'/&gt;
+	&lt;field accessType='outputOnly' name='BalancedBoardBottomLeft' type='SFFloat'/&gt;
+	&lt;field accessType='outputOnly' name='BalancedBoardBottomRight' type='SFFloat'/&gt;
+&lt;/IOSensor&gt;
+		</pre></div>
+
+		
+		
+		
+    
+    Files:
+    <ul class="files"><li><a href="wii_remote_buttons_rumble.x3d">wii_remote_buttons_rumble.x3d</a></li><li><a href="wii_remote_accel_ir.x3d">wii_remote_accel_ir.x3d</a></li><li><a href="wii_remote_enumerate_leds.x3d">wii_remote_enumerate_leds.x3d</a></li></ul>
+    </div>
+</div>

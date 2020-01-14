@@ -1,0 +1,338 @@
+<div id="tutorialContainer">
+  <h2 class="title">Using PackagedShader with CgFX support</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        PackagedShader,
+        CgFX,
+        FX,
+        effect<br/><strong>Author(s): </strong>Karsten Schwenk<br/><strong>Date: </strong>2008-01-05</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to use PackagedShader to shade geometry with CgFX effects.
+It assumes the reader has a basic working knowledge of CgFX and AppearancePropertyNode.</p>
+  <div id="content">
+    <h2>Introduction</h2>
+    <p>
+    <a href="/documentation/nodetype/PackagedShader">PackagedShader</a> is designed as a wrapper to popular effect files like Microsoft's FX and NVidia's CgFX.
+    Currently only CgFX is supported in intantreality. Please also note that this is an experimental feature that is only
+    available on Windows and MacOS.
+    </p>
+    <h2>What is CgFX?</h2>
+    <p>
+    CgFX is an effect framework developed and maintained by NVidia. It supports OpenGL and Direct3D and uses Cg as its shader language.
+    CgFX files are a flexible and convenient way to provide a material description, much like an <a href="/documentation/nodetype/Appearance">Appearance</a> in x3d.
+    A CgFX effect can contain shaders, states, (default) textures and parameters, fallback techniques for weaker hardware, and more.
+    More information can be found on <a href="http://developer.nvidia.com/object/cg_toolkit.html">NVidia's Cg page</a>.
+    </p>
+    <h2>What are the benefits of using CgFX?</h2>
+    <p>
+    Powerful authoring and debugging tools are available for CgFX effects,
+    like <a href="http://developer.nvidia.com/object/fx_composer_home.html">NVidia's FX Composer</a>.
+    Using CgFX also allows to exchange shaders (or complete materials for that matter) with applications that do not support x3d but CgFX.
+    Additionally, there are already many effects available, e.g. from
+    <a href="http://developer.download.nvidia.com/shaderlibrary/webpages/shader_library.html">NVidia's Shader Library</a>.
+    In my opinion, Cg also makes it easier to manage larger shader utility libraries,
+    because it features a complete C-style preprocessor (including <tt>#include</tt> directives) and (primitive but useful) interface classes.
+    </p>
+    <p>
+    The diagram below shows how CgFX effects fit into the instantreality framework.
+    Note that no file conversions are needed.
+    </p>
+    <div class="imgContainer"><img src="pipeline_trans.png" align="center"/><div class="imgCaption">Image: How CgFX fits into X3D</div></div>
+
+    <h2>Basic examples</h2>
+    This section illustrates the basic concepts behind <a href="/documentation/nodetype/PackagedShader">PackagedShader</a>'s CgFX support.
+    <h2>Blinking Earth</h2>
+    <p>
+    Probably the easiest way of demonstrating how to use a CgFX effect with <a href="/documentation/nodetype/PackagedShader">PackagedShader</a> is by example.
+    The example below should give you a sphere with an earth texture blinking in magenta.
+    Please bear in mind that this example is meant to show basic concepts, not to illustrate the full power of CgFX.
+    A zipped archive containing all files necessary to run the example is available <a href="blinking_earth.zip">here</a>.
+    </p>
+    <div class="imgContainer"><img src="blinking_earth.png" align="center"/><div class="imgCaption">Image: Screenshot of example</div></div>
+
+    <div class="code"><h3>Code: A simple example</h3><pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;X3D version="3.0"&gt;
+  &lt;head&gt;
+    &lt;meta content="" name="info"/&gt;
+  &lt;/head&gt;
+  &lt;Scene DEF="scene"&gt;
+    &lt;Shape&gt;
+      &lt;Appearance&gt;
+        &lt;ImageTexture DEF="earth" url="earth.png"/&gt;
+        
+        &lt;PackagedShader DEF="blinkeffect" url="simple_multipass.cgfx"
+          language="CGFX"&gt;
+          
+          &lt;field accessType="inputOutput" name="__technique__"
+            type="SFInt32" value="0"/&gt;
+          &lt;field accessType="inputOutput" name="__compilerOptions__"
+            type="MFString" value="&amp;quot;-DAVALON&amp;quot;"/&gt;
+          &lt;field accessType="inputOutput" name="__additionalIncludeDirectories__"
+            type="MFString" value="&amp;quot;/myshaderlibrary/include&amp;quot;"/&gt;
+
+          &lt;field accessType="inputOutput" name="BlinkScale"
+            type="SFFloat" value="0.0"/&gt;
+          &lt;field accessType="inputOutput" name="BlinkColor"
+            type="SFVec3f" value="1 0 1"/&gt;
+
+          &lt;field accessType="inputOutput" name="TestSampler" type="SFNode" &gt;
+            &lt;ImageTexture USE="earth"/&gt;
+          &lt;/field&gt;
+
+        &lt;/PackagedShader&gt;
+      &lt;/Appearance&gt;
+      &lt;Sphere/&gt;
+    &lt;/Shape&gt;
+
+    &lt;TimeSensor DEF="timer"
+        cycleInterval='1'
+        loop='TRUE'
+        startTime='0'
+        stopTime='0'
+        pauseTime='0'
+        resumeTime='0'
+        triggerName='Timer'
+        description=''
+        enabled='TRUE'
+        logFeature=''
+    /&gt;
+ 
+    &lt;ScalarInterpolator DEF="int" keyValue="0, 1" key="0, 1" /&gt;
+    &lt;ROUTE fromNode='timer' fromField='fraction_changed' toNode='int' toField='set_fraction'/&gt;
+    &lt;ROUTE fromNode='int' fromField='value_changed' toNode='blinkeffect' toField='BlinkScale'/&gt;
+
+  &lt;/Scene&gt;
+&lt;/X3D&gt;
+
+    </pre></div>
+
+    <p>
+    Let's go through the code step by step and see what is happening.
+    </p>
+
+    <p>
+    The first interesting thing is the definition of the <a href="/documentation/nodetype/ImageTexture">ImageTexture</a> node inside the <a href="/documentation/nodetype/Appearance">Appearance</a>.
+    This is how you can define textures to be used by the effect.
+    Doing it this way also has the benefit that the chunks of the
+    texture definitions are used as a fallback if the effect cannot
+    be created for some reason.
+    </p>
+    <p>
+    The <a href="/documentation/nodetype/PackagedShader">PackagedShader</a> then defines a CGFX effect.
+    The <tt>url</tt> attribute should point the url of the CgFX file and the <tt>language</tt> can be set to CGFX (which is the default anyways).
+    The effect contains only a simple two-pass technique.
+    The first pass renders the textured sphere, the second pass blends the blinking sphere on top of it.
+    You can view the CgFX file's content in the <i>Supplementary Material</i> section at the bottom of this page.
+    </p>
+
+    <p>
+    Next come three fields that are somewhat special: <tt>__technique__</tt>, <tt>__compilerOptions__</tt>, and <tt>__compilerOptions__</tt>.
+    These are reserved names that are not shader parameters, but used the control the effect itself.
+    </p>
+    <p>
+    As you might have guessed, <tt>__technique__</tt> sets the technique to be used (currently you can only set this by index, not by name).
+    If the specified technique does not validate, the remaining techniques of the effect are tried in order of appearance to find a fallback solution.
+    </p>
+    <p>
+    The <tt>__compilerOptions__</tt> field sets command-line options for the effect compiler.
+    It is most useful to specify preprocessor definitions, set include paths, and specifying debug/optimization flags.
+    (See Known Issues below for a note on include files.)
+    Note that changes to this field will trigger a recompilation of the effect, so you shouldn't change it every frame.
+    </p>
+    <p>
+    <tt>__additionalIncludeDirectories__</tt> can be used to specify - believe it or not - additional include directories.
+    The advantage of this field over the '-I' option for the effect compiler is that
+    directories which are specified via <tt>__additionalIncludeDirectories__</tt> are searched on the client machine
+    and do not have to be present on all machines that compile an effect (e.g. the servers in a cluster).
+    Note that this feature requires Cg 2.1 or later.
+    </p>
+
+    <p>
+    The following fields (<tt>BlinkScale</tt> and <tt>BlinkColor</tt>) are the shader parameters in the usual way,
+    i.e. the fields are mapped to actual effect parameters by their names.
+    If you do not explicitly set the value of an effect parameter, it's default value (if provided in the CgFX file) is used.
+    This also applies to sampler parameters.
+    Members of structs and array elementes are accessed like you would do it from within the shader.
+    For example <tt>structure.member</tt> or <tt>array[23].foo</tt>.
+    </p> 
+
+    <p>
+    The <tt>TestSampler</tt> field references the previously declared <a href="/documentation/nodetype/ImageTexture">ImageTexture</a>
+    and binds it to the effect's <tt>TestSampler</tt> sampler declaration.
+    You can use any texture type as long as it is compatible with the sampler declaration in the effect.
+    An alternative way of specifying a texture is by providing the filename directly in an <tt>SFString</tt> field:
+    <div class="code"><pre>
+&lt;field accessType="inputOutput" name="TestSampler" type="SFString" value="earth.png"/&gt;
+    </pre></div>
+    Note that in this case the file will by loaded directly from the filesystem, not via a URL.
+    This can cause problems when rendering in a cluster where servers do not have direct access to the file.
+    </p>
+
+    <p>
+    The rest of the example just makes the sphere blink so we won't discuss it here.
+    </p>
+
+    <h2>Goochy Flipper</h2>
+    <p>
+    Most CgFX effects can quite easily be used with <a href="/documentation/nodetype/PackagedShader">PackagedShader</a>.
+    For example, here are the steps necessary to apply the 'goochy' effect from nVidia's shader library to our flipper geometry.
+    </p>
+    <div class="imgContainer"><img src="goochy_flipper.png" align="center"/><div class="imgCaption">Image: Screenshot of flipper with Gooch shading</div></div>
+    <p>
+    Get the 'goochy' CgFX effect from 
+    <a href="http://developer.download.nvidia.com/shaderlibrary/webpages/shader_library.html#goochy">here</a>,
+    download the <a href="flipper.x3d">flipper.x3d</a> file, and put them in one directory.
+    </p>
+    <p>
+    Open <tt>flipper.x3d</tt> and replace the <a href="/documentation/nodetype/Material">Material</a> at line 52 with the following code.
+    <div class="code"><pre>
+&lt;PackagedShader url="goochy.cgfx" language="CGFX"&gt;
+  &lt;field accessType="inputOutput" name="gLamp0Pos" type="SFVec3f" value="200 200 200"/&gt;
+&lt;/PackagedShader&gt;
+    </pre></div>
+    This just tells the system which effect file to load and sets the <tt>gLamp0Pos</tt> parameter.
+    (The other parameters are left at their defaults.)
+    </p>
+    <p>
+    If you view the file now you should see something similar to the screenshot above. 
+    </p>
+    
+    <h2>Advanced features</h2>
+    This section covers advanced topics, e.g. how to use Cg's shader interfaces with <a href="/documentation/nodetype/PackagedShader">PackagedShader</a>. 
+    <h2>Shader Interfaces</h2>
+    <p>
+    Cg's shader interfaces are very useful to write generic library functions.
+    In syntax they are similar to Java interfaces, but they function more like
+    C++ templates. In particular they are a compile time mechanism and do not
+    support runtime-polymorphism. See the reference manual on
+    <a href="http://developer.nvidia.com/object/cg_toolkit.html">NVidia's Cg page</a>
+    for details.
+    </p>
+    <p>
+    Say we wanted to write a function that calculates the reflection
+    from a given surface point due to direct illumination from a given
+    light source. This calculation depends on
+    </p>
+    <ul><li>the local surface geometry,</li><li>the surface's BRDF,</li><li>and the light.</li></ul>
+    <p>
+    To describe the geometry a simple struct will suffice, but for the light
+    and the BRDF polymorphism would be nice.
+    Assuming we had the interfaces <tt>Light</tt> and <tt>BRDF</tt> we could
+    calculate the reflectance like this (think of <tt>Spectrum</tt> as a simple
+    <tt>float3</tt> rgb vector):
+    </p>
+    <div class="code"><pre>
+// Computes the radiance that is reflected in direction omega_o
+// from a differential surface when it is illuminated by a light source.
+Spectrum LocalReflectance(
+    in DifferentialSurface surface,
+    in BRDF brdf,
+    in Light light,
+    in float3 omega_o
+    )
+{
+    if( dot( surface.n, omega_o ) &lt; 0.f )
+        return 0.f;
+        
+    float3 omega_i = 0.f;
+    Spectrum L_i = light.GetRadiance( omega_i, surface );
+
+    Spectrum f_r = brdf.Evaluate( surface, omega_i, omega_o );
+
+    float NdotL = max( 0.0, dot( surface.n, omega_i ) );
+    return f_r * L_i * NdotL;
+}
+    </pre></div>
+    <p>
+    Cg allows us to define the interface <tt>Light</tt> like this:
+    </p>
+    <div class="code"><pre>
+// A generic light interface.
+interface Light
+{
+    // Returns the radiance arriving at 'surface' from
+    // this light (from direction 'omega_i').
+    // It is assumed that that the radiance function of
+    // the light contains a Dirac-delta (so omega_i is unambiguous).
+    Spectrum GetRadiance(
+        out float3 omega_i,
+        in DifferentialSurface surface
+        );
+};
+    </pre></div>
+    <p>
+    The definition of <tt>BRDF</tt> is analogously:
+    </p>
+    <div class="code"><pre>
+// A generic BRDF interface.
+interface BRDF
+{
+    // Evaluate the BRDF at 'surface' for incident direction
+    // 'omega_i' and outgoing direction 'omega_o'.
+    Spectrum Evaluate(
+        in DifferentialSurface surface,
+        in float3 omega_i,
+        in float3 omega_o
+    );
+    
+};
+    </pre></div>
+    <p>
+    An implementation of <tt>Light</tt> for a directional light could look like this:
+    </p>
+    <div class="code"><pre>
+struct DirectionalLight: Light
+{
+// private:
+	float3 direction;
+	Spectrum radiance;
+
+// Light interface
+	Spectrum GetRadiance(
+		out float3 omega_i,
+		in DifferentialSurface surface
+		)
+	{
+		omega_i = direction;
+		return radiance;
+	}
+};
+    </pre></div>
+    <p>
+    With this mechanism we can use <tt>LocalReflectance</tt> with all types
+    of light sources and brdfs without any branching or changes to the code. 
+    </p>
+    <p>
+    Now the question arises how we tell the effect compiler which implementation
+    we want to use for our interface variables. The types for interface variables
+    are simply specified as <tt>SFString</tt> fields, much like ordinary shader
+    parameters. So if we had a variable <tt>Light light</tt> in our effect
+    and wanted to use the implementation <tt>DirectionalLight</tt> given above,
+    we would add this field to the corresponding <a href="/documentation/nodetype/PackagedShader">PackagedShader</a>:
+    </p>
+    <div class="code"><pre>
+&lt;field accessType="inputOutput" name="light" type="SFString" value="DirectionalLight"/&gt;
+    </pre></div>
+    <p>
+    The data members of <tt>light</tt> can then be set the usual way:
+    </p>
+    <div class="code"><pre>
+&lt;field accessType="inputOutput" name="light.radiance" type="SFVec3f" value="0 1 0"/&gt;
+&lt;field accessType="inputOutput" name="light.direction" type="SFVec3f" value="0.577 0.577 0.577"/&gt;
+    </pre></div>
+    <p>
+    The full source code for this example is available <a href="cgShaderInterfaces.zip">here</a>.
+    Below are four images which were all generated with the same effect code
+    just by changing the implementations of the interfaces. 
+    </p>
+    <div class="imgContainer"><img src="shader_interfaces.png" align="center"/><div class="imgCaption">Image: Top row: diffuse BRDF, bottom row: glossy BRDF, left column: green directional light, right column: red point light.</div></div>
+    
+    <h2>Known Issues</h2>
+    <ul><li>SAS-support is limited to the most basic semantics, scripts are not supported at all.</li><li>Texture arrays are not supported.</li><li>Float has to be the base type of all fields specifying numeric shader parameters (e.g. an <tt>int2</tt> parameter would be fed by a <tt>SFVec3f</tt> field).</li><li>+ Many, many others we have not discovered yet.</li></ul>
+
+    <h2>Supplementary Material</h2>
+    
+    Files:
+    <ul class="files"><li><a href="blinking_earth.zip">blinking_earth.zip (zipped version of first example)</a></li><li><a href="cgfx.x3d">cgfx.x3d (x3d file of first example)</a></li><li><a href="simple_multipass.cgfx">simple_multipass.cgfx (cgfx effect of first example)</a></li><li><a href="flipper.x3d">flipper.x3d (flipper geometry for second example)</a></li><li><a href="cgShaderInterfaces.zip">cgShaderInterfaces.zip (shader interfaces example)</a></li></ul>
+
+    </div>
+</div>

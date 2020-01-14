@@ -1,0 +1,42 @@
+<div id="tutorialContainer">
+  <h2 class="title">Editing X3D</h2>
+  <p class="description"><strong>Keywords:</strong><br/>tutorial,
+        X3D,
+        VRML,
+        edit<br/><strong>Author(s): </strong>Yvonne Jung<br/><strong>Date: </strong>2010-02-09</p>
+  <p><strong>Summary: </strong>This tutorial shows you how to edit an X3D scene in XML and VRML encoding.</p>
+  <div id="content">
+	
+	<h2>Introduction</h2>
+	<p>
+		If your goal is to create non-interactive 3D content, perhaps with some simple animations, that shall be used e.g. for a product visualization - and you are not interested in the creation of an interactive 3D world - you should use a 3D modeling tool like 3dsMax (for which we also provide an X3D/ H-Anim exporter), Cinema4D or Maya, to name just a few. But for creating interactive content or some special effects you need to directly write X3D code.
+	</p>
+
+	<h2>XML encoding</h2>
+	<p>
+		Writing X3D code is more or less like editing a web page in HTML. X3D in XML encoding can be edited with any text-editor, but it is helpful to use one that provides XML syntax highlighting such as SciTE, Notepad++, kwrite, vim and so on. But as these editors are not specialized on the X3D dialect, there is neither code completion nor do they provide syntax highlighting for embedded scripts within a Script node etc. Alternatively you can use the X3D-Edit Authoring Tool, which can be found for download <a href="https://savage.nps.edu/X3D-Edit/">here.</a> But please note, that Instant Reality specific node extensions are not supported in X3D-Edit.
+	</p>
+	
+	<h2>VRML encoding</h2>
+	<p>
+		People who prefer using the classic VRML encoding or who miss advanced syntax highlighting and code completion, definitely should use <a href="http://www.parallelgraphics.com/products/vrmlpad">VrmlPad</a>, a nice editing tool from Parallel Graphics (a screenshot is shown below). A trial version can be downloaded <a href="http://www.parallelgraphics.com/products/vrmlpad">here.</a> Although this tool is a Windows application, you can easily run it in wine for usage on Unix/ Linux systems. 
+	</p>
+	<p>
+	But please note, that your files should end with <i>*.wrl</i> instead of <i>*.x3dv</i>, and that you should use the following old style VRML header for activating correct syntax highlighting (which by the way makes no difference when loading the file with Instant Player): <b>#VRML V2.0 utf8</b>
+	</p>
+	<div class="imgContainer"><img src="vrmlpad.png" align="center"/><div class="imgCaption">Image: VrmlPad from Parallel Graphics.</div></div>
+	<p>
+		If you install VrmlPad out of the box, it also doesn't know anything about Instant Reality specific nodes such as e.g. the <a href="/documentation/nodetype/BlendMode">BlendMode</a> or node extensions like the "sortKey" field of the <a href="/documentation/nodetype/Appearance">Appearance</a> node. But you can easily tell VrmlPad about their existence by providing an additional Proto VRML file that contains all prototypes Instant Reality provides. When having installed Instant Player, this file can be found in <b>Instant Player/Resources/systemProto.wrl</b>.
+	</p>
+	<p>
+		Now simply copy systemProto.wrl to <b>ParallelGraphics/VrmlPad/Nodes</b>. For ease of use, it is advisable to rename the proto file to something more meaningful such as <i>InstantPlayer</i>. Then start VrmlPad and go to "Tools/Options". In the tab "General" in the "VRML Extensions" pane you see the different node libraries as shown in the next screenshot. Here, you should first deactivate "Standard VRML 97 nodes", because they have priority over node extensions, which prevents the editor from knowing about additional fields such as the aforementioned "sortKey".
+		Then simply activate "InstantPlayer" instead (the name directly corresponds to the names of the proto files provided), click on OK and restart VrmlPad for having nice syntax highlighting, code completion etc.
+	</p>
+	<p>
+		Another useful option you should activate if you like working with a shell is the "Start-up folder". Here choose "Folder" and type "." (for the current directory) into the text edit field. And if you often work with big files, in "Node Folds" you can additionally choose, which node types shall be collapsed on start-up. This is often useful for e.g. Coordinate or Interpolator nodes. Furthermore, the tool allows downloading complete VRML worlds including all <a href="/documentation/nodetype/Inline">Inline</a> references.
+		That's all, except for a last hint: please note that depending of the version of VrmlPad the previously explained way to teach VrmlPad new nodes might differ a bit.
+	</p>
+	<div class="imgContainer"><img src="options.png" align="center"/><div class="imgCaption">Image: Teaching VrmlPad new node types.</div></div>
+	
+	</div>
+</div>

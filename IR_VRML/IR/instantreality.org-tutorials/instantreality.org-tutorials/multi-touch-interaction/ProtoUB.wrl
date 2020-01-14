@@ -1,0 +1,221 @@
+#VRML V2.0 utf8
+
+#####################################################################
+PROTO USER_BODY [
+	exposedField SFVec3f translation 0 0 0
+	exposedField SFBool	render TRUE
+	exposedField SFBool	hot FALSE	
+	field SFVec2f size 0.20 0.15
+	field SFColor color 1 0 0
+	field SFVec3f offset 0 0 0
+	exposedField MFString string ["UB"]
+	exposedField SFBool enabled TRUE
+]
+{
+	Transform {
+		translation	IS offset
+		children [
+			Transform {
+				translation	IS translation
+				children[		
+					UserBody {	
+						render IS render  
+						hot	IS hot
+						enabled	IS enabled
+						children [
+							Transform {	
+								translation	0 0 0.1			
+								children [							
+									Shape {
+										geometry Rectangle2D	{
+											size	IS size
+										}									
+										appearance Appearance {	
+											#sortKey	100							
+											material Material{			
+												ambientIntensity 0.08					
+												diffuseColor 0.75 0.14 0.01
+												emissiveColor IS color						
+											}		
+											texture	TextTexture	{
+												string IS string
+											}	
+											depthMode	DepthMode	{
+												readOnly TRUE
+											}	  
+										}
+									} 
+								]
+							}					
+						]
+					}
+				]
+			}
+		]
+	} 
+}
+
+#####################################################################
+PROTO USER_BODY_MANAGER [			  
+	eventIn	MFVec4f	set_panePositionsIDs
+	field SFBool initHot FALSE
+	field SFBool render  TRUE 
+]
+{
+	# Group contains all generated UserBodys
+	DEF UB_Group Group {
+		children []
+	}
+
+	DEF	UB_Manager Script {										 
+		eventIn	MFVec4f	set_panePositionsIDs IS set_panePositionsIDs
+		eventIn	SFFloat	fract
+		field SFBool initHot IS	initHot
+		field SFBool render IS render
+		field SFNode group USE UB_Group
+
+		url	"javascript:
+
+		//----------------------------------------------------------------------
+		function Blob(node, timestamp)
+		{						
+			this.node = node;
+			this.timestamp = timestamp;	
+		}
+
+		//----------------------------------------------------------------------
+		var activeBlobIDs = new Object();
+
+		var prevTS = 0;	
+		var prevLen = -1;		
+		var stack = new Array();	// for stacking requests
+
+		var MAX_UB = 0;
+		var userBodies = new Array();
+
+		//----------------------------------------------------------------------
+		function fract(val, time)
+		{	
+			var top = stack.pop();
+
+			if (top) {
+				var fps = (Browser.currentFrameRate > 0) ? Browser.currentFrameRate : 62.5;
+				fps = 5 * (1.0 / fps); // make sure to wait longer than a frame!
+
+				if (time - top.t > fps)
+					set_panePositionsIDs(top.v, time);
+				else
+					stack.push( top );
+			}
+		}
+					
+		//----------------------------------------------------------------------				  
+		// update/ reposition all user bodies
+		function set_panePositionsIDs(value, ts)
+		{
+			var idLen = value.length;					
+
+			// can't attach/detach within one frame
+			if (ts == prevTS) 
+			{
+				if (prevLen != idLen) 
+				{
+					stack.push( { v: value, t: ts } );
+					//Browser.println('Stack size: ' + stack.length + ' | ' + (ts-prevTS));				 
+				}										  
+				return;
+			}					
+			//Browser.println(stack.length + '; ' + (ts-prevTS));						 			  
+				
+			group.children.length = 0;		   
+									 
+			var i, j, count = 0;
+			
+			// remember valid IDs of UB list
+			for (i=0; i<idLen; i++)	
+			{	
+				var currBlob = new SFVec3f(value[i].x, value[i].y, value[i].z);										
+				var ID = value[i].w;
+
+				if (activeBlobIDs.hasOwnProperty(ID))
+				{
+					// already created, only update timestamp and position
+					activeBlobIDs[ID].timestamp = ts;
+					activeBlobIDs[ID].node.translation = currBlob;
+					group.children[count++] = activeBlobIDs[ID].node;
+					//Browser.println('old ' + ID);
+				}
+				else
+				{
+					// create new Blob/ UB with given position and ID
+					var node = null;
+
+					for (j=0; j<MAX_UB && !node; ++j)
+					{
+						if (!userBodies[j].enabled)
+						{								 
+							userBodies[j].hot = initHot;
+							userBodies[j].render = render;
+							userBodies[j].enabled = true;
+
+							node = userBodies[j];
+						}
+					}
+					if (!node)
+					{
+						userBodies[j] = Browser.currentScene.createNode('USER_BODY');
+						userBodies[j].hot = initHot;
+						userBodies[j].render = render;
+						userBodies[j].enabled = true;
+
+						node = userBodies[j];
+						MAX_UB = userBodies.length;
+						//Browser.println('### Created UB no. ' + MAX_UB + ' ###');
+					}
+
+					node.translation = currBlob;
+					node.string = new MFString(ID);
+
+					group.children[count++] = node;
+					activeBlobIDs[ID] = new Blob(node, ts);
+					//Browser.println('NEW id ' + ID + ' / ' + ts);
+				}					 
+			}
+
+			// check for old unused Blobs and delete them
+			var delArr = new Array();
+
+			count = 0;
+
+			for (var ID in activeBlobIDs)
+			{						 							   
+				if (activeBlobIDs.hasOwnProperty(ID) &&
+					activeBlobIDs[ID] && 
+					activeBlobIDs[ID].timestamp <= prevTS)
+				{	
+					activeBlobIDs[ID].node.enabled = false;													   
+					delArr[count++] = ID;				   							  
+				}
+			}
+			
+			for (i=0; i<count; i++) 
+			{ 
+				delete activeBlobIDs[delArr[i]];
+				//Browser.println('DEL id ' + delArr[i] + ' / ' + ts);  
+			}
+
+			// remember current timestep and length:
+			// more events in one timeframe possible
+			prevTS  = ts;
+			prevLen = idLen;	  
+		}
+		"
+	}
+
+	DEF Timer TimeSensor {
+		loop TRUE
+		cycleInterval 1.0
+	}
+
+	ROUTE Timer.fraction_changed TO	UB_Manager.fract					
+}

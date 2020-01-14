@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D>
+	<Engine DEF='engine'>
+		<TimerJob DEF='timer'/>
+		<SynchronizeJob DEF='synchronize'/>
+		<RenderJob DEF='render'>
+			<WindowGroup>
+				<Window position='10 50' size='640,480' fullScreen='false' />
+			</WindowGroup>
+		</RenderJob>
+	</Engine>
+
+	<Scene DEF='scene'>
+        
+        <Viewpoint DEF='vf' description='cam0' zNear='1' zFar='1000' position='0 0.2 20.0'/> 
+    	
+        <IOSensor DEF='VisionLib' type='VisionLib' configFile='Tutorial6dofTracking.pm' dataAttributeSlots='true' addDataBases='WiiData1;InstantCamera;'>
+            <field accessType='outputOnly' name='InstantCamera_ModelView'   type='SFMatrix4f'/>
+    	    <field accessType='outputOnly' name='InstantCamera_Projection'  type='SFMatrix4f'/>
+            <field accessType='outputOnly' name='InstantCamera_Position'    type='SFVec3f'/>
+    	    <field accessType='outputOnly' name='InstantCamera_Orientation' type='SFRotation'/>
+            
+            <!-- WiiData Output Slots -->
+            <field accessType='outputOnly' name='WiiData1_out_ButtonLeftPressed'     type='SFString'/>
+            <field accessType='outputOnly' name='WiiData1_out_ButtonUpPressed'       type='SFString'/>
+            <field accessType='outputOnly' name='WiiData1_out_ButtonRightPressed'    type='SFString'/>
+            <field accessType='outputOnly' name='WiiData1_out_ButtonDownPressed'     type='SFString'/>
+            
+            <field accessType='outputOnly' name='WiiData1_out_ButtonAPressed'        type='SFString'/>
+            <field accessType='outputOnly' name='WiiData1_out_ButtonBPressed'        type='SFString'/>
+
+            <field accessType='outputOnly' name='WiiData1_out_ButtonOnePressed'      type='SFString'/>
+            <field accessType='outputOnly' name='WiiData1_out_ButtonTwoPressed'      type='SFString'/>
+            <field accessType='outputOnly' name='WiiData1_out_ButtonHomePressed'     type='SFString'/>
+            
+            <field accessType='outputOnly' name='WiiData1_out_ButtonPlusPressed'     type='SFString'/>
+            <field accessType='outputOnly' name='WiiData1_out_ButtonMinusPressed'    type='SFString'/>
+            
+            <!--Wiidata Input Slots-->
+            <field accessType='inputOnly' name='WiiData1_in_Rumble' type='SFString'/>
+            <field accessType='inputOnly' name='WiiData1_in_LEDs' type='SFString'/>
+        </IOSensor>
+
+
+        <!--KeySensor for the LED Lights on the Wiimote -->
+        <KeySensor DEF='keySensor'/>
+        <ValueTrigger DEF='trigger1'>
+          <field accessType='initializeOnly' name='filter' type='SFString' value='1'/>
+          <field accessType='inputOutput' name='color' type='SFString' value='16'/>
+        </ValueTrigger>
+        <ValueTrigger DEF='trigger2'>
+          <field accessType='initializeOnly' name='filter' type='SFString' value='2'/>
+          <field accessType='inputOutput' name='color' type='SFString' value='32'/>
+        </ValueTrigger>
+        <ValueTrigger DEF='trigger3'>
+          <field accessType='initializeOnly' name='filter' type='SFString' value='3'/>
+          <field accessType='inputOutput' name='color' type='SFString' value='48'/>
+        </ValueTrigger>
+
+
+
+        <Foreground DEF='fg' isDefault='false'>
+			<ScreenTextOverlay DEF='sto' text='' />
+		</Foreground>
+        
+        <Script DEF="script" >
+			<field name='update'     type='SFTime'  accessType='inputOnly'/>
+			<field name='Position3D' type='SFVec3f' accessType='inputOnly'/>
+			<field name='Rotation3D' type='SFVec3f' accessType='inputOnly'/>
+            <field name='Matrix'     type='SFMatrix4f' accessType='inputOnly'/>
+            
+            <field name='color_changed'  type='SFColor' accessType='outputOnly'/>
+            
+            <field name='ButtonLeftPressed'    type='SFString' accessType='inputOnly'/>
+            <field name='ButtonUpPressed'      type='SFString' accessType='inputOnly'/>
+            <field name='ButtonRightPressed'   type='SFString' accessType='inputOnly'/>
+            <field name='ButtonDownPressed'    type='SFString' accessType='inputOnly'/>
+            
+            <field name='ButtonAPressed'       type='SFString' accessType='inputOnly'/>
+            <field name='ButtonBPressed'       type='SFString' accessType='inputOutput'/>
+            
+            <field name='ButtonOnePressed'     type='SFString' accessType='inputOnly'/>
+            <field name='ButtonTwoPressed'     type='SFString' accessType='inputOnly'/>
+            <field name='ButtonHomePressed'    type='SFString' accessType='inputOnly'/>
+            
+            <field name='ButtonPlusPressed'    type='SFString' accessType='inputOnly'/>            
+            <field name='ButtonMinusPressed'   type='SFString' accessType='inputOnly'/>
+            
+			<![CDATA[
+				ecmascript:
+				
+				var sto = Browser.currentScene.getNamedNode('sto');
+                
+                var pos3D = new SFVec3f(-1,-1,-1);
+                var rot3D = new SFVec3f(-1,-1,-1);
+                var mat  = new SFMatrix4f();
+                var butA ;
+                var butB ;
+                var butOne ;
+                var butTwo ;
+                var butHome ;
+                var butPlus ;
+                var butMinus ;
+                var butDown ;
+                var R = new MFInt32(0);
+				var G = new MFInt32(0);
+                var B = new MFInt32(0);
+                var Rumble = 0;
+                
+				function update()
+				{                     
+					sto.text[0] = 'Position3D: ' + pos3D ;	
+                    sto.text[1] = 'Rotation3D: ' + rot3D ;
+                    sto.text[2] = 'Button A Pressed: ' + butA ;
+                    sto.text[3] = 'Button B Pressed/Rumble: ' + butB ;
+                    sto.text[4] = 'Button Plus Pressed: ' + butPlus ;
+                    sto.text[5] = 'Button Minus Pressed: ' + butMinus ;
+                    sto.text[6] = 'Button One Pressed: ' + butOne ;
+                    sto.text[7] = 'Button Two Pressed: ' + butTwo ;
+                    sto.text[8] = 'Button Home Pressed: ' + butHome ;
+                    sto.text[9] = 'Matrix: ' + mat; 
+				}
+                
+                function Position3D(val)
+                {   
+                    pos3D = val;                
+                }
+                
+                function Rotation3D(val)
+                {   
+                    rot3D = val;                
+                }
+                
+                function Matrix(val)
+                {   
+                    mat = val;                
+                }
+                
+                function ButtonAPressed(val)
+                { 
+                   butA = val;
+                }
+                
+                function ButtonBPressed(val)
+                { 
+                    butB = val;
+                }
+                
+                function ButtonLeftPressed(val)
+                { 
+                    R = val;
+                    color_changed = new SFColor(R, G, B);
+                }
+                
+                function ButtonUpPressed(val)
+                {
+                    G = val;
+                    color_changed = new SFColor(R, G, B);
+                }
+                
+                function ButtonRightPressed(val)
+                {
+                    B = val;
+                    color_changed = new SFColor(R, G, B);
+                }
+                
+                function ButtonDownPressed(val)
+                {
+                    butDown = val;
+                }
+                
+                function ButtonOnePressed(val)
+                {
+                     butOne = val;
+                }
+                
+                function ButtonTwoPressed(val)
+                {
+                    butTwo = val;
+                }
+                
+                function ButtonHomePressed(val)
+                {
+                    butHome = val;
+                }
+                
+                function ButtonPlusPressed(val)
+                {
+                    butPlus = val;
+                }
+                
+                function ButtonMinusPressed(val)
+                {
+                    butMinus = val;
+                }
+			]]>
+		</Script>
+       
+        <MatrixTransform DEF='ControlerPosition' invert='FALSE'>
+			<Transform DEF='Teapot'>
+                 <Inline url='"CoordFrame.wrl"'/>
+				<Shape>
+					<Appearance>
+						<Material DEF='mat' emissiveColor='1 0.5 0' />
+					</Appearance>
+					<!--<Teapot size='1 1 1' />-->
+				</Shape>
+			</Transform>
+		</MatrixTransform>
+        
+        
+        <!-- <ROUTE fromNode='VisionLib' fromField='InstantCamera_Position' toNode='ControlerPosition' toField='translation'/>    	
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_Orientation' toNode='ControlerPosition' toField='rotation'/> -->
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_ModelView' toNode='ControlerPosition' toField='matrix'/>
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_ModelView' toNode='script' toField='Matrix'/>
+        <!--<ROUTE fromNode='VisionLib' fromField='InstantCamera_Valid' toNode='ControlerPosition' toField='render'/>-->
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_Position' toNode='script' toField='Position3D'/>
+        <ROUTE fromNode='VisionLib' fromField='InstantCamera_Orientation' toNode='script' toField='Rotation3D'/>
+        
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonAPressed' toNode='script' toField='ButtonAPressed'/>
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonBPressed' toNode='script' toField='ButtonBPressed'/>
+        
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonLeftPressed' toNode='script' toField='ButtonLeftPressed'/>
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonUpPressed' toNode='script' toField='ButtonUpPressed'/>
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonRightPressed' toNode='script' toField='ButtonRightPressed'/>
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonDownPressed' toNode='script' toField='ButtonDownPressed'/>
+
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonPlusPressed' toNode='script' toField='ButtonPlusPressed'/>
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonMinusPressed' toNode='script' toField='ButtonMinusPressed'/>
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonHomePressed' toNode='script' toField='ButtonHomePressed'/>
+        
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonOnePressed' toNode='script' toField='ButtonOnePressed'/>
+        <ROUTE fromNode='VisionLib' fromField='WiiData1_out_ButtonTwoPressed' toNode='script' toField='ButtonTwoPressed'/>
+        
+        
+        <ROUTE fromNode='script' fromField='ButtonBPressed' toNode='VisionLib' toField='WiiData1_in_Rumble'/>
+
+        <ROUTE fromNode='trigger1' fromField='color' toNode='VisionLib' toField='WiiData1_in_LEDs'/>
+        <ROUTE fromNode='keySensor' fromField='keyPress' toNode='trigger1' toField='trigger'/>
+        <ROUTE fromNode='trigger2' fromField='color' toNode='VisionLib' toField='WiiData1_in_LEDs'/>
+        <ROUTE fromNode='keySensor' fromField='keyPress' toNode='trigger2' toField='trigger'/>
+        <ROUTE fromNode='trigger3' fromField='color' toNode='VisionLib' toField='WiiData1_in_LEDs'/>
+        <ROUTE fromNode='keySensor' fromField='keyPress' toNode='trigger3' toField='trigger'/>
+        
+        
+        <ROUTE fromNode='script' fromField='color_changed' toNode='mat' toField='set_emissiveColor'/>
+        
+        <TimeSensor DEF='ts' loop='true' cycleInterval='0.03' />
+		<ROUTE fromNode='ts' fromField='cycleTime' toNode='script' toField='update'/>
+    
+
+    </Scene>
+</X3D>
